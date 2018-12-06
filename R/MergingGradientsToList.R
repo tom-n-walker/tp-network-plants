@@ -1,10 +1,11 @@
 #### MAKE A LIST FOR ALL COUNTRIES ####
 
-MakeCountryList <- function(metaCH, metaCommunityCH, communityCH, traitCH, fluxCH,
-                            metaPE, metaCommunityPE, communityPE, traitPE, fluxPE,
-                            metaSV, metaCommunitySV, communitySV, traitSV, fluxSV,
-                            metaNO, metaCommunityNO, communityNO, traitNO, fluxNO,
-                            metaCO, metaCommunityCO, communityCO, traitCO, fluxCO
+MakeCountryList <- function(metaCH_Lavey, metaCommunityCH_Lavey, communityCH_Lavey, traitCH_Lavey,
+                            metaCH_Calanda, metaCommunityCH_Calanda, communityCH_Calanda, traitCH_Calanda,
+                            metaNO_Ulvehaugen, metaCommunityNO_Ulvehaugen, communityNO_Ulvehaugen, traitNO_Ulvehaugen,
+                            metaNO_Lavisdalen, metaCommunityNO_Lavisdalen, communityNO_Lavisdalen, traitNO_Lavisdalen,
+                            metaNO_Gudmedalen, metaCommunityNO_Gudmedalen, communityNO_Gudmedalen, traitNO_Gudmedalen,
+                            metaNO_Skjellingahaugen, metaCommunityNO_Skjellingahaugen, communityNO_Skjellingahaugen, traitNO_Skjellingahaugen
                             ){
   
   CountryList <- list(CH_Lavey = list(meta = metaCH_Lavey,
