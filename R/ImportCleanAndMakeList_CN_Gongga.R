@@ -59,8 +59,8 @@ CleanCommunity_CN_Gongga <- function(dat){
   dat2 <- dat %>% 
     filter(TTtreat != c("OTC")) %>% 
     rename(Year = year, Treatment = TTtreat, Taxon = speciesName, Cover = cover) %>% 
-    mutate(Country = "CH",
-           Gradient = "CN_Gongga") %>% 
+    mutate(Gradient = "CN_Gongga",
+                      Country = as.character("China"),) %>% 
     mutate(Taxon = recode(Taxon, "Potentilla stenophylla var. emergens" = "Potentilla stenophylla")) %>% 
     filter(!is.na(Cover), !Cover == 0)
   
@@ -71,9 +71,9 @@ CleanCommunity_CN_Gongga <- function(dat){
 CleanMetaCommunity_CN_Gongga <- function(dat){
   dat2 <- dat %>% 
     select(PlotID, Year, Moss, Lichen2, Litter, BareGround, Rock, Vascular, Bryophyte, Lichen, MedianHeight_cm, MedianMossHeight_cm) %>% 
-    mutate(Country = "CH",
-           Site = substr(PlotID, 1,1),
-           Gradient = "1")
+    mutate(Gradient = "CN_Gongga",
+           Country = as.character("China"),
+           Site = substr(PlotID, 1,1))
   return(dat2)
 }
 
@@ -95,7 +95,6 @@ CleanMeta_CN_Gongga <- function(dat){
 ImportClean_CN_Gongga <- function(){
   
   ### IMPORT DATA
-  ## CN_Gongga
   meta_CN_Gongga_raw = get(load(file = file_in("data/metaCN_Gongga.Rdata")))
   metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/metaCommunityCN_Gongga_2012_2016.Rdata")))
   community_CN_Gongga_raw = ImportCommunity_CN_Gongga()
