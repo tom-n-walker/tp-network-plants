@@ -2,6 +2,37 @@
 ### CN_GONGGA  ###
 ##################
 
+#### Import Community ####
+ImportCommunity_CN_Gongga <- function(){
+  fl <- list.files("R/community_CN_Gongga/", full.names = TRUE)
+  sapply(fl, source)
+  
+  ## ---- load_community
+  con <- src_sqlite(path = "data/transplant.sqlite", create = FALSE)
+  # need to move all code to dplyr for consistancy
+  
+  #load cover data and metadata
+  cover_thin_CN_Gongga <- load_comm(con = con)
+  
+  return(cover_thin_CN_Gongga)
+}
+
+
+#get taxonomy table
+ImportTaxa_CN_Gongga <- function(){
+  fl <- list.files("R/community_CN_Gongga/", full.names = TRUE)
+  sapply(fl, source)
+  
+  ## ---- load_community
+  con <- src_sqlite(path = "data/transplant.sqlite", create = FALSE)
+  
+  # need to move all code to dplyr for consistancy
+  taxa_CN_Gongga <- tbl(con, "taxon") %>%
+  collect()
+return(taxa_CN_Gongga)
+}
+
+
 #### Cleaning Code ####
 # Clean trait data
 CleanTrait_CN_Gongga <- function(dat){
@@ -61,27 +92,29 @@ CleanMeta_CN_Gongga <- function(dat){
 
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
-Import_CN_Gongga <- function(){
+ImportClean_CN_Gongga <- function(){
   
   ### IMPORT DATA
   ## CN_Gongga
-  metaCN_Gongga_raw = get(load(file = file_in("data/metaCN_Gongga.Rdata")))
-  metaCommunityCN_Gongga_raw = get(load(file = file_in("data/metaCommunityCN_Gongga_2012_2016.Rdata")))
-  communityCN_Gongga_raw = get(load(file = file_in("data/cover_thin_CH_2012_2016.Rdata")))
-  traitCN_Gongga_raw = get(load(file = file_in("data/traits_2015_2016_China.Rdata")))
+  meta_CN_Gongga_raw = get(load(file = file_in("data/metaCN_Gongga.Rdata")))
+  metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/metaCommunityCN_Gongga_2012_2016.Rdata")))
+  community_CN_Gongga_raw = ImportCommunity_CN_Gongga()
+  taxa_CN_Gongga = ImportTaxa_CN_Gongga()
+  trait_CN_Gongga_raw = get(load(file = file_in("data/traits_2015_2016_China.Rdata")))
 
   ### CLEAN DATA SETS
   ## CN_Gongga
-  metaCN_Gongga = CleanMeta_CN_Gongga(metaCN_Gongga_raw)
-  metaCommunityCN_Gongga = CleanMetaCommunity_CN_Gongga(metaCommunityCN_Gongga_raw)
-  communityCN_Gongga = CleanCommunity_CN_Gongga(communityCN_Gongga_raw)
-  traitCN_Gongga = CleanTrait_CN_Gongga(traitCN_Gongga_raw)
+  meta_CN_Gongga = CleanMeta_CN_Gongga(meta_CN_Gongga_raw)
+  metaCommunity_CN_Gongga = CleanMetaCommunity_CN_Gongga(metaCommunity_CN_Gongga_raw)
+  community_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw)
+  trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
   
-  CN_Gongga = list(meta = metaCN_Gongga,
-                   metaCommunity = metaCommunityCN_Gongga,
-                   community = communityCN_Gongga,
-                   trait = traitCN_Gongga)
-
+  # Make list
+  CN_Gongga = list(meta = meta_CN_Gongga,
+                   metaCommunity = metaCommunity_CN_Gongga,
+                   community = community_CN_Gongga,
+                   taxa = taxa_CN_Gongga,
+                   trait = trait_CN_Gongga)
   
   return(CN_Gongga)
 }
