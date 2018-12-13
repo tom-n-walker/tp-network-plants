@@ -17,11 +17,17 @@ pn <- . %>% print(n = Inf)
 
 # source scripts
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
+source("R/ImportCleanAndMakeList_NO_Norway.R")
+
 
 # Import Data
 ImportDrakePlan <- drake_plan(
-  CN_Gongga = ImportClean_CN_Gongga()
+  CN_Gongga = ImportClean_CN_Gongga(),
   
+  NO_Ulvhaugen = ImportClean_NO_Norway(g = 1),
+  NO_Lavisdalen = ImportClean_NO_Norway(g = 2),
+  NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
+  NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4)
 )
 
 # my_plan <- bind_rows(cwm_report, cwm_datasets_plan, cwm_analyses, setting_plan)
