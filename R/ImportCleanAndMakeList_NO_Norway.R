@@ -2,27 +2,22 @@
 ### NO_NORWAY  ###
 ##################
 
+source("R/community_NO_Norway/loadCover.r")
 
 #### Import Community ####
-ImportCommunity_NO_Norway <- function(){
+ImportCommunity_NO_Norway <- function(con){
   ## ---- load_community
-  
-  #make database connection
-  con <- DBI::dbConnect(RSQLite::SQLite(), "data/NO_Norway/seedclim.sqlite")
   
   #load cover data and metadata
   #cover
-  source("R/community_NO_Norway/loadCover.r")
-  cover_thin_NO_Norway <- cover.thin
+  cover_thin_NO_Norway <- load_cover_NO_Norway(con = con)
   
   return(cover_thin_NO_Norway)
 }
 
 
 #get taxonomy table
-ImportTaxa_NO_Norway <- function(){
-  #make database connection
-  con <- DBI::dbConnect(RSQLite::SQLite(), "data/NO_Norway/seedclim.sqlite")
+ImportTaxa_NO_Norway <- function(con){
   
   # need to move all code to dplyr for consistancy
   #get taxonomy table
@@ -35,7 +30,7 @@ ImportTaxa_NO_Norway <- function(){
 
 #### Cleaning Code ####
 # Cleaning China meta community data
-CleanCommunity_NO_Norway <- function(community_NO_Norway_raw){
+CleanCommunity_NO_Norway <- function(community_NO_Norway_raw, taxa_NO_Norway){
   dat2 <- community_NO_Norway_raw %>% 
     left_join(taxa_NO_Norway, by = "species") %>% 
     select(-temperature_level, -summerTemperature, -annualPrecipitation, -precipitation_level, -notbad, -authority, -family, -comment) %>% 
@@ -98,8 +93,11 @@ ImportClean_NO_Norway <- function(g){
   ### IMPORT DATA
   meta_NO_Norway_raw = get(load(file = file_in("data/NO_Norway/meta_NO_Norway.Rdata")))
   #metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/NO_Norway/metaCommunity_NO_Norway.Rdata")))
-  community_NO_Norway_raw = ImportCommunity_NO_Norway()
-  taxa_NO_Norway = ImportTaxa_NO_Norway()
+  
+  #make database connection
+  con <- src_sqlite(path = "data/NO_Norway/seedclim.sqlite", create = FALSE)
+  community_NO_Norway_raw = ImportCommunity_NO_Norway(con)
+  taxa_NO_Norway = ImportTaxa_NO_Norway(con)
   trait_NO_Norway_raw = read_csv(file = file_in("data/NO_Norway/traitdata_NO.csv"))
   
   ### CLEAN DATA SETS
@@ -107,7 +105,7 @@ ImportClean_NO_Norway <- function(g){
     filter(Site %in% sites)
   #metaCommunity_NO_Norway = CleanMetaCommunity_NO_Norway(metaCommunity_NO_Norway_raw) %>% 
   #filter(Site %in% sites)
-  community_NO_Norway = CleanCommunity_NO_Norway(community_NO_Norway_raw) %>% 
+  community_NO_Norway = CleanCommunity_NO_Norway(community_NO_Norway_raw, taxa_NO_Norway) %>% 
     filter(destSiteID %in% sites)
   trait_NO_Norway = CleanTrait_NO_Norway(trait_NO_Norway_raw) %>% 
     filter(Site %in% sites)
