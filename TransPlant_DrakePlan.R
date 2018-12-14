@@ -18,7 +18,7 @@ pn <- . %>% print(n = Inf)
 # source scripts
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
-
+source("R/Analysis_SR.R")
 
 # Import Data
 ImportDrakePlan <- drake_plan(
@@ -30,12 +30,14 @@ ImportDrakePlan <- drake_plan(
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4)
 )
 
+AnalyzeDrakePlan <- drake_plan(
+  CN_Gongga_lm = AnalyzeSR(CN_Gongga)
+)
+
 # my_plan <- bind_rows(cwm_report, cwm_datasets_plan, cwm_analyses, setting_plan)
-MyPlan <- ImportDrakePlan
+MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
 
 conf <- drake_config(MyPlan)
 make(MyPlan)
 loadd()
 vis_drake_graph(conf, targets_only = TRUE)
-
-system("evince trait_distributions/Rmd/trait_ordinations.pdf", wait = FALSE)
