@@ -1,16 +1,34 @@
 ###### Lavey community data ####
 #Chelsea Chisholm, 19.02.2018
 
-load_comm <- function(con) {
+load_comm <- function(cover) {
   require("tidyverse")
   require("readxl")
   
 path <- "PRA_PRAturf.xlsx"
-  
+cover_PRA <- lapply(excel_sheets(path), read_excel, path = path)
+cover_PRA <- cover_PRA[-1]
+lapply(cover_PRA, sumcov)
+sumcov(cover_PRA)
+sumcov <- function(x) {
+  x %>% select(-1) %>% 
+    colSums() 
+}
+cover_PRA %>% 
 cover_PRA <- path %>% 
     excel_sheets() %>%
+    filter(!1)
     set_names() %>% 
     map(read_excel, path = path) 
+
+rbind.all.columns <- function(x, y) {
+  x.diff <- setdiff(colnames(x), colnames(y))
+  y.diff <- setdiff(colnames(y), colnames(x))
+  x[, c(as.character(y.diff))] <- NA
+  y[, c(as.character(x.diff))] <- NA
+  return(rbind(x, y))
+}
+all.data <- Reduce(rbind.all.columns, cover_PRA )
 
 #to do: remove Feuile sheet, merge (not bind_rows, cols not identical across sheets)
 #check that not duplicating columns (likely...)
