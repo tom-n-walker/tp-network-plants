@@ -3,7 +3,7 @@
 
 setwd("./data/CH_Lavey/2017/cover")
 #load_comm <- function(cover) {
-  require("tidyverse")
+  require("tidyverse") # you should not need to do this, tidyverse should be loaded at the start anyway... (Aud)
   
   collector <- function (x) {
     cover <- excel_sheets(x) %>% 
