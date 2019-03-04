@@ -19,6 +19,7 @@ pn <- . %>% print(n = Inf)
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
+source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/Analysis_SR.R")
 
 # Import Data
@@ -30,7 +31,9 @@ ImportDrakePlan <- drake_plan(
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4), 
   
-  US_Colorado = ImportClean_US_Colorado()
+  US_Colorado = ImportClean_US_Colorado(),
+  
+  CH_Lavey = ImportClean_CH_Lavey()
 )
 
 AnalyzeDrakePlan <- drake_plan(
