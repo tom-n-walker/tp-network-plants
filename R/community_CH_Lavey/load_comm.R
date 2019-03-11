@@ -1,5 +1,5 @@
 ###### Lavey community data functions ####
-#Chelsea Chisholm, 19.02.2018
+#Chelsea Chisholm, 19.02.2019
 
 load_cover_CH_Lavey <- function(){
   
