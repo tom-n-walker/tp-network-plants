@@ -21,7 +21,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw){
     mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
                                  Treatment == "veg_home" & Site == "Cal" ~ "Control",
                                  Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
-           speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) #%>%
+           #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) #%>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
     rename(originSiteID = Site, Cover = cover, SpeciesShort = speccode, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
     # only select control, local control, warm/down transplant
@@ -59,8 +59,8 @@ CleanMeta_CH_Calanda <- function(community_CH_Calanda_raw){
     mutate(Elevation = as.numeric(recode(Treatment, 'Control'='1200', 'LocalControl'='1500', 'Warm'='1500')),
            Gradient = "CH_Calanda",
            Country = as.character("Switzerland"),
-           YearEstablished = 2015,
-           PlotSize_m2 = 0.0625)
+           YearEstablished = 2013,#CHECK THIS, maybe it was established the year before?
+           PlotSize_m2 = 0.0625) #Check this as well!
   
   return(dat)
 }
