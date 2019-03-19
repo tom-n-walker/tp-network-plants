@@ -20,6 +20,7 @@ source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
+source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/Analysis_SR.R")
 
 # Import Data
@@ -33,7 +34,9 @@ ImportDrakePlan <- drake_plan(
   
   US_Colorado = ImportClean_US_Colorado(),
   
-  CH_Lavey = ImportClean_CH_Lavey()
+  CH_Lavey = ImportClean_CH_Lavey(),
+  
+  IN_Kashmir = ImportClean_IN_Kashmir()
 )
 
 AnalyzeDrakePlan <- drake_plan(
