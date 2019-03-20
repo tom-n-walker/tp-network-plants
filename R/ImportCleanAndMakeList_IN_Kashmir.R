@@ -48,3 +48,24 @@ ImportClean_IN_Kashmir <- function(){
   
   return(IN_Kashmir)
 }
+
+# Clean metadata
+
+CleanMeta_IN_Kashmir <- function(community_IN_Kashmir_raw){
+  dat <- 
+    community_IN_Kashmir_raw %>% 
+    select(siteID, turfID, Year) %>%
+   # mutate(Treatment = recode(siteID, "RIO_RIO" = "Control", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
+           Collector = 'Jean') %>%
+    separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
+    rename(originSiteID = siteID, Year = year) %>% 
+    # only select control, local control, warm/down transplant
+    filter(Treatment %in% c("Control", "LocalControl", "Warm")) %>%
+    mutate(Elevation = as.numeric(recode(Treatment, 'Control'='1200', 'LocalControl'='1500', 'Warm'='1500')),
+           Gradient = "CH_Lavey",
+           Country = as.character("Switzerland"),
+           YearEstablished = 2015,
+           PlotSize_m2 = 0.0625)
+  
+  return(dat)
+}
