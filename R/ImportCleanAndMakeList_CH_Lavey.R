@@ -34,13 +34,13 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw){
 # Clean taxa list (add these to end of above)
 CleanTaxa_CH_Lavey <- function(community_CH_Lavey_raw) {
   dat <- community_CH_Lavey_raw %>% gather(species, 'cover', 3:221) %>%
-    mutate(Treatment = recode(siteID, "RIO_RIO" = "Control", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
+    mutate(Treatment = recode(siteID, "RIO_RIO" = "LocalControl", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
            speccode= sapply(strsplit(species, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
            Collector = 'Jean') %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
     rename(originSiteID = siteID, Cover = cover, SpeciesShort = speccode, Year = year, SpeciesName = species) %>% 
     # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("Control", "LocalControl", "Warm")) 
+    filter(Treatment %in% c("LocalControl", "Warm")) 
   taxa <- unique(dat$SpeciesName)
   return(taxa)
 }
@@ -50,13 +50,13 @@ CleanMeta_CH_Lavey <- function(community_CH_Lavey_raw){
   dat <- 
     community_CH_Lavey_raw %>% 
     select(siteID, turfID, year) %>%
-    mutate(Treatment = recode(siteID, "RIO_RIO" = "Control", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
+    mutate(Treatment = recode(siteID, "RIO_RIO" = "LocalControl", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
            Collector = 'Jean') %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
     rename(originSiteID = siteID, Year = year) %>% 
     # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("Control", "LocalControl", "Warm")) %>%
-    mutate(Elevation = as.numeric(recode(Treatment, 'Control'='1200', 'LocalControl'='1500', 'Warm'='1500')),
+    filter(Treatment %in% c("LocalControl", "Warm")) %>%
+    mutate(Elevation = as.numeric(recode(destsiteID, ''='1200', 'LocalControl'='1500', 'Warm'='1500')),
            Gradient = "CH_Lavey",
            Country = as.character("Switzerland"),
            YearEstablished = 2015,
