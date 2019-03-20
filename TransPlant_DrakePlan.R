@@ -20,6 +20,7 @@ source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
+source("R/ImportCleanAndMakeList_CH_Calanda.R")
 source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/Analysis_SR.R")
 
@@ -30,11 +31,12 @@ ImportDrakePlan <- drake_plan(
   NO_Ulvhaugen = ImportClean_NO_Norway(g = 1),
   NO_Lavisdalen = ImportClean_NO_Norway(g = 2),
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
-  NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4), 
+  NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),
   
   US_Colorado = ImportClean_US_Colorado(),
   
   CH_Lavey = ImportClean_CH_Lavey(),
+  CH_Calanda = ImportClean_CH_Calanda(),
   
   IN_Kashmir = ImportClean_IN_Kashmir()
 )
@@ -43,10 +45,9 @@ AnalyzeDrakePlan <- drake_plan(
   CN_Gongga_lm = AnalyzeSR(CN_Gongga)
 )
 
-# my_plan <- bind_rows(cwm_report, cwm_datasets_plan, cwm_analyses, setting_plan)
 MyPlan <- ImportDrakePlan
 
-MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
+#MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
 
 conf <- drake_config(MyPlan)
 make(MyPlan)
