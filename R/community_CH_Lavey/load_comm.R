@@ -16,10 +16,10 @@ load_cover_CH_Lavey <- function(){
   
   #import data
   files <- list.files('./data/CH_Lavey/2017/cover/')
-  cover <- data_frame(siteID = files) %>% 
+  cover <- tibble(siteID = files) %>% 
     mutate(file_contents = map(siteID, collector)) %>%
     mutate(siteID = gsub(pattern = 'turf.xlsx', replacement='', siteID)) %>%
-    unnest() %>% select(-Dead, -contains('FOCAL'), -`NA`) %>%
+    unnest() %>% select(-'Dead', -contains('FOCAL'), -`NA`) %>%
     mutate(year=2017)
 
   return(cover)
