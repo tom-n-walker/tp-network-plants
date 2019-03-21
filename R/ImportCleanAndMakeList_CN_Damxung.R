@@ -13,7 +13,7 @@ ImportCommunity_CN_Damxung <- function(){
 
 
 #### Cleaning Code ####
-# Cleaning Kashmir community data
+# Cleaning Damxung community data
 CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
     dat2 <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
