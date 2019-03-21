@@ -19,12 +19,15 @@ ImportCommunity_CH_Calanda <- function(){
 CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
     mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
-                                 Treatment == "veg_home" & Site == "Cal" ~ "Control",
-                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl")) %>%
+                                 Treatment == "veg_home" & Site == "Cal" ~ "LocalControl",
+                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
+           origSiteID = case_when(Treatment == "veg_away" & Site == c("Cal", "Nes") ~ "PEA",
+                                  Treatment == "veg_home" & Site == "Nes" ~ "Nes",
+                                  Treatment == "veg_home" & Site == "Pea" ~ "Nes")) %>%
            #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) %>%
-    rename(origSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
+    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
     # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("Control", "LocalControl", "Warm")) 
+    filter(Treatment %in% c("LocalControl", "Warm")) 
   
   return(dat)
 }
@@ -35,11 +38,14 @@ CleanTaxa_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
     mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
                                  Treatment == "veg_home" & Site == "Cal" ~ "LocalControl",
-                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl")) %>%
+                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
+           origSiteID = case_when(Treatment == "veg_away" & Site == c("Cal", "Nes") ~ "PEA",
+                                  Treatment == "veg_home" & Site == "Nes" ~ "Nes",
+                                  Treatment == "veg_home" & Site == "Pea" ~ "Nes")) %>%
     #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) %>%
-    rename(origSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
+    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
     # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("Control", "LocalControl", "Warm")) 
+    filter(Treatment %in% c("LocalControl", "Warm")) 
   taxa <- unique(dat$SpeciesName)
   return(taxa)
 }
@@ -49,16 +55,19 @@ CleanMeta_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
     mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
                                  Treatment == "veg_home" & Site == "Cal" ~ "LocalControl",
-                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl")) %>%
+                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
+           origSiteID = case_when(Treatment == "veg_away" & Site == c("Cal", "Nes") ~ "PEA",
+                                  Treatment == "veg_home" & Site == "Nes" ~ "Nes",
+                                  Treatment == "veg_home" & Site == "Pea" ~ "Nes")) %>%
     #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) %>%
-    rename(origSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
+    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(Elevation = as.numeric(recode(Treatment, 'Control'='1200', 'LocalControl'='1500', 'Warm'='1500')),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'Control'='1200', 'LocalControl'='1500', 'Warm'='1500')),
            Gradient = "CH_Calanda",
            Country = as.character("Switzerland"),
-           YearEstablished = 2013,#CHECK THIS, maybe it was established the year before?
-           PlotSize_m2 = 0.0625) #Check this as well!
+           YearEstablished = 2012,
+           PlotSize_m2 = 0.75) 
   
   return(dat)
 }
