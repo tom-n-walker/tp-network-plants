@@ -4,22 +4,22 @@
 load_cover_CH_Lavey <- function(){
   
   collector <- function (x) {
-    dat <- excel_sheets(paste0('./data/CH_Lavey/2017/cover/',x)) %>% 
+    dat <- excel_sheets(paste0('./data/CH_Lavey/CH_Lavey_commdata/2017/',x)) %>% 
       set_names() %>% 
       map_df(
-        ~ read_xlsx(path = paste0('./data/CH_Lavey/2017/cover/',x), sheet = .x),
-        .id = "turfID") %>% 
-      group_by(turfID) %>% 
-      summarise_if(is.numeric, sum)
+        ~ read_xlsx(path = paste0('./data/CH_Lavey/CH_Lavey_commdata/2017/',x), sheet = .x),
+         .id = "turfID") #%>% 
+      # group_by(turfID) %>% 
+      # summarise_if(is.numeric, sum)
     return(dat)
   }
   
   #import data
-  files <- list.files('./data/CH_Lavey/2017/cover/')
+  files <- list.files('./data/CH_Lavey/CH_Lavey_commdata/2017/')
   cover <- tibble(siteID = files) %>% 
-    mutate(file_contents = map(siteID, collector)) %>%
+    mutate(file_contents = map(siteID, collector)) #%>%
     mutate(siteID = gsub(pattern = 'turf.xlsx', replacement='', siteID)) %>%
-    unnest() %>% select(-'Dead', -contains('FOCAL'), -`NA`) %>%
+    unnest() %>% select(-contains('FOCAL'), -`NA`) %>% #-Dead?
     mutate(year=2017)
 
   return(cover)
