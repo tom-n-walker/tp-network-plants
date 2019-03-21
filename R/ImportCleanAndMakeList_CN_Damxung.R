@@ -1,48 +1,48 @@
 ####################
-### IN_Kashmir  ###
+### CN_Damxung  ###
 ####################
 
 #### Import Community ####
-ImportCommunity_IN_Kashmir <- function(){
-  community_IN_Kashmir_14<-read_xlsx(path ="data/IN_Kashmir/background 2014.xlsx")
-  community_IN_Kashmir_15<-read_xlsx(path ="data/IN_Kashmir/2015.xlsx")
-  return(list(community_IN_Kashmir_14, community_IN_Kashmir_15))
+
+#This lists all the different files from years 2013-2018 and combines them
+ImportCommunity_CN_Damxung <- function(){
+  files <- list.files("data/CN_Damxung/CN_Damxung_commdata/")
+  dat <- map_df(files, ~ read_excel(paste0("data/CN_Damxung/CN_Damxung_commdata/", .)))
+  return(dat)
 } 
 
 
 #### Cleaning Code ####
 # Cleaning Kashmir community data
-CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
-    dat2 <- community_IN_Kashmir_raw %>% 
-    bind_rows() %>% 
+CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
+    dat2 <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
     rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
-      mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 70 , `11` = 90)) 
+      mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) 
   return(dat2)
 }
 
 # Clean metadata
 
-CleanMeta_IN_Kashmir <- function(community_IN_Kashmir_raw){
-  dat2 <- community_IN_Kashmir_raw %>% 
-    bind_rows() %>% 
+CleanMeta_CN_Damxung <- function(community_CN_Damxung_raw){
+  dat2 <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
     rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
-    mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 70 , `11` = 90)) %>% 
+    mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) %>% 
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '2684', 'LOW' = '1951')),
-           Gradient = 'IN_Kashmir',
-           Country = 'India',
-           YearEstablished = 2013,
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '4800', 'LOW' = '4313')),
+           Gradient = 'CN_Damxung',
+           Country = 'China',
+           YearEstablished = NA,
            PlotSize_m2 = 0.25
     )
   
@@ -51,16 +51,15 @@ CleanMeta_IN_Kashmir <- function(community_IN_Kashmir_raw){
 }
 
 # Cleaning Kashmir species list
-CleanTaxa_IN_Kashmir <- function(community_IN_Kashmir_raw){
-  dat2 <- community_IN_Kashmir_raw %>% 
-    bind_rows() %>% 
+CleanTaxa_CN_Damxung <- function(community_CN_Damxung_raw){
+  dat2 <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
     rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl"))%>% 
-    mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 70 , `11` = 90))  
+                                 Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
+    mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) 
   
   taxa<-unique(dat2$SpeciesName)
   return(taxa)
@@ -68,26 +67,26 @@ CleanTaxa_IN_Kashmir <- function(community_IN_Kashmir_raw){
 
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
-ImportClean_IN_Kashmir <- function(){
+ImportClean_CN_Damxung <- function(){
   
   ### IMPORT DATA
-  community_IN_Kashmir_raw = ImportCommunity_IN_Kashmir()
+  community_CN_Damxung_raw = ImportCommunity_CN_Damxung()
  
   
   ### CLEAN DATA SETS
-  ## IN_Kashmir
+  ## CN_Damxung
 
-  community_IN_Kashmir = CleanCommunity_IN_Kashmir(community_IN_Kashmir_raw)
-  meta_IN_Kashmir = CleanMeta_IN_Kashmir(community_IN_Kashmir_raw)
-  taxa_IN_Kashmir = CleanTaxa_IN_Kashmir(community_IN_Kashmir_raw)
+  community_CN_Damxung = CleanCommunity_CN_Damxung(community_CN_Damxung_raw)
+  meta_CN_Damxung = CleanMeta_CN_Damxung(community_CN_Damxung_raw)
+  taxa_CN_Damxung = CleanTaxa_CN_Damxung(community_CN_Damxung_raw)
   
   
   # Make list
-  IN_Kashmir = list(meta =  meta_IN_Kashmir,
-                   community = community_IN_Kashmir,
-                   taxa = taxa_IN_Kashmir,
+  CN_Damxung = list(meta =  meta_CN_Damxung,
+                   community = community_CN_Damxung,
+                   taxa = taxa_CN_Damxung,
                    trait = NA)
   
-  return(IN_Kashmir)
+  return(CN_Damxung)
 }
 
