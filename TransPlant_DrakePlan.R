@@ -24,6 +24,7 @@ source("R/ImportCleanAndMakeList_CH_Calanda.R")
 source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
+source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
 source("R/Analysis_SR.R")
 
 # Import Data
@@ -44,7 +45,9 @@ ImportDrakePlan <- drake_plan(
   
   CN_Damxung = ImportClean_CN_Damxung(),
   
-  DE_Grainau = ImportClean_DE_Grainau()
+  DE_Grainau = ImportClean_DE_Grainau(),
+  
+  FR_AlpeHuez = ImportClean_FR_AlpeHuez()
 )
 
 AnalyzeDrakePlan <- drake_plan(
