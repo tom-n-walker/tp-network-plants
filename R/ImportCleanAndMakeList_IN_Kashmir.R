@@ -6,7 +6,7 @@
 ImportCommunity_IN_Kashmir <- function(){
   community_IN_Kashmir_14<-read_xlsx(path ="data/IN_Kashmir/background 2014.xlsx")
   community_IN_Kashmir_15<-read_xlsx(path ="data/IN_Kashmir/2015.xlsx")
-  return(list(community_IN_Kashmir_14, community_IN_Kashmir_15))
+  return(bind_rows(community_IN_Kashmir_14, community_IN_Kashmir_15))
 } 
 
 
@@ -14,7 +14,6 @@ ImportCommunity_IN_Kashmir <- function(){
 # Cleaning Kashmir community data
 CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
     dat2 <- community_IN_Kashmir_raw %>% 
-    bind_rows() %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
     rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
