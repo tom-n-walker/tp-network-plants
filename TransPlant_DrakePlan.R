@@ -8,6 +8,7 @@ library("tidyverse")
 library("readxl")
 library("lubridate")
 library("e1071")
+library("DBI")
 
 # drake configurations
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
@@ -25,31 +26,32 @@ source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
 source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
+source("R/ImportCleanAndMakeList_SE_Abisko.R")
 source("R/Analysis_SR.R")
 
 # Import Data
 ImportDrakePlan <- drake_plan(
-  
+
   NO_Ulvhaugen = ImportClean_NO_Norway(g = 1),
   NO_Lavisdalen = ImportClean_NO_Norway(g = 2),
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),
-  
+
   CH_Lavey = ImportClean_CH_Lavey(),
   CH_Calanda = ImportClean_CH_Calanda(),
   #Insert other Calanda (from Jacob)
-  
+
   US_Colorado = ImportClean_US_Colorado(),
   #Insert US_Montana, US_Arizon(need data)
-  
+
   CN_Gongga = ImportClean_CN_Gongga(),
   CN_Damxung = ImportClean_CN_Damxung(),
   IN_Kashmir = ImportClean_IN_Kashmir(),
   #Insert Heibei data (from Wang)
-  
+
   DE_Grainau = ImportClean_DE_Grainau(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
-  SE_Abikso = ImportClean_SE_Abisko()
+  SE_Abisko = ImportClean_SE_Abisko()
   #Insert FR_Lauteret
 )
 
@@ -62,6 +64,7 @@ MyPlan <- ImportDrakePlan
 #MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
 
 conf <- drake_config(MyPlan)
-make(MyPlan)
+make(MyPlan, keep_going = TRUE)
 loadd()
 vis_drake_graph(conf, targets_only = TRUE)
+sankey_drake_graph(conf)

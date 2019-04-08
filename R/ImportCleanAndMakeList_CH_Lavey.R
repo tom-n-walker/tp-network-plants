@@ -20,11 +20,12 @@ sitenames <-c('CRE_CRE','CRE_RIO','MAR_MAR','MAR_RIO','PRA_PRA','PRA_RIO','RIO_R
 # Cleaning Lavey community data
 CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw){
   dat <- 
-    community_CH_Lavey_raw %>% gather(SpeciesName, 'cover', -year, -siteID, -turfID) %>%
+    community_CH_Lavey_raw %>% gather(SpeciesName, cover, -year, -siteID, -turfID) %>%
     mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
                               "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
            SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
-           Collector = ifelse(year==2017, 'Jean', 'Loic')) %>%
+           Collector = ifelse(year==2017, 'Jean', 'Loic'),
+           cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
     rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
     # only select control, local control, warm/down transplant
@@ -36,12 +37,15 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw){
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_CH_Lavey <- function(community_CH_Lavey_raw) {
-  dat <- community_CH_Lavey_raw %>% gather(species, 'cover', 3:221) %>%
-    mutate(Treatment = recode(siteID, "RIO_RIO" = "LocalControl", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
-           speccode= sapply(strsplit(species, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
-           Collector = 'Jean') %>%
+  dat <- 
+    community_CH_Lavey_raw %>% gather(SpeciesName, cover, -year, -siteID, -turfID) %>%
+    mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
+                              "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
+           SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
+           Collector = ifelse(year==2017, 'Jean', 'Loic'),
+           cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, SpeciesShort = speccode, Year = year, SpeciesName = species) %>% 
+    rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) 
   taxa <- unique(dat$SpeciesName)
@@ -51,19 +55,21 @@ CleanTaxa_CH_Lavey <- function(community_CH_Lavey_raw) {
 # Clean metadata
 CleanMeta_CH_Lavey <- function(community_CH_Lavey_raw){
   dat <- 
-    community_CH_Lavey_raw %>% 
-    select(siteID, turfID, year) %>%
-    mutate(Treatment = recode(siteID, "RIO_RIO" = "LocalControl", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
-           Collector = 'Jean') %>%
+    community_CH_Lavey_raw %>% gather(SpeciesName, cover, -year, -siteID, -turfID) %>%
+    mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
+                              "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
+           SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
+           Collector = ifelse(year==2017, 'Jean', 'Loic'),
+           cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Year = year) %>% 
+    rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(Elevation = as.numeric(recode(destsiteID, 'PRA'='1200', 'RIO'='1500')),
+    mutate(Elevation = as.numeric(recode(destsiteID, 'PRA'=1400, 'MAR'= 1750, 'CRE'=1950, 'RIO'=2200)),
            Gradient = "CH_Lavey",
            Country = as.character("Switzerland"),
-           YearEstablished = 2015,
-           PlotSize_m2 = 0.0625)
+           YearEstablished = 2016,
+           PlotSize_m2 = 1)
   
   return(dat)
 }

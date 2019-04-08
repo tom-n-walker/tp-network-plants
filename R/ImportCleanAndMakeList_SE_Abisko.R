@@ -8,8 +8,10 @@
 ImportCommunity_SE_Abisko <- function(){
   
   #import data
-  files <- list.files("data/SE_Abisko/SE_Abisko_commdata/")
-  dat <- map_df(files, ~ read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", .), sheet = "Vegetation control treatments"))
+  files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
+       grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
+
+      dat <- read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", files), sheet = "Vegetation control treatments")
   
   return(dat)
 }
@@ -21,7 +23,7 @@ ImportCommunity_SE_Abisko <- function(){
 CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
   dat2 <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
-    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , turfID = `Core ID` , Treatment = Treatment , Date = Year) %>% 
+    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , turfID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
                                  originSiteID =="Mid" & destSiteID == "Mid" ~ "LocalControl" ,
                                  originSiteID =="Low" & destSiteID == "Low" ~ "LocalControl" , 
@@ -31,7 +33,7 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "Mid" ~ "Cold" , 
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
-    gather(SpeciesName, 'cover', -destSiteID:Date)
+    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -turfID, -destBlockID, -Treatment, -Year) 
   return(dat2)
 }
 
@@ -39,42 +41,40 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
 
 CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
   dat2 <- community_SE_Abisko_raw %>% 
-    select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , turfID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
-           Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "HIGH" ~ "LocalControl"),
-           Year = year(as.Date(Date, format='%Y-%m-%d')),
-           Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
-           Cover= as.numeric(as.character(Cover))) %>% 
-    select(-c('Date', 'SpeciesName', 'Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '1714', 'LOW' = '773')),
+    select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
+    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , turfID = `Core ID` , Treatment = Treatment) %>% 
+    mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
+                                 originSiteID =="Mid" & destSiteID == "Mid" ~ "LocalControl" ,
+                                 originSiteID =="Low" & destSiteID == "Low" ~ "LocalControl" , 
+                                 originSiteID =="High" & destSiteID == "Low" ~ "Warm" ,
+                                 originSiteID =="High" & destSiteID == "Mid" ~ "Warm" ,
+                                 originSiteID =="Mid" & destSiteID == "Low" ~ "Warm" , 
+                                 originSiteID =="Low" & destSiteID == "Mid" ~ "Cold" , 
+                                 originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
+                                 originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
+    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -turfID, -destBlockID, -Treatment, -Year) %>%
+    select(-c('SpeciesName', 'Cover')) %>% 
+    distinct() %>% 
+    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '690', 'Mid' = '690', 'LOW' = '500')),
            Gradient = 'SE_Abisko',
-           Country = 'France',
-           YearEstablished = 2014,
-           PlotSize_m2 = 0.25
+           Country = 'Sweden',
+           YearEstablished = 2012,
+           PlotSize_m2 = 0.0177
     )
   
   
   return(dat2)
 }
 
-# Cleaning Kashmir species list
+# Cleaning species list (full name found in other sheet of excel)
 CleanTaxa_SE_Abisko <- function(community_SE_Abisko_raw){
-  dat2 <- community_SE_Abisko_raw %>% 
-    select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , turfID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
-           Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "HIGH" ~ "LocalControl"),
-           Year = year(as.Date(Date, format='%Y-%m-%d')),
-           Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
-           Cover= as.numeric(as.character(Cover))) %>% 
-    select(-Date)
-  taxa<-unique(dat2$SpeciesName)
+  files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
+    grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
+  splist <- map_df(files, ~ read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", .), sheet = "Species list 2012"))
+  rar <- c(splist$Name...2, splist$Name...4)
+  rar <- rar[!is.na(rar)]
+  taxa <- rar[!rar %in% c('Lichen', 'Litter', 'Moss')]
+  
   return(taxa)
 }
 
