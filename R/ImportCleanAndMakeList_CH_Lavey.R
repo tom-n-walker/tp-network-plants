@@ -14,16 +14,19 @@ ImportCommunity_CH_Lavey <- function(){
   return(cover_CH_Lavey)
 }
 
+sitenames <-c('CRE_CRE','CRE_RIO','MAR_MAR','MAR_RIO','PRA_PRA','PRA_RIO','RIO_RIO')
+
 #### Cleaning Code ####
 # Cleaning Lavey community data
 CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw){
   dat <- 
-    community_CH_Lavey_raw %>% gather(species, 'cover', 3:221) %>%
-    mutate(Treatment = recode(siteID, "RIO_RIO" = "LocalControl", "PRA_PRAturf 2.xlsx" = "LocalControl", "PRA_RIO" = "Warm"),
-           speccode= sapply(strsplit(species, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
-           Collector = 'Jean') %>%
+    community_CH_Lavey_raw %>% gather(SpeciesName, 'cover', -year, -siteID, -turfID) %>%
+    mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
+                              "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
+           SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
+           Collector = ifelse(year==2017, 'Jean', 'Loic')) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, SpeciesShort = speccode, Year = year, SpeciesName = species) %>% 
+    rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) 
   
