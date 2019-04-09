@@ -26,7 +26,7 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
            Treatment = substr(turfID, 7, 8),
            originSiteID = substr(turfID, nchar(turfID)-4, nchar(turfID)-3),
            originBlockID = substr(turfID, nchar(turfID)-2, nchar(turfID)-2)) %>% 
-      mutate(Treatment = recode(Treatment, "c1" = "Cold", "c2" = "ColdLong", "w1" = "Warm", "w2" = "WarmLong", "nu" = "NettedControl", "u_" = "Control", "ws" = "LocalControl")) %>% 
+      mutate(Treatment = recode(Treatment, "c1" = "Cold", "c2" = "Cold", "w1" = "Warm", "w2" = "Warm", "nu" = "NettedControl", "u_" = "Control", "ws" = "LocalControl")) %>% 
     rename(destPlotID = turfID) %>% 
     select(-date_yyyymmdd)
     
@@ -34,7 +34,29 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
 }
 
 # Clean metadata
-
+CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
+  dat2 <- community_US_Colorado_raw %>% 
+    select(-c(pos1.1:pos5.5)) %>% 
+    rename(SpeciesName = species, Cover = percentCover) %>% 
+    mutate(Year = year(ymd(date_yyyymmdd)), 
+           destSiteID = substr(turfID, 1, 2),
+           destBlockID = substr(turfID, 3, 3),
+           Treatment = substr(turfID, 7, 8),
+           originSiteID = substr(turfID, nchar(turfID)-4, nchar(turfID)-3),
+           originBlockID = substr(turfID, nchar(turfID)-2, nchar(turfID)-2)) %>% 
+    mutate(Treatment = recode(Treatment, "c1" = "Cold", "c2" = "Cold", "w1" = "Warm", "w2" = "Warm", "nu" = "NettedControl", "u_" = "Control", "ws" = "LocalControl")) %>% 
+    rename(destPlotID = turfID) %>% 
+    select(-date_yyyymmdd)
+  select(-c('SpeciesName', 'Cover')) %>% 
+    distinct()%>% 
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '3300', MID,FILL IN 'LOW' = '2900')),
+           Gradient = 'US_Colorado',
+           Country = 'USA',
+           YearEstablished = 2017,
+           PlotSize_m2 = 0.25
+  
+  return(dat2)
+}
 
 # Clean species list
 
