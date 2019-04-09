@@ -19,11 +19,11 @@ ImportCommunity_SE_Abisko <- function(){
 
 
 #### Cleaning Code ####
-# Cleaning AlpeHuez community data
+# Cleaning Abisko community data
 CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
   dat2 <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
-    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , turfID = `Core ID` , Treatment = Treatment) %>% 
+    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
                                  originSiteID =="Mid" & destSiteID == "Mid" ~ "LocalControl" ,
                                  originSiteID =="Low" & destSiteID == "Low" ~ "LocalControl" , 
@@ -42,7 +42,7 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
 CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
   dat2 <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
-    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , turfID = `Core ID` , Treatment = Treatment) %>% 
+    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
                                  originSiteID =="Mid" & destSiteID == "Mid" ~ "LocalControl" ,
                                  originSiteID =="Low" & destSiteID == "Low" ~ "LocalControl" , 

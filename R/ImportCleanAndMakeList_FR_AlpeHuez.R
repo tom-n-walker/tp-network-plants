@@ -21,7 +21,7 @@ ImportCommunity_FR_AlpeHuez <- function(){
 CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
     dat2 <- community_FR_AlpeHuez_raw %>% 
     select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , turfID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
+    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , destPlotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 
@@ -38,7 +38,7 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
 CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
   dat2 <- community_FR_AlpeHuez_raw %>% 
     select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , turfID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
+    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , destPlotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 
@@ -63,7 +63,7 @@ CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
 CleanTaxa_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
   dat2 <- community_FR_AlpeHuez_raw %>% 
     select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , turfID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
+    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , destPlotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 

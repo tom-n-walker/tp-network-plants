@@ -37,7 +37,7 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw, taxa_NO_Norway){
     rename(originSiteID = siteID, originBlockID = blockID, Treatment = TTtreat, Cover = cover, SpeciesShort = species, Year = year, SpeciesName = speciesName, Collector = recorder) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("TTC", "TT1", "TT2")) %>% 
-    mutate(Treatment = recode(Treatment, "TTC" = "Control", "TT1" = "LocalControl", "TTC" = "Warm"))
+    mutate(Treatment = recode(Treatment, "TTC" = "Control", "TT1" = "LocalControl", "TT2" = "Warm"))
   
   return(dat2)
 }

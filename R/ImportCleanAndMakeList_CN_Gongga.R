@@ -94,7 +94,7 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
     rename(Year = year, Treatment = TTtreat, Cover = cover, SpeciesName = speciesName) %>% 
     mutate(Gradient = "CN_Gongga",
                       Country = as.character("China"),
-           Treatment = recode(Treatment, "control" = "Control", "local" = "LocalControl", "warm1" = "Warm", "cool1" = "Cold", "warm3" = "WarmLong", "cool3" = "ColdLong")) %>% 
+           Treatment = recode(Treatment, "control" = "Control", "local" = "LocalControl", "warm1" = "Warm", "cool1" = "Cold", "warm3" = "Warm", "cool3" = "Cold")) %>% 
     mutate(SpeciesName = recode(SpeciesName, "Potentilla stenophylla var. emergens" = "Potentilla stenophylla")) %>% 
     filter(!is.na(Cover), !Cover == 0)
   

@@ -15,7 +15,7 @@ ImportCommunity_IN_Kashmir <- function(){
 CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
     dat2 <- community_IN_Kashmir_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
-    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
+      rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>%
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
@@ -28,9 +28,8 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
 
 CleanMeta_IN_Kashmir <- function(community_IN_Kashmir_raw){
   dat2 <- community_IN_Kashmir_raw %>% 
-    bind_rows() %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
-    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
+    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>%
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
@@ -52,9 +51,8 @@ CleanMeta_IN_Kashmir <- function(community_IN_Kashmir_raw){
 # Cleaning Kashmir species list
 CleanTaxa_IN_Kashmir <- function(community_IN_Kashmir_raw){
   dat2 <- community_IN_Kashmir_raw %>% 
-    bind_rows() %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
-    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , turfID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
+    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 

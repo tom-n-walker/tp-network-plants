@@ -9,16 +9,16 @@ ImportCommunity_CH_Lavey <- function(){
   ## ---- load_community
   
   #load cover data and metadata
-  cover_CH_Lavey <- load_cover_CH_Lavey()
+  community_CH_Lavey_raw <- load_cover_CH_Lavey()
   
-  return(cover_CH_Lavey)
+  return( community_CH_Lavey_raw)
 }
 
 sitenames <-c('CRE_CRE','CRE_RIO','MAR_MAR','MAR_RIO','PRA_PRA','PRA_RIO','RIO_RIO')
 
 #### Cleaning Code ####
 # Cleaning Lavey community data
-CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw){
+CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
   dat <- 
     community_CH_Lavey_raw %>% gather(SpeciesName, cover, -year, -siteID, -turfID) %>%
     mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
@@ -27,13 +27,13 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw){
            Collector = ifelse(year==2017, 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
+    rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) 
   
   return(dat)
-}
 
+}
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_CH_Lavey <- function(community_CH_Lavey_raw) {
@@ -45,7 +45,7 @@ CleanTaxa_CH_Lavey <- function(community_CH_Lavey_raw) {
            Collector = ifelse(year==2017, 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
+    rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) 
   taxa <- unique(dat$SpeciesName)
@@ -62,10 +62,10 @@ CleanMeta_CH_Lavey <- function(community_CH_Lavey_raw){
            Collector = ifelse(year==2017, 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, Year = year) %>% 
+    rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(Elevation = as.numeric(recode(destsiteID, 'PRA'=1400, 'MAR'= 1750, 'CRE'=1950, 'RIO'=2200)),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'PRA'=1400, 'MAR'= 1750, 'CRE'=1950, 'RIO'=2200)),
            Gradient = "CH_Lavey",
            Country = as.character("Switzerland"),
            YearEstablished = 2016,

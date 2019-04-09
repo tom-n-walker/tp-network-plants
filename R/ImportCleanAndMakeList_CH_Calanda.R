@@ -9,23 +9,24 @@ ImportCommunity_CH_Calanda <- function(){
   ## ---- load_community
   
   #load cover data and metadata
-  cover_CH_Calanda <- load_cover_CH_Calanda()
+  community_CH_Calanda_raw <- load_cover_CH_Calanda()
   
-  return(cover_CH_Calanda)
+  return(community_CH_Calanda_raw)
 }
 
 #### Cleaning Code ####
 # Cleaning Calanda community data
 CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
-    mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
-                                 Treatment == "veg_home" & Site == "Cal" ~ "LocalControl",
-                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
-           origSiteID = case_when(Treatment == "veg_away" & Site == c("Cal", "Nes") ~ "PEA",
+    mutate(originSiteID = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "PEA",
                                   Treatment == "veg_home" & Site == "Nes" ~ "Nes",
-                                  Treatment == "veg_home" & Site == "Pea" ~ "Nes")) %>%
-           #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) %>%
-    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
+                                  Treatment == "veg_home" & Site == "Pea" ~ "Pea"),
+           Treatment = case_when(Treatment == "veg_away" & Site == "Cal" ~ "Warm", 
+                                 Treatment == "veg_away" & Site == "Nes" ~ "Warm",
+                                 Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
+    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
+    mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
+    mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) 
   
@@ -36,14 +37,15 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
 # Clean taxa list (add these to end of above)
 CleanTaxa_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
-    mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
-                                 Treatment == "veg_home" & Site == "Cal" ~ "LocalControl",
-                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
-           origSiteID = case_when(Treatment == "veg_away" & Site == c("Cal", "Nes") ~ "PEA",
-                                  Treatment == "veg_home" & Site == "Nes" ~ "Nes",
-                                  Treatment == "veg_home" & Site == "Pea" ~ "Nes")) %>%
-    #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) %>%
-    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
+    mutate(originSiteID = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "PEA",
+                                    Treatment == "veg_home" & Site == "Nes" ~ "Nes",
+                                    Treatment == "veg_home" & Site == "Pea" ~ "Pea"),
+           Treatment = case_when(Treatment == "veg_away" & Site == "Cal" ~ "Warm", 
+                                 Treatment == "veg_away" & Site == "Nes" ~ "Warm",
+                                 Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
+    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
+    mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
+    mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) 
   taxa <- unique(dat$SpeciesName)
@@ -53,17 +55,18 @@ CleanTaxa_CH_Calanda <- function(community_CH_Calanda_raw) {
 # Clean metadata
 CleanMeta_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
-    mutate(Treatment = case_when(Treatment == "veg_away" ~ "Warm", 
-                                 Treatment == "veg_home" & Site == "Cal" ~ "LocalControl",
-                                 Treatment == "veg_home" & Site == c("Nes","Pea") ~ "LocalControl"),
-           origSiteID = case_when(Treatment == "veg_away" & Site == c("Cal", "Nes") ~ "PEA",
-                                  Treatment == "veg_home" & Site == "Nes" ~ "Nes",
-                                  Treatment == "veg_home" & Site == "Pea" ~ "Nes")) %>%
-    #speccode = sapply(strsplit(Species_Name, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse=''))) %>%
-    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1) %>% 
+    mutate(originSiteID = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "PEA",
+                                    Treatment == "veg_home" & Site == "Nes" ~ "Nes",
+                                    Treatment == "veg_home" & Site == "Pea" ~ "Pea"),
+           Treatment = case_when(Treatment == "veg_away" & Site == "Cal" ~ "Warm", 
+                                 Treatment == "veg_away" & Site == "Nes" ~ "Warm",
+                                 Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
+    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
+    mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
+    mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(Elevation = as.numeric(recode(destSiteID, 'Control'='1200', 'LocalControl'='1500', 'Warm'='1500')),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'Pea'='2800', 'Cal'='2000', 'Nes'='1400')),
            Gradient = "CH_Calanda",
            Country = as.character("Switzerland"),
            YearEstablished = 2012,

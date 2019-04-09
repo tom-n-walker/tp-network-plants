@@ -27,10 +27,17 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
            originSiteID = substr(turfID, nchar(turfID)-4, nchar(turfID)-3),
            originBlockID = substr(turfID, nchar(turfID)-2, nchar(turfID)-2)) %>% 
       mutate(Treatment = recode(Treatment, "c1" = "Cold", "c2" = "ColdLong", "w1" = "Warm", "w2" = "WarmLong", "nu" = "NettedControl", "u_" = "Control", "ws" = "LocalControl")) %>% 
+    rename(destPlotID = turfID) %>% 
     select(-date_yyyymmdd)
     
   return(dat2)
 }
+
+# Clean metadata
+
+
+# Clean species list
+
 
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
