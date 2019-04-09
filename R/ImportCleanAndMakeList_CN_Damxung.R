@@ -7,8 +7,8 @@
 #This lists all the different files from years 2013-2018 and combines them
 ImportCommunity_CN_Damxung <- function(){
   files <- list.files("data/CN_Damxung/CN_Damxung_commdata/")
-  dat <- map_df(files, ~ read_excel(paste0("data/CN_Damxung/CN_Damxung_commdata/", .)))
-  return(dat)
+  community_CN_Damxung_raw <- map_df(files, ~ read_excel(paste0("data/CN_Damxung/CN_Damxung_commdata/", .)))
+  return(community_CN_Damxung_raw)
 } 
 
 
@@ -42,7 +42,7 @@ CleanMeta_CN_Damxung <- function(community_CN_Damxung_raw){
     mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '4800', 'LOW' = '4313')),
            Gradient = 'CN_Damxung',
            Country = 'China',
-           YearEstablished = NA,
+           YearEstablished = 2013,
            PlotSize_m2 = 0.25
     )
   

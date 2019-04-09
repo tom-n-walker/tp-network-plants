@@ -9,9 +9,9 @@ ImportCommunity_FR_AlpeHuez <- function(){
  
    #import data
   files <- list.files("data/FR_AlpeHuez/FR_AlpeHuez_commdata/")
-  dat <- map_df(files, ~ read_excel(paste0("data/FR_AlpeHuez/FR_AlpeHuez_commdata/", .), sheet = "relevee"))
+  community_FR_AlpeHuez_raw <- map_df(files, ~ read_excel(paste0("data/FR_AlpeHuez/FR_AlpeHuez_commdata/", .), sheet = "relevee"))
   
-  return(dat)
+  return(community_FR_AlpeHuez_raw)
   }
  
   
