@@ -4,7 +4,11 @@
 AnalyzeSR <- function(p) {
 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-  SR <- x$community %>% group_by(destSiteID, Treatment, turfID) %>% summarize(SR=n_distinct(SpeciesName)) %>%
+  SR <- x$community %>% 
+    data.list %>% 
+    map(~full_join(.$community, .$meta, by='destSiteID')) %>%
+    bind_rows(., .id='Gradient')
+    group_by(destSiteID, Treatment, turfID) %>% summarize(SR=n_distinct(SpeciesName)) %>%
     ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~destSiteID)
     #overlap of species between low and high sites
  
