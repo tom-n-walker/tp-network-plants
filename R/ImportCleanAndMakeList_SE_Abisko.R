@@ -11,9 +11,9 @@ ImportCommunity_SE_Abisko <- function(){
   files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
        grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
 
-      dat <- read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", files), sheet = "Vegetation control treatments")
+  community_SE_Abisko_raw <- read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", files), sheet = "Vegetation control treatments")
   
-  return(dat)
+  return(community_SE_Abisko_raw)
 }
 
 
@@ -21,7 +21,7 @@ ImportCommunity_SE_Abisko <- function(){
 #### Cleaning Code ####
 # Cleaning Abisko community data
 CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
-  dat2 <- community_SE_Abisko_raw %>% 
+  dat <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
     rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
@@ -34,13 +34,13 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
     gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -turfID, -destBlockID, -Treatment, -Year) 
-  return(dat2)
+  return(dat)
 }
 
 # Clean metadata
 
 CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
-  dat2 <- community_SE_Abisko_raw %>% 
+  dat <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
     rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
@@ -63,7 +63,7 @@ CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
     )
   
   
-  return(dat2)
+  return(dat)
 }
 
 # Cleaning species list (full name found in other sheet of excel)
