@@ -1,14 +1,6 @@
 ##### Simple Test Analysis ####
 #C&D 14.12.2018
 
-#summarize data and analyze Species richness ~treatment by Year and Site
-NMDS <- function(x) {
-  
-  x %>% metaMDS(.) 
-}
-
-library(ggfortify) #use pack for github repos
-
 AnalyzeSR <- function(p) {
 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
@@ -28,13 +20,16 @@ AnalyzeSR <- function(p) {
   
  #### Code to produce RDA per site (for final year, low site treatments)  
    library(vegan)
-   data.list<- list(a = NO_Ulvhaugen, b=NO_Skjellingahaugen)
+   data.list<- list(a = DE_Grainau, b=FR_AlpeHuez)
    
-   rda1<- data.list %>% map_df('community', .id='Gradient') %>% 
-     select(Gradient, destSiteID, turfID, Treatment, Year, SpeciesName, Cover) %>% 
-     filter(!is.na(SpeciesName), destSiteID %in% c('Fauske','Ovstedal'), Treatment %in% c('TT2', 'Control')) %>%
+   rda1<- data.list %>% 
+     map(~full_join(.$community, .$meta, by='destSiteID')) %>%
+     bind_rows(., .id='Gradient') %>%
+     select(Gradient, destSiteID, destPlotID, Treatment, Year, SpeciesName, Elevation, Cover) %>% 
+     filter(!is.na(SpeciesName), Treatment %in% c('Warm', 'LocalControl')) %>%
      group_by(Gradient, Treatment) %>% 
-     filter(Year==max(Year)) %>% select(-Year, -destSiteID) %>%
+     filter(Year==max(Year), Elevation==min(Elevation)) %>% 
+     select(-Year, -destSiteID, -Elevation) %>%
      nest() %>%
       mutate(comm = map(data, ~spread(., SpeciesName, Cover, fill=0)),
              rda = map(comm, ~{
@@ -43,12 +38,16 @@ AnalyzeSR <- function(p) {
                rda(com ~ Treatment, pred)}),
              rda_output = map2(.x=rda, .y=comm, ~fortify(.x, display = c("wa","cn"))))
    
-   rda1<- data.list %>% map2(.x='community', .y='meta', ~full_join(., by='destSiteID'))
-     reduce(left_join, by=c('destSiteID'))
+   
+   #Trying to first merge metadata (elevation) and community data
+   rda1<- 
+     
+     
+     #map over data.list, left_join(.$comm, .$)
      
      data.list %>% map_df('community', .id='Gradient') %>% 
      select(Gradient, destSiteID, turfID, Treatment, Year, SpeciesName, Cover) %>% 
-     filter(!is.na(SpeciesName), destSiteID %in% c('Fauske','Ovstedal'), Treatment %in% c('TT2', 'Control')) %>%
+     filter(!is.na(SpeciesName), destSiteID %in% c('Fauske','Ovstedal'), Treatment %in% c('Warm', 'Control')) %>%
      group_by(Gradient, Treatment) %>% 
      filter(Year==max(Year)) %>% select(-Year, -destSiteID) %>%
      nest() %>%
