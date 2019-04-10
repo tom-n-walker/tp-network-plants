@@ -23,7 +23,7 @@ ImportCommunity_SE_Abisko <- function(){
 CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
   dat <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
-    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
+    rename(originSiteID = 'Elevation of origin', destSiteID = 'Transplant elevation' , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
                                  originSiteID =="Mid" & destSiteID == "Mid" ~ "LocalControl" ,
                                  originSiteID =="Low" & destSiteID == "Low" ~ "LocalControl" , 
@@ -33,7 +33,7 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "Mid" ~ "Cold" , 
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
-    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -turfID, -destBlockID, -Treatment, -Year) 
+    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destBlockID, -Treatment, -Year) 
   return(dat)
 }
 
@@ -42,7 +42,7 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
 CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
   dat <- community_SE_Abisko_raw %>% 
     select(-c(El, Ori, Yr, `Spot ID`, Tag, `Bare soil`:Mosses)) %>% 
-    rename(originSiteID = `Elevation of origin`, destSiteID = `Transplant elevation` , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
+    rename(originSiteID = 'Elevation of origin', destSiteID = 'Transplant elevation' , destBlockID = Block , destPlotID = `Core ID` , Treatment = Treatment) %>% 
     mutate(Treatment = case_when(originSiteID =="High" & destSiteID == "High" ~ "LocalControl" , 
                                  originSiteID =="Mid" & destSiteID == "Mid" ~ "LocalControl" ,
                                  originSiteID =="Low" & destSiteID == "Low" ~ "LocalControl" , 
@@ -52,7 +52,7 @@ CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "Mid" ~ "Cold" , 
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
-    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -turfID, -destBlockID, -Treatment, -Year) %>%
+    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destBlockID, -Treatment, -Year)  %>%
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '690', 'Mid' = '690', 'LOW' = '500')),
