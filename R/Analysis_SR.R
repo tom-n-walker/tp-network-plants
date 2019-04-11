@@ -11,26 +11,19 @@ data.list <- list(CH_Calanda, CN_Damxung, CN_Gongga, DE_Grainau, FR_AlpeHuez, IN
   #   data.list %>% 
   #   map(~right_join(.$community, .$meta, by='destSiteID')) %>%
   #   bind_rows(., .id='Gradient')
-
-data.list=list(CN_Damxung, DE_Grainau)
+names(data.list) <- c("CH_Calanda", "CN_Damxung", "CN_Gongga", "DE_Grainau", "FR_AlpeHuez", "IN_Kashmir", "SE_Abisko", "US_Colorado")
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-  #bind first then calculate
-  SR <-data.list %>% map_df('community', .id='Gradient') %>% 
-    select(Gradient, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
-    group_by(Gradient, destSiteID, Treatment) %>% 
+ #fix block issue and then bind
+  data.list %>% map(~mutate(.$community, destBlockID=as.character(destBlockID),
+                         Cover=as.numeric(Cover))) %>%
+    bind_rows(.id='Region') %>% 
+    select(Region, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
+    group_by(Region, destSiteID, Treatment, destPlotID) %>% 
     nest() %>% 
     mutate(specrich = map(data, ~summarize(., SR=n_distinct(SpeciesName)))) %>%
-    unnest(specrich) #%>%
-    #ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~destSiteID)
-  
-  #fix block issue and then bind
-  SR <-data.list %>% map(~mutate(.$community, destBlockID=as.character(destBlockID))) #%>%
-    map_df('community', .id='Gradient') %>% 
-    select(Gradient, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
-    group_by(Gradient, destSiteID, Treatment) %>% 
-    nest() %>% 
-    mutate(specrich = map(data, ~summarize(., SR=n_distinct(SpeciesName)))) %>%
-    unnest(specrich)
+    unnest(specrich) %>%
+    filter(!Treatment %in% c('NettedControl','Control')) %>%
+    ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~Region)
  
   #GET OVERLAP OF HIGH AND LOW SPECIES
   data.list %>% map_df('community', .id='Gradient') %>% 

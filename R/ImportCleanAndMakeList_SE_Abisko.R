@@ -33,7 +33,7 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "Mid" ~ "Cold" , 
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
-    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destBlockID, -Treatment, -Year) 
+    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destPlotID, -destBlockID, -Treatment, -Year) 
   return(dat)
 }
 
@@ -52,7 +52,7 @@ CleanMeta_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "Mid" ~ "Cold" , 
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
-    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destBlockID, -Treatment, -Year)  %>%
+    gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destPlotID, -destBlockID, -Treatment, -Year) %>%    
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '690', 'Mid' = '690', 'LOW' = '500')),
