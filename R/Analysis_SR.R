@@ -1,10 +1,12 @@
 ##### Simple Test Analysis ####
 #C&D 14.12.2018
 
-AnalyzeSR <- function(p) {
+#AnalyzeSR <- function(p) {
 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-  SR <- x$community %>% 
+data.list <- list(CH_Calanda, CH_Lavey, CN_Damxung, CN_Gongga, DE_Grainau, FR_AlpeHuez, IN_Kashmir, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen, SE_Abisko, US_Colorado)
+  
+  SR <-
     data.list %>% 
     map(~full_join(.$community, .$meta, by='destSiteID')) %>%
     bind_rows(., .id='Gradient')
