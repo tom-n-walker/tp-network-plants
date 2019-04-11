@@ -2,34 +2,47 @@
 #C&D 14.12.2018
 
 #AnalyzeSR <- function(p) {
-<<<<<<< HEAD
 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-data.list <- list(CH_Calanda, CH_Lavey, CN_Damxung, CN_Gongga, DE_Grainau, FR_AlpeHuez, IN_Kashmir, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen, SE_Abisko, US_Colorado)
-  
-  SR <-
-    data.list %>% 
-    map(~full_join(.$community, .$meta, by='destSiteID')) %>%
-    bind_rows(., .id='Gradient')
-=======
-data.list=list(CH_Calanda, CN_Damxung, CN_Gongga)
+data.list <- list(CH_Calanda, CN_Damxung, CN_Gongga, DE_Grainau, FR_AlpeHuez, IN_Kashmir, SE_Abisko, US_Colorado)
+  #not lavey because it's an ass
+#JOIN METADATA AND COMMUNITY DATA
+  # SR <-
+  #   data.list %>% 
+  #   map(~right_join(.$community, .$meta, by='destSiteID')) %>%
+  #   bind_rows(., .id='Gradient')
+
+data.list=list(CN_Damxung, DE_Grainau)
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-  SR <-data.list %>% .$community %>%
-    map(~right_join(.$community, .$meta, by='destSiteID')) %>%
-    bind_rows(., .id='Gradient') %>%
->>>>>>> baad7423151b5fc54bc517da84ce1871abe1838f
-    group_by(destSiteID, Treatment, turfID) %>% summarize(SR=n_distinct(SpeciesName)) %>%
-    ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~destSiteID)
-    #overlap of species between low and high sites
+  #bind first then calculate
+  SR <-data.list %>% map_df('community', .id='Gradient') %>% 
+    select(Gradient, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
+    group_by(Gradient, destSiteID, Treatment) %>% 
+    nest() %>% 
+    mutate(specrich = map(data, ~summarize(., SR=n_distinct(SpeciesName)))) %>%
+    unnest(specrich) #%>%
+    #ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~destSiteID)
+  
+  #fix block issue and then bind
+  SR <-data.list %>% map(~mutate(.$community, destBlockID=as.character(destBlockID))) #%>%
+    map_df('community', .id='Gradient') %>% 
+    select(Gradient, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
+    group_by(Gradient, destSiteID, Treatment) %>% 
+    nest() %>% 
+    mutate(specrich = map(data, ~summarize(., SR=n_distinct(SpeciesName)))) %>%
+    unnest(specrich)
  
   #GET OVERLAP OF HIGH AND LOW SPECIES
-  SR <- x$community %>% group_by(destSiteID, Treatment) %>% 
-     nest() %>% 
-     mutate(splist = map(data, ~select(., SpeciesName))) %>%
-     filter(!Treatment=='Warm') %>%
-     select(-data, -Treatment) %>%
-     arrange(destSiteID) %>%
-     summarise(overlap = length(intersect(splist[[1]]$SpeciesName, splist[[2]]$SpeciesName)))
+  data.list %>% map_df('community', .id='Gradient') %>% 
+    select(Gradient, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
+    group_by(Gradient, destSiteID, Treatment) %>% 
+    nest() %>% 
+    mutate(splist = map(data, ~select(., SpeciesName))) %>%
+    filter(!Treatment=='Warm') %>%
+    select(-data, -Treatment) %>%
+    arrange(destSiteID) %>%
+    mutate(overlap = map(splist, ~summarise(overlap = length(intersect(splist[[1]]$SpeciesName, splist[[2]]$SpeciesName))))) %>%
+    unnest(overlap)
 
   
  #### Code to produce RDA per site (for final year, low site treatments)  
