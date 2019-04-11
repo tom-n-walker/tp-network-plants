@@ -1,13 +1,12 @@
 ##### Simple Test Analysis ####
 #C&D 14.12.2018
 
-AnalyzeSR <- function(p) {
-
+#AnalyzeSR <- function(p) {
+data.list=list(CH_Calanda, CN_Damxung, CN_Gongga)
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-  SR <- x$community %>% 
-    data.list %>% 
-    map(~full_join(.$community, .$meta, by='destSiteID')) %>%
-    bind_rows(., .id='Gradient')
+  SR <-data.list %>% .$community %>%
+    map(~right_join(.$community, .$meta, by='destSiteID')) %>%
+    bind_rows(., .id='Gradient') %>%
     group_by(destSiteID, Treatment, turfID) %>% summarize(SR=n_distinct(SpeciesName)) %>%
     ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~destSiteID)
     #overlap of species between low and high sites

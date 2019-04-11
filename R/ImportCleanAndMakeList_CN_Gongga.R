@@ -116,7 +116,7 @@ CleanMeta_CN_Gongga <- function(dat){
     mutate(Elevation = as.numeric(as.character(Elevation)),
            Gradient = "CN_Gongga",
            Country = as.character("China"),
-           Site = as.character(Site),
+           destSiteID = as.character(Site),
            YearEstablished = 2012,
            PlotSize_m2 = 0.0625)
   
