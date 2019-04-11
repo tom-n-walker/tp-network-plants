@@ -6,7 +6,8 @@
 ImportCommunity_IN_Kashmir <- function(){
   community_IN_Kashmir_14<-read_xlsx(path ="data/IN_Kashmir/background 2014.xlsx")
   community_IN_Kashmir_15<-read_xlsx(path ="data/IN_Kashmir/2015.xlsx")
-  return(bind_rows(community_IN_Kashmir_14, community_IN_Kashmir_15))
+  community_IN_Kashmir_raw <- bind_rows(community_IN_Kashmir_14, community_IN_Kashmir_15)
+  return(community_IN_Kashmir_raw)
 } 
 
 

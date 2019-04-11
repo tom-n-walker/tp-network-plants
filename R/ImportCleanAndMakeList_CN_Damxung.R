@@ -50,7 +50,7 @@ CleanMeta_CN_Damxung <- function(community_CN_Damxung_raw){
   return(dat2)
 }
 
-# Cleaning Kashmir species list
+# Cleaning Damxung species list
 CleanTaxa_CN_Damxung <- function(community_CN_Damxung_raw){
   dat2 <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 

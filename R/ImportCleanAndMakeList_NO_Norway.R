@@ -29,7 +29,7 @@ ImportTaxa_NO_Norway <- function(con){
 
 
 #### Cleaning Code ####
-# Cleaning China meta community data
+# Cleaning NO community data
 CleanCommunity_NO_Norway <- function(community_NO_Norway_raw, taxa_NO_Norway){
   dat2 <- community_NO_Norway_raw %>% 
     left_join(taxa_NO_Norway, by = "species") %>% 
