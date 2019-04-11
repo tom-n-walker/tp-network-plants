@@ -2,6 +2,7 @@
 #C&D 14.12.2018
 
 #AnalyzeSR <- function(p) {
+<<<<<<< HEAD
 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
 data.list <- list(CH_Calanda, CH_Lavey, CN_Damxung, CN_Gongga, DE_Grainau, FR_AlpeHuez, IN_Kashmir, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen, SE_Abisko, US_Colorado)
@@ -10,6 +11,13 @@ data.list <- list(CH_Calanda, CH_Lavey, CN_Damxung, CN_Gongga, DE_Grainau, FR_Al
     data.list %>% 
     map(~full_join(.$community, .$meta, by='destSiteID')) %>%
     bind_rows(., .id='Gradient')
+=======
+data.list=list(CH_Calanda, CN_Damxung, CN_Gongga)
+  #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
+  SR <-data.list %>% .$community %>%
+    map(~right_join(.$community, .$meta, by='destSiteID')) %>%
+    bind_rows(., .id='Gradient') %>%
+>>>>>>> baad7423151b5fc54bc517da84ce1871abe1838f
     group_by(destSiteID, Treatment, turfID) %>% summarize(SR=n_distinct(SpeciesName)) %>%
     ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~destSiteID)
     #overlap of species between low and high sites

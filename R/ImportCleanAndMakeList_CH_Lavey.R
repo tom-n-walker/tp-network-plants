@@ -11,7 +11,7 @@ ImportCommunity_CH_Lavey <- function(){
   #load cover data and metadata
   community_CH_Lavey_raw <- load_cover_CH_Lavey()
   
-  return( community_CH_Lavey_raw)
+  return(community_CH_Lavey_raw)
 }
 
 sitenames <-c('CRE_CRE','CRE_RIO','MAR_MAR','MAR_RIO','PRA_PRA','PRA_RIO','RIO_RIO')
