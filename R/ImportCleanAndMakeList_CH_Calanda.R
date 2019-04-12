@@ -66,6 +66,8 @@ CleanMeta_CH_Calanda <- function(community_CH_Calanda_raw) {
     rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
     mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
     mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>% 
+    #add block ID because blerg
+    mutate(destBlockID=NA) %>%
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
     mutate(Elevation = as.numeric(recode(destSiteID, 'Pea'='2800', 'Cal'='2000', 'Nes'='1400')),

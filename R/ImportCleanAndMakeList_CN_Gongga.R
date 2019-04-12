@@ -118,7 +118,8 @@ CleanMeta_CN_Gongga <- function(dat){
            Country = as.character("China"),
            destSiteID = as.character(Site),
            YearEstablished = 2012,
-           PlotSize_m2 = 0.0625)
+           PlotSize_m2 = 0.0625,
+           destBlockID= NA)
   
   return(dat2)
 }
