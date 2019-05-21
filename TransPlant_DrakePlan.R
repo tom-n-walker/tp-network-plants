@@ -56,9 +56,12 @@ ImportDrakePlan <- drake_plan(
 )
 
 AnalyzeDrakePlan <- drake_plan(
+  #create data.list, run 'collatedata()'
+  ##can you use ImportDrakePlan$target to add targest to data.list (get(ImportDrakePlan$target))
   CN_Gongga_lm = AnalyzeSR(CN_Gongga)
 )
 
+#instert manuscript/presentation drake plan, can have several manuscripts building off same data
 MyPlan <- ImportDrakePlan
 
 #MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)

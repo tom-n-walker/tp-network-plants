@@ -14,7 +14,6 @@ ImportCommunity_CH_Lavey <- function(){
   return(community_CH_Lavey_raw)
 }
 
-sitenames <-c('CRE_CRE','CRE_RIO','MAR_MAR','MAR_RIO','PRA_PRA','PRA_RIO','RIO_RIO')
 
 #### Cleaning Code ####
 # Cleaning Lavey community data
