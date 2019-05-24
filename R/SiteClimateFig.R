@@ -1,8 +1,8 @@
 #### MAKE A CLIMATE FIGURE ####
 #10.04.2019
 library(tidyverse)
-devtools::install_github('MirzaCengic/climatedata')
-devtools::install_github("jimhester/archive")
+#devtools::install_github('MirzaCengic/climatedata')
+#devtools::install_github("jimhester/archive")
 library(climatedata)
 library(archive)
 
