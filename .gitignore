@@ -27,6 +27,8 @@ vignettes/*.pdf
 
 
 #data
+*.txt
+*.hobo
 *.xls
 *.csv
 *.Rdata
@@ -45,6 +47,7 @@ vignettes/*.pdf
 *.RData.Tmp1
 *.rds
 *.rtf
+*.tiff
 
 #rasters & shapefiles
 *.bil

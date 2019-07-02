@@ -9,13 +9,13 @@ load_cover_CH_Lavey <- function(){
     dat <- excel_sheets(y) %>%
       str_subset("^\\d|^\\d.") %>%
       map_df(
-        ~ read_excel(path = y, sheet = .x, .name_repair = ), #has to add name repair because adding unique names. Just combine them I think...
+        ~ read_excel(path = y, sheet = .x), #has to add name repair because adding unique names. Just combine them I think...
          .id = "turfID") %>% 
-      select(-contains('Bare'), -contains("...")) %>% 
+      select(-contains('Bare', 'Remarque', 'FOCAL')) %>% 
       mutate(turfID = paste0('T', gsub("[^0-9.-]", "", turfID))) %>%
       group_by(turfID) %>%
       summarise_if(is.numeric, sum) %>%
-      gather(key='SpeciesName', value='cover', -turfID )
+      gather(key='SpeciesName', value='cover', -turfID ) #in gather, remove unique IDS and sum across groups. Then spread again.
     return(dat)
   }
   
