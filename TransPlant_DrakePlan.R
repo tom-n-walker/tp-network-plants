@@ -54,6 +54,7 @@ ImportDrakePlan <- drake_plan(
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
   SE_Abisko = ImportClean_SE_Abisko()
   #Insert FR_Lauteret #CC
+  #Insert IT_Matchymatchy #CC
 )
 
 AnalyzeDrakePlan <- drake_plan(
@@ -68,6 +69,6 @@ MyPlan <- ImportDrakePlan
 #MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
 
 conf <- drake_config(MyPlan)
-make(MyPlan, keep_going = TRUE)
+make(MyPlan, force=T, keep_going = TRUE)
 loadd()
 vis_drake_graph(conf, targets_only = TRUE)
