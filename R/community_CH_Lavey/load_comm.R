@@ -10,25 +10,39 @@ load_cover_CH_Lavey <- function(){
       str_subset("^\\d|^\\d.") %>%
       map_df(
         ~ read_excel(path = y, sheet = .x), #has to add name repair because adding unique names. Just combine them I think...
-         .id = "turfID") %>% 
-      select(-contains('Bare', 'Remarque', 'FOCAL')) %>% 
+         .id = "turfID") #no idea why but needed to break pipeline here 
+    dat1 <- dat %>% dplyr::select(-'NA', -contains('Bare'), -contains('FOCAL'), -Dead) %>%
       mutate(turfID = paste0('T', gsub("[^0-9.-]", "", turfID))) %>%
       group_by(turfID) %>%
       summarise_if(is.numeric, sum) %>%
-      gather(key='SpeciesName', value='cover', -turfID ) #in gather, remove unique IDS and sum across groups. Then spread again.
-    return(dat)
+      gather(key='SpeciesName', value='cover', -turfID ) %>% 
+      mutate(SpeciesName=str_replace(SpeciesName, "\\...+[\\d]$", "")) %>% #remove unique IDS and sum across groups
+      group_by(turfID, SpeciesName) %>%
+      summarise(cover=sum(cover))
+    return(dat1)
   }
+  
+  
   
   collector18 <- function (y) {
     dat <- excel_sheets(y) %>%
       str_subset("^\\d|^\\d.") %>%
       map_df(
         ~ read_excel(path = y, sheet = .x),
-        .id = "turfID") %>%
-      select(-sp_2017) %>%
-      mutate(turfID = paste0('T', gsub("[^0-9.-]", "", turfID)), cover=rowSums(select_if(., is.numeric), na.rm=T)) %>%
-      select(-starts_with('CRE')) %>%
-      filter(!is.na(cover))
+        .id = "turfID") 
+    dat1 <- dat %>% dplyr::select(-'sp2017') %>%
+      mutate(turfID = paste0('T', gsub("[^0-9.-]", "", turfID))) %>%
+      group_by(turfID) %>%
+      summarise_if(is.numeric, sum) %>%
+      gather(key='SpeciesName', value='cover', -turfID ) %>% 
+      mutate(SpeciesName=str_replace(SpeciesName, "\\...+[\\d]$", "")) %>% #remove unique IDS and sum across groups
+      group_by(turfID, SpeciesName) %>%
+      summarise(cover=sum(cover))
+    #This is the older text, need to harmonize these! I think the 2018 data is in a different format (transposed)  
+    # select(-sp_2017) %>%
+      # mutate(turfID = paste0('T', gsub("[^0-9.-]", "", turfID)), cover=rowSums(select_if(., is.numeric), na.rm=T)) %>%
+      # select(-starts_with('CRE')) %>%
+      # filter(!is.na(cover))
       
     return(dat)
   }
@@ -42,16 +56,16 @@ load_cover_CH_Lavey <- function(){
   cover17 <- tibble(siteID=files17) %>% 
     mutate(file_contents = map(siteID, collector17)) %>%
     mutate(siteID = str_extract(siteID, paste(sitenames, collapse="|")), year=2017) %>%
-    unnest() %>% 
+    unnest(cols = c(file_contents)) %>% 
     select(-contains('FOCAL'), -'NA')
   
   #Cover18 is species x site
   cover18 <- tibble(siteID=files18) %>% 
     mutate(file_contents = map(siteID, collector18)) %>%
     mutate(siteID = str_extract(siteID, paste(sitenames, collapse="|")), year=2018) %>%
-    unnest() %>%
-    select(siteID, year, turfID, sp_2018, cover) %>%
-    spread(key=sp_2018, value_cover, -siteID, -year, -turfID) %>%
+    unnest(cols = c(file_contents)) %>%
+    dplyr::select(siteID, year, turfID, sp_2018, cover) %>%
+    spread(key=sp_2018, cover, -siteID, -year, -turfID) %>%
     filter(!is.na(sp_2018), -contains('FOCAL', sp_2018)) %>%
     #filter(!sp2018 %in% grepl('FOCAL', sp2018))
 

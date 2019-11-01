@@ -66,9 +66,8 @@ AnalyzeDrakePlan <- drake_plan(
 #instert manuscript/presentation drake plan, can have several manuscripts building off same data
 MyPlan <- ImportDrakePlan
 
-#MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
 
 conf <- drake_config(MyPlan)
-make(MyPlan, force=T, keep_going = TRUE)
+make(MyPlan)#, force=T, keep_going = TRUE)
 loadd()
 vis_drake_graph(conf, targets_only = TRUE)
