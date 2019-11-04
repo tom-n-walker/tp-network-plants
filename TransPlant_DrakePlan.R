@@ -24,10 +24,13 @@ source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
 source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
+source("R/ImportCleanAndMakeList_FR_Lautaret.R")
+source("R/ImportCleanAndMakeList_IT_MatschMazia.R")
 source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_SE_Abisko.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
+source("R/ImportCleanAndMakeList_US_Montana.R")
 source("R/Analysis_SR.R")
 
 # Import Data
@@ -38,12 +41,12 @@ ImportDrakePlan <- drake_plan(
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4), #DE check data with Aud
 
-  CH_Lavey = ImportClean_CH_Lavey(), #check this, some issues with the import code
+  CH_Lavey = ImportClean_CH_Lavey(), 
   CH_Calanda = ImportClean_CH_Calanda(),
   CH_Calanda2 = ImportClean_CH_Calanda2(),
 
   US_Colorado = ImportClean_US_Colorado(),
-  #Insert US_Montana #CC
+  US_Montana = ImportClean_US_Montana(),
   #US_Arizona, not in % cover so need to convert after using traits? #DE
 
   CN_Gongga = ImportClean_CN_Gongga(),
@@ -53,9 +56,9 @@ ImportDrakePlan <- drake_plan(
 
   DE_Grainau = ImportClean_DE_Grainau(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
-  SE_Abisko = ImportClean_SE_Abisko()
-  #Insert FR_Lauteret #CC
-  #Insert IT_Matchymatchy #CC
+  SE_Abisko = ImportClean_SE_Abisko(),
+  FR_Lautaret = ImportClean_FR_Lautaret(), #Follow up with her on 2018 data (still waiting...)
+  IT_MatschMazia = ImportClean_IT_MatschMazia ### THIS WILL BREAK, fixing tomorrow
 )
 
 AnalyzeDrakePlan <- drake_plan(
