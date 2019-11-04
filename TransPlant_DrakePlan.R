@@ -18,6 +18,7 @@ pn <- . %>% print(n = Inf)
 
 # source scripts
 source("R/ImportCleanAndMakeList_CH_Calanda.R")
+source("R/ImportCleanAndMakeList_CH_Calanda2.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
@@ -37,9 +38,9 @@ ImportDrakePlan <- drake_plan(
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4), #DE check data with Aud
 
-  CH_Lavey = ImportClean_CH_Lavey(),
+  CH_Lavey = ImportClean_CH_Lavey(), #check this, some issues with the import code
   CH_Calanda = ImportClean_CH_Calanda(),
-  #Insert other Calanda (from Jacob) #CC
+  CH_Calanda2 = ImportClean_CH_Calanda2(),
 
   US_Colorado = ImportClean_US_Colorado(),
   #Insert US_Montana #CC
