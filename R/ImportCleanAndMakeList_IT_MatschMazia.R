@@ -15,20 +15,18 @@ ImportCommunity_IT_MatschMazia <- function(){
 # Cleaning Lautaret community data
 CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
   dat <- community_IT_MatschMazia_raw %>% 
-    rename(Year=year, Elevation=elevation, Donor = Treatment) %>%
-    gather(SpeciesName, Cover, -destSiteID, -destPlotID, -Elevation, -Treatment, -Year) %>%
+    rename(Year=year, Elevation=elevation, treat = Treatment) %>%
+    gather(SpeciesName, Cover, -destSiteID, -destPlotID, -Elevation, -treat, -Year) %>%
     filter(!is.na(Cover)) %>%
     mutate(SpeciesName = gsub('\\_', ' ', SpeciesName)) %>%
-    
-    ###### START HERE< CANT FIGURE OUT PLOT IDS #####
-    # mutate(Treatment = case_when(Donor == "receiving" & destSiteID == 'Low'& Elevation = 1000 ~ "Warm", 
-    #                              Donor == "receiving" & destSiteID == 'Low'& Elevation = 1500 ~ "Warm",
-    #                              Donor == "receiving" & destSiteID == 'Low' ~ "Warm")),
-    #        origSiteID = case_when(destSiteID == "L" & Treatment == 'TP' ~ "G", 
-    #                               destSiteID == "L" & Treatment == 'CP' ~ "L",
-    #                               destSiteID == "G" & Treatment == 'CP' ~ "G")) %>% 
-    mutate(Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
-    select(Year, destSiteID, origSiteID, destPlotID, Treatment, SpeciesName, Cover, -plot)
+    mutate(Treatment = case_when(treat == "receiving" & destSiteID == 'Low' & Elevation == 1000 ~ "LocalControl",
+                                treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm",
+                                treat == "donor" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
+                                treat == "donor" & destSiteID == 'High' & Elevation == 1950 ~ "Warm"),
+            origSiteID = case_when(Elevation == 1000 ~ "Low",
+                                   Elevation == 1500 ~ "Middle",
+                                   Elevation == 1950 ~ "High")) %>%
+    select(Year, destSiteID, origSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat)
   
   return(dat)
 }
@@ -36,19 +34,18 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
 # Clean taxa list (add these to end of above)
 CleanTaxa_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
   dat <- community_IT_MatschMazia_raw %>% 
-    mutate(plot=rownames(.)) %>%
-    gather(SpeciesName, Cover, -plot) %>%
+    rename(Year=year, Elevation=elevation, treat = Treatment) %>%
+    gather(SpeciesName, Cover, -destSiteID, -destPlotID, -Elevation, -treat, -Year) %>%
     filter(!is.na(Cover)) %>%
-    mutate(SpeciesName = gsub('\\.', ' ', SpeciesName)) %>%
-    mutate(Year = 2017, 
-           destSiteID = substr(plot, 1, 1),
-           destPlotID = substr(plot, 3, 4),
-           Treatment = substr(plot, 6, 7),
-           origSiteID = case_when(destSiteID == "L" & Treatment == 'TP' ~ "G", 
-                                  destSiteID == "L" & Treatment == 'CP' ~ "L",
-                                  destSiteID == "G" & Treatment == 'CP' ~ "G")) %>% 
-    mutate(Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
-    select(Year, destSiteID, origSiteID, destPlotID, Treatment, SpeciesName, Cover, -plot)
+    mutate(SpeciesName = gsub('\\_', ' ', SpeciesName)) %>%
+    mutate(Treatment = case_when(treat == "receiving" & destSiteID == 'Low' & Elevation == 1000 ~ "LocalControl",
+                                 treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm",
+                                 treat == "donor" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
+                                 treat == "donor" & destSiteID == 'High' & Elevation == 1950 ~ "Warm"),
+           origSiteID = case_when(Elevation == 1000 ~ "Low",
+                                  Elevation == 1500 ~ "Middle",
+                                  Elevation == 1950 ~ "High")) %>%
+    select(Year, destSiteID, origSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat)
   taxa <- unique(dat$SpeciesName)
   return(taxa)
 }
@@ -56,19 +53,18 @@ CleanTaxa_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
 # Clean metadata
 CleanMeta_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
   dat <- community_IT_MatschMazia_raw %>% 
-    mutate(plot=rownames(.)) %>%
-    gather(SpeciesName, Cover, -plot) %>%
+    rename(Year=year, Elevation=elevation, treat = Treatment) %>%
+    gather(SpeciesName, Cover, -destSiteID, -destPlotID, -Elevation, -treat, -Year) %>%
     filter(!is.na(Cover)) %>%
-    mutate(SpeciesName = gsub('\\.', ' ', SpeciesName)) %>%
-    mutate(Year = 2017, 
-           destSiteID = substr(plot, 1, 1),
-           destPlotID = substr(plot, 3, 4),
-           Treatment = substr(plot, 6, 7),
-           origSiteID = case_when(destSiteID == "L" & Treatment == 'TP' ~ "G", 
-                                  destSiteID == "L" & Treatment == 'CP' ~ "L",
-                                  destSiteID == "G" & Treatment == 'CP' ~ "G")) %>% 
-    mutate(Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
-    select(Year, destSiteID, origSiteID, destPlotID, Treatment, SpeciesName, Cover, -plot) %>%
+    mutate(SpeciesName = gsub('\\_', ' ', SpeciesName)) %>%
+    mutate(Treatment = case_when(treat == "receiving" & destSiteID == 'Low' & Elevation == 1000 ~ "LocalControl",
+                                 treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm",
+                                 treat == "donor" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
+                                 treat == "donor" & destSiteID == 'High' & Elevation == 1950 ~ "Warm"),
+           origSiteID = case_when(Elevation == 1000 ~ "Low",
+                                  Elevation == 1500 ~ "Middle",
+                                  Elevation == 1950 ~ "High")) %>%
+    select(Year, destSiteID, origSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat) %>%
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct()  %>% 
     mutate(Gradient = 'IT_MatschMazia', #Already fixed this, just add dat above

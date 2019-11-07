@@ -31,7 +31,7 @@ source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_SE_Abisko.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
 source("R/ImportCleanAndMakeList_US_Montana.R")
-source("R/Analysis_SR.R")
+
 
 # Import Data
 ImportDrakePlan <- drake_plan(
@@ -58,20 +58,27 @@ ImportDrakePlan <- drake_plan(
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
   SE_Abisko = ImportClean_SE_Abisko(),
   FR_Lautaret = ImportClean_FR_Lautaret(), #Follow up with her on 2018 data (still waiting...)
-  IT_MatschMazia = ImportClean_IT_MatschMazia ### THIS WILL BREAK, fixing tomorrow
+  IT_MatschMazia = ImportClean_IT_MatschMazia 
 )
 
+
+source("R/Analysis_SR.R")
+source("R/plots.R")
 AnalyzeDrakePlan <- drake_plan(
   #create data.list, run 'collatedata()'
   ##can you use ImportDrakePlan$target to add targest to data.list (get(ImportDrakePlan$target))
-  CN_Gongga_lm = AnalyzeSR(CN_Gongga)
+  alldat = list(NO_Gudmedalen, NO_Ulvhaugen, NO_Skjellingahaugen, NO_Lavisdalen, CH_Lavey, CH_Calanda, CH_Calanda2,
+                 US_Colorado, US_Montana, CN_Gongga, CN_Damxung, IN_Kashmir, DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia), 
+  names(alldat) = c('NO_Gudmedalen', 'NO_Ulvhaugen', 'NO_Skjellingahaugen', 'NO_Lavisdalen', 'CH_Lavey', 'CH_Calanda', 'CH_Calanda2',
+                    'US_Colorado', 'US_Montana', 'CN_Gongga', 'CN_Damxung', 'IN_Kashmir', 'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia'),
+  SR = AnalyzeSR(alldat)
 )
 
-#instert manuscript/presentation drake plan, can have several manuscripts building off same data
-MyPlan <- ImportDrakePlan
-
-
+#insert manuscript/presentation drake plan, can have several manuscripts building off same data
+MyPlan <- bind_rows(ImportDrakePlan)
 conf <- drake_config(MyPlan)
-make(MyPlan)#, force=T, keep_going = TRUE)
+make(MyPlan)
 loadd()
 vis_drake_graph(conf, targets_only = TRUE)
+
+

@@ -44,6 +44,7 @@ CleanMeta_US_Montana <- function(community_US_Montana_raw){
     mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1985', 'Middle'= '2185', 'High'='2620')), #need to figure this out
            Country = 'USA',
            YearEstablished = 2013,
+           destBlockID = NA,
            PlotSize_m2 = NA) #need to find this
   
   return(dat)
