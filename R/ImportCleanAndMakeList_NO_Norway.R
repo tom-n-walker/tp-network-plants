@@ -66,6 +66,7 @@ CleanMeta_NO_Norway <- function(meta_NO_Norway_raw){
            Country = as.character("Norway"),
            YearEstablished = 2009,
            PlotSize_m2 = 0.0625,
+           destBlockID = NA,
            destSiteID = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske"))
   
   return(dat2)

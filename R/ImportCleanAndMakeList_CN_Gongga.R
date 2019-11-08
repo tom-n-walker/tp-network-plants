@@ -107,6 +107,7 @@ CleanMetaCommunity_CN_Gongga <- function(metaCommunity_CN_Gongga_raw){
   dat2 <- metaCommunity_CN_Gongga_raw %>% 
     select(PlotID, Year, Moss, Lichen2, Litter, BareGround, Rock, Vascular, Bryophyte, Lichen, MedianHeight_cm, MedianMossHeight_cm) %>% 
     mutate(Gradient = "CN_Gongga",
+           destBlockID = NA,
            Country = as.character("China"))
   return(dat2)
 }

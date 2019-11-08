@@ -1,6 +1,7 @@
 #### MAKE A CLIMATE FIGURE ####
 #10.04.2019
 library(tidyverse)
+library(readxl)
 #devtools::install_github('MirzaCengic/climatedata')
 #devtools::install_github("jimhester/archive")
 library(climatedata)
@@ -10,13 +11,13 @@ metadata <- read_excel(path = '~/Dropbox/projects/SNF Experiment/Transplant_Incl
                        sheet='Site level', skip = c(2))
 metadat <- data.frame(gradient = metadata[,1], site = metadata[,2], lat =  metadata[,5], long = metadata[,6], elev=metadata[4], year1=metadata[7], yearn=metadata[8])
 colnames(metadat) <- c('gradient', 'site', 'lat', 'long', 'elev', 'year1', 'yearn') 
-metadat <- metadat %>% group_by(Country, gradient) %>% summarize(nSites=n(), lat=mean(as.numeric(lat)), long=mean(as.numeric(long)),
+metadat <- metadat %>% group_by(gradient,site) %>% summarize(lat=mean(as.numeric(lat)), long=mean(as.numeric(long)),
                                                         yearn=mean(yearn), year1=mean(year1), 
-                                                        Elevrange=(max(elev)-min(elev)), Yearrange=yearn-year1)
+                                                        elev=elev, Yearrange=yearn-year1)
 
 
 
-#chelsa_bioclim <- get_chelsa(output_dir = "./climate", period = "current")
+chelsa_bioclim <- get_chelsa(output_dir = "./climate", period = "current")
 
 library(raster)
 library(sp)
@@ -37,7 +38,7 @@ values <- extract(r,points)
 
 df <- cbind.data.frame(coordinates(points),values)
 df <-df %>% mutate(Temp=Temp/10, Prec=Prec/10)
-df <- cbind(df, metadat)
+df <- cbind.data.frame(df, metadat)
 df <- df %>% mutate(Continent=case_when(gradient %in% c('CH_Calanda', 'CH_Lavey', 'DE_Grainau',
                                                    'FR_AlpeHuez', 'FR_Lautaret','IT_MatschMazia') ~ 'Alps',
                                gradient %in% c('NO_Gudmedalen', 'NO_Lavisdalen', 'NO_Skjellingahaugen',
@@ -107,3 +108,5 @@ ggplot() +
     legend.spacing.x = unit(0.5, units = "cm"), # horizontal spacing between legends
     panel.grid = element_blank() # eliminate grids
   )
+
+write.csv(df, '~/Desktop/metadata_transplant.csv')
