@@ -20,6 +20,7 @@ pn <- . %>% print(n = Inf)
 source("R/ImportCleanAndMakeList_CH_Calanda.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
+source("R/ImportCleanAndMakeList_CN_Heibei.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
 source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
@@ -48,7 +49,7 @@ ImportDrakePlan <- drake_plan(
   CN_Gongga = ImportClean_CN_Gongga(),
   CN_Damxung = ImportClean_CN_Damxung(),
   IN_Kashmir = ImportClean_IN_Kashmir(),
-  #Insert Heibei data (from Wang) #DE
+  IN_Kashmir = ImportClean_CN_Heibei(),
 
   DE_Grainau = ImportClean_DE_Grainau(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
