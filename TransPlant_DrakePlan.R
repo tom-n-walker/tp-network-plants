@@ -32,27 +32,29 @@ source("R/Analysis_SR.R")
 # Import Data
 ImportDrakePlan <- drake_plan(
 
-  NO_Ulvhaugen = ImportClean_NO_Norway(g = 1),
+  NO_Ulvhaugen = ImportClean_NO_Norway(g = 1), #add metadata, check we have all dat from 2017 onwards
   NO_Lavisdalen = ImportClean_NO_Norway(g = 2),
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),
 
   CH_Lavey = ImportClean_CH_Lavey(),
   CH_Calanda = ImportClean_CH_Calanda(),
-  #Insert other Calanda (from Jacob)
+  CH_Calanda2 = ImportClean_CH_Calanda2(),
 
   US_Colorado = ImportClean_US_Colorado(),
-  #Insert US_Montana, US_Arizon(need data)
+  US_Montana = ImportClean_US_Montana(),
+  #Insert arizona data DE
 
   CN_Gongga = ImportClean_CN_Gongga(),
   CN_Damxung = ImportClean_CN_Damxung(),
   IN_Kashmir = ImportClean_IN_Kashmir(),
-  #Insert Heibei data (from Wang)
+  #Insert Heibei data (from Wang) DE
 
   DE_Grainau = ImportClean_DE_Grainau(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
-  SE_Abisko = ImportClean_SE_Abisko()
-  #Insert FR_Lauteret
+  SE_Abisko = ImportClean_SE_Abisko(),
+  FR_Lautaret = ImportClean_FR_Lautaret(),
+  IT_MatschMazia = ImportClean_IT_MatschMazia()
 )
 
 AnalyzeDrakePlan <- drake_plan(
