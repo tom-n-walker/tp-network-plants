@@ -18,21 +18,16 @@ pn <- . %>% print(n = Inf)
 
 # source scripts
 source("R/ImportCleanAndMakeList_CH_Calanda.R")
-source("R/ImportCleanAndMakeList_CH_Calanda2.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
-source("R/ImportCleanAndMakeList_CN_Heibei.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
 source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
-source("R/ImportCleanAndMakeList_FR_Lautaret.R")
-source("R/ImportCleanAndMakeList_IT_MatschMazia.R")
 source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_SE_Abisko.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
-source("R/ImportCleanAndMakeList_US_Montana.R")
-
+source("R/Analysis_SR.R")
 
 # Import Data
 ImportDrakePlan <- drake_plan(
@@ -40,46 +35,35 @@ ImportDrakePlan <- drake_plan(
   NO_Ulvhaugen = ImportClean_NO_Norway(g = 1),
   NO_Lavisdalen = ImportClean_NO_Norway(g = 2),
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
-  NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4), #DE check data with Aud
+  NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),
 
-  CH_Lavey = ImportClean_CH_Lavey(), 
+  CH_Lavey = ImportClean_CH_Lavey(),
   CH_Calanda = ImportClean_CH_Calanda(),
-  CH_Calanda2 = ImportClean_CH_Calanda2(),
+  #Insert other Calanda (from Jacob)
 
   US_Colorado = ImportClean_US_Colorado(),
-  US_Montana = ImportClean_US_Montana(),
-  #US_Arizona, not in % cover so need to convert after using traits? #DE
+  #Insert US_Montana, US_Arizon(need data)
 
   CN_Gongga = ImportClean_CN_Gongga(),
   CN_Damxung = ImportClean_CN_Damxung(),
   IN_Kashmir = ImportClean_IN_Kashmir(),
-  IN_Kashmir = ImportClean_CN_Heibei(),
+  #Insert Heibei data (from Wang)
 
   DE_Grainau = ImportClean_DE_Grainau(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
-  SE_Abisko = ImportClean_SE_Abisko(),
-  FR_Lautaret = ImportClean_FR_Lautaret(), #Follow up with her on 2018 data (still waiting...)
-  IT_MatschMazia = ImportClean_IT_MatschMazia 
+  SE_Abisko = ImportClean_SE_Abisko()
+  #Insert FR_Lauteret
 )
 
-
-source("R/Analysis_SR.R")
-source("R/plots.R")
 AnalyzeDrakePlan <- drake_plan(
-  #create data.list, run 'collatedata()'
-  ##can you use ImportDrakePlan$target to add targest to data.list (get(ImportDrakePlan$target))
-  alldat = list(NO_Gudmedalen, NO_Ulvhaugen, NO_Skjellingahaugen, NO_Lavisdalen, CH_Lavey, CH_Calanda, CH_Calanda2,
-                 US_Colorado, US_Montana, CN_Gongga, CN_Damxung, IN_Kashmir, DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia), 
-  names(alldat) = c('NO_Gudmedalen', 'NO_Ulvhaugen', 'NO_Skjellingahaugen', 'NO_Lavisdalen', 'CH_Lavey', 'CH_Calanda', 'CH_Calanda2',
-                    'US_Colorado', 'US_Montana', 'CN_Gongga', 'CN_Damxung', 'IN_Kashmir', 'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia'),
-  SR = AnalyzeSR(alldat)
+  CN_Gongga_lm = AnalyzeSR(CN_Gongga)
 )
 
-#insert manuscript/presentation drake plan, can have several manuscripts building off same data
-MyPlan <- bind_rows(ImportDrakePlan)
+MyPlan <- ImportDrakePlan
+
+#MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
+
 conf <- drake_config(MyPlan)
-make(MyPlan)
+make(MyPlan, keep_going = TRUE)
 loadd()
 vis_drake_graph(conf, targets_only = TRUE)
-
-
