@@ -57,6 +57,10 @@ ImportDrakePlan <- drake_plan(
   IT_MatschMazia = ImportClean_IT_MatschMazia()
 )
 
+#Make taxa vectors all a dataframe with column name 'speciesName', keep consistent across all dataframes
+#destBlockID needs to be added to Norway data, Gongga, etc. destBlockID <- NA
+
+
 AnalyzeDrakePlan <- drake_plan(
   CN_Gongga_lm = AnalyzeSR(CN_Gongga)
 )
