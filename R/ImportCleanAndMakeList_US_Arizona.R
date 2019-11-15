@@ -17,12 +17,14 @@ ImportCommunity_US_Arizona <- function(){
 CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
   dat <- community_US_Arizona_raw %>% 
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
+    mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
-    revalue(Warm = "Warming")
+    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) 
+    
            
 # Actions to take:  
 # Split column destPlotID in two columns by '_' , call the first column containing MC or PP destSiteID.
-# Change names in column Treatment from 'Warming' to Warm.
+# Change names in column Treatment from 'Warming' to Warm. DONE
 
   return(dat)
 }
@@ -33,12 +35,9 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
 CleanMeta_US_Arizona <- function(community_US_Arizona_raw){
   dat <- community_US_Arizona_raw %>% 
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
-    rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot')    
-  
-  # Actions to take:  
-  # Split column destPlotID in two columns by '_' , call the first column containing MC or PP destSiteID.
-  # Change names in column Treatment from 'Warming' to Warm.
-
+    mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
+    rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
+    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>% 
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'MC' = '2620', 'PP' = '2344')),
