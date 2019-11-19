@@ -5,7 +5,7 @@
 #### Import Community ####
 
 ImportCommunity_CN_Heibei <- function(){
-  community_CN_Heibei_raw<-read_excel("data/CN_Heibei/data to J Ecology.xlsx")
+  community_CN_Heibei_raw<-read_excel(file_in("data/CN_Heibei/data to J Ecology.xlsx"))
   return(community_CN_Heibei_raw)
 } 
 
@@ -34,20 +34,9 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
 
 # Clean metadata
 
-CleanMeta_CN_Heibei <- function(community_CN_Heibei_raw){
-  dat2 <- community_CN_Heibei_raw %>% 
-    rename(SpeciesName = `species` , Cover = `Coverage(%)` , PlotID = Treatment , destSiteID = `away` , originSiteID = `home`, Year = year, destPlotID = `replicate`)%>% 
-    filter(!(destSiteID == 3600 | originSiteID == 3600)) %>%  
-    mutate(Treatment = case_when(destSiteID =="3200" & originSiteID == "3200" ~ "LocalControl" , 
-                                 destSiteID =="3400" & originSiteID == "3400" ~ "LocalControl" , 
-                                 destSiteID =="3800" & originSiteID == "3800" ~ "LocalControl" , 
-                                 destSiteID =="3200" & originSiteID == "3400" ~ "Warm" , 
-                                 destSiteID =="3200" & originSiteID == "3800" ~ "Warm" , 
-                                 destSiteID =="3400" & originSiteID == "3200" ~ "Cold" , 
-                                 destSiteID =="3400" & originSiteID == "3800" ~ "Warm" , 
-                                 destSiteID =="3800" & originSiteID == "3200" ~ "Cold" ,
-                                 destSiteID =="3800" & originSiteID == "3400" ~ "Cold"))
-  select(-c("SpeciesName", "Cover", "PlotID")) %>% 
+CleanMeta_CN_Heibei <- function(community_CN_Heibei){
+  dat2 <- community_CN_Heibei %>% 
+  select(-SpeciesName, -Cover, -PlotID) %>% 
     distinct()%>% 
     mutate(Elevation = destSiteID , 
            Gradient = 'CN_Heibei',
@@ -62,20 +51,8 @@ CleanMeta_CN_Heibei <- function(community_CN_Heibei_raw){
 
 # Cleaning Heibei species list
 
-CleanTaxa_CN_Heibei <- function(community_CN_Heibei_raw){
-  dat2 <- community_CN_Heibei_raw %>% 
-  rename(SpeciesName = `species` , Cover = `Coverage(%)` , PlotID = Treatment , destSiteID = `away` , originSiteID = `home`, Year = year, destPlotID = `replicate`)%>% 
-    filter(!(destSiteID == 3600 | originSiteID == 3600)) %>% 
-    mutate(Treatment = case_when(destSiteID =="3200" & originSiteID == "3200" ~ "LocalControl" , 
-                                 destSiteID =="3400" & originSiteID == "3400" ~ "LocalControl" , 
-                                 destSiteID =="3800" & originSiteID == "3800" ~ "LocalControl" , 
-                                 destSiteID =="3200" & originSiteID == "3400" ~ "Warm" , 
-                                 destSiteID =="3200" & originSiteID == "3800" ~ "Warm" , 
-                                 destSiteID =="3400" & originSiteID == "3200" ~ "Cold" , 
-                                 destSiteID =="3400" & originSiteID == "3800" ~ "Warm" , 
-                                 destSiteID =="3800" & originSiteID == "3200" ~ "Cold" ,
-                                 destSiteID =="3800" & originSiteID == "3400" ~ "Cold"))
-  taxa<-unique(dat2$SpeciesName)
+CleanTaxa_CN_Heibei <- function(community_CN_Heibei){
+  taxa<-unique(community_CN_Heibei$SpeciesName)
   return(taxa)
 }
 
@@ -91,8 +68,8 @@ ImportClean_CN_Heibei <- function(){
   ## CN_Heibei
 
   community_CN_Heibei = CleanCommunity_CN_Heibei(community_CN_Heibei_raw)
-  meta_CN_Heibei = CleanMeta_CN_Heibei(community_CN_Heibei_raw)
-  taxa_CN_Heibei = CleanTaxa_CN_Heibei(community_CN_Heibei_raw)
+  meta_CN_Heibei = CleanMeta_CN_Heibei(community_CN_Heibei)
+  taxa_CN_Heibei = CleanTaxa_CN_Heibei(community_CN_Heibei)
   
   
   # Make list
