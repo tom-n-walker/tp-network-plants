@@ -21,16 +21,11 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm")) 
     
-           
-# Actions to take:  
-# Split column destPlotID in two columns by '_' , call the first column containing MC or PP destSiteID.
-# Change names in column Treatment from 'Warming' to Warm. DONE
 
   return(dat)
 }
 
-# Clean metadata 
-# This is mostly correct. Just fill in the 'actions to take' as above.
+
 
 CleanMeta_US_Arizona <- function(community_US_Arizona_raw){
   dat <- community_US_Arizona_raw %>% 
@@ -52,18 +47,20 @@ CleanMeta_US_Arizona <- function(community_US_Arizona_raw){
 }
 
 # Cleaning species list 
+# NOTE This species list now can't talk to the community data. How do we think about this?
 
-# full names found in other sheet of excel. This is still DIRECTLY COPIED from Abisko, but the principle is similar. Need to figure out.
-# Do we need to collapse all the species under each other? How?
-
-CleanTaxa_US_Arizona <- function(community_US_Arizona_raw){
-  files <- list.files("data/US_Arizona/US_Arizona_commdata/") %>% 
-    grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
-  splist <- map_df(files, ~ read_excel(paste0("data/US_Arizona/US_Arizona_commdata/", .), sheet = "Species list 2012"))
-  rar <- c(splist$Name...2, splist$Name...4)
-  rar <- rar[!is.na(rar)]
-  taxa <- rar[!rar %in% c('Lichen', 'Litter', 'Moss')]
-  
+CleanTaxa_US_Arizona <- function(){
+  splist <- read_excel(file_in("data/US_Arizona/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx"), sheet = "Species List ")
+  mutate(
+    SpeciesName = paste(Genus, Species),
+    SpeciesName = case_when(
+      Code=="unk.grass"~"Poacae sp.",
+      Code=="unk.forb"~"Forb sp.",
+      Code=="unk.germinant"~"Germinant sp.",
+      TRUE~SpeciesName)
+  )
+  taxa <- splist$SpeciesName
+      
   return(taxa)
 }
 
