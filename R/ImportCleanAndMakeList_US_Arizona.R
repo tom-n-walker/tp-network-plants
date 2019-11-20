@@ -50,7 +50,7 @@ CleanMeta_US_Arizona <- function(community_US_Arizona_raw){
 # NOTE This species list now can't talk to the community data. How do we think about this?
 
 CleanTaxa_US_Arizona <- function(){
-  splist <- read_excel(file_in("data/US_Arizona/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx"), sheet = "Species List ")
+  splist <- read_excel(file_in("data/US_Arizona/US_Arizona_commdata/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx"), sheet = "Species List ")
   mutate(
     SpeciesName = paste(Genus, Species),
     SpeciesName = case_when(
