@@ -5,7 +5,7 @@
 #### Import Community ####
 
 ImportCommunity_CN_Heibei <- function(){
-  community_CN_Heibei_raw<-read_excel(file_in("data/CN_Heibei/data to J Ecology.xlsx"))
+  community_CN_Heibei_raw<-read_excel(file_in("data/CN_Heibei/CN_Heibei_commdata/data to J Ecology.xlsx"))
   return(community_CN_Heibei_raw)
 } 
 
