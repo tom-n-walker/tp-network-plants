@@ -18,15 +18,18 @@ pn <- . %>% print(n = Inf)
 
 # source scripts
 source("R/ImportCleanAndMakeList_CH_Calanda.R")
+source("R/ImportCleanAndMakeList_CH_Calanda2.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
 source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
+source("R/ImportCleanAndMakeList_FR_Lautaret.R")
 source("R/ImportCleanAndMakeList_IN_Kashmir.R")
 source("R/ImportCleanAndMakeList_NO_Norway.R")
 source("R/ImportCleanAndMakeList_SE_Abisko.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
+source("R/ImportCleanAndMakeList_US_Montana.R")
 source("R/ImportCleanAndMakeList_IT_MatschMazia.R")
 #source("R/ImportCleanAndMakeList_US_Arizona.R") //DE
 source("R/ImportCleanAndMakeList_CN_Heibei.R")
@@ -74,7 +77,7 @@ MyPlan <- ImportDrakePlan
 
 conf <- drake_config(MyPlan)
 make(MyPlan, keep_going = TRUE)
-#loadd()
+loadd()
 failed()
 vis_drake_graph(conf, targets_only = TRUE)
 vis_drake_graph(conf)
