@@ -27,12 +27,8 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
 
 
 
-CleanMeta_US_Arizona <- function(community_US_Arizona_raw){
-  dat <- community_US_Arizona_raw %>% 
-    select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
-    mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
-    rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
-    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>% 
+CleanMeta_US_Arizona <- function(community_US_Arizona){
+  dat <- community_US_Arizona %>% 
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'MC' = '2620', 'PP' = '2344')),
@@ -76,8 +72,8 @@ ImportClean_US_Arizona <- function(){
   ## US_Arizona
   
   community_US_Arizona = CleanCommunity_US_Arizona(community_US_Arizona_raw)
-  meta_US_Arizona = CleanMeta_US_Arizona(community_US_Arizona_raw)
-  taxa_US_Arizona = CleanTaxa_US_Arizona(community_US_Arizona_raw)
+  meta_US_Arizona = CleanMeta_US_Arizona(community_US_Arizona)
+  taxa_US_Arizona = CleanTaxa_US_Arizona()
   
   
   # Make list

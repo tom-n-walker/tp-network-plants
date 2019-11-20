@@ -31,7 +31,7 @@ source("R/ImportCleanAndMakeList_SE_Abisko.R")
 source("R/ImportCleanAndMakeList_US_Colorado.R")
 source("R/ImportCleanAndMakeList_US_Montana.R")
 source("R/ImportCleanAndMakeList_IT_MatschMazia.R")
-#source("R/ImportCleanAndMakeList_US_Arizona.R") //DE
+source("R/ImportCleanAndMakeList_US_Arizona.R")
 source("R/ImportCleanAndMakeList_CN_Heibei.R")
 source("R/Analysis_SR.R")
 
@@ -49,7 +49,7 @@ ImportDrakePlan <- drake_plan(
 
   US_Colorado = ImportClean_US_Colorado(),
   US_Montana = ImportClean_US_Montana(),
-  #US_Arizona = ImportClean_US_Arizona(), 
+  US_Arizona = ImportClean_US_Arizona(), 
 
   CN_Gongga = ImportClean_CN_Gongga(),
   CN_Damxung = ImportClean_CN_Damxung(),
