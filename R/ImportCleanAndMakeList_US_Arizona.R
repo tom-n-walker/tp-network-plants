@@ -6,7 +6,7 @@
 
 #### Import Community ####
 ImportCommunity_US_Arizona <- function(){
-  community_US_Arizona_raw<-read_excel("data/US_Arizona/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx", sheet = "Community Data 2014-2018")
+  community_US_Arizona_raw<-read_excel("data/US_Arizona/US_Arizona_commdata/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx", sheet = "Community Data 2014-2018")
   return(community_US_Arizona_raw)
 } 
 
