@@ -37,7 +37,8 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw, taxa_NO_Norway){
     rename(originSiteID = siteID, originBlockID = blockID, Treatment = TTtreat, Cover = cover, SpeciesShort = species, Year = year, SpeciesName = speciesName, Collector = recorder) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("TTC", "TT1", "TT2")) %>% 
-    mutate(Treatment = recode(Treatment, "TTC" = "Control", "TT1" = "LocalControl", "TT2" = "Warm"))
+    mutate(Treatment = recode(Treatment, "TTC" = "Control", "TT1" = "LocalControl", "TT2" = "Warm")) %>% 
+    filter(Year != 2016)
   
   return(dat2)
 }
@@ -60,16 +61,19 @@ CleanTrait_NO_Norway <- function(trait_NO_Norway_raw){
 
 
 CleanMeta_NO_Norway <- function(meta_NO_Norway_raw){
-  dat2 <- meta_NO_Norway_raw %>% 
+  meta_NO_Norway <- meta_NO_Norway_raw %>% 
     mutate(Elevation = as.numeric(as.character(Elevation)),
-           Gradient = "NO_Norway",
            Country = as.character("Norway"),
            YearEstablished = 2009,
            PlotSize_m2 = 0.0625,
            destBlockID = NA,
-           destSiteID = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske"))
+           destSiteID = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske")) %>% 
+    mutate(Gradient = case_when(destSiteID %in% c("Ulvhaugen", "Alrust", "Fauske")~ 1 ,
+                                destSiteID %in% c("Lavisdalen", "Hogsete", "Vikesland")~ 2 ,
+                                destSiteID %in% c("Gudmedalen", "Rambera", "Arhelleren")~ 3 ,  
+                                destSiteID %in% c("Skjellingahaugen", "Veskre", "Ovstedal")~ 4 ))
   
-  return(dat2)
+  return(meta_NO_Norway)
 }
 
 
@@ -93,7 +97,6 @@ ImportClean_NO_Norway <- function(g){
   
   ### IMPORT DATA
   meta_NO_Norway_raw = get(load(file = file_in("data/NO_Norway/meta_NO_Norway.Rdata")))
-  #metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/NO_Norway/metaCommunity_NO_Norway.Rdata")))
   
   #make database connection
   con <- src_sqlite(path = "data/NO_Norway/seedclim.sqlite", create = FALSE)
@@ -103,7 +106,7 @@ ImportClean_NO_Norway <- function(g){
   
   ### CLEAN DATA SETS
   meta_NO_Norway = CleanMeta_NO_Norway(meta_NO_Norway_raw) %>% 
-    filter(Site %in% sites)
+    filter(destSiteID %in% sites)
   #metaCommunity_NO_Norway = CleanMetaCommunity_NO_Norway(metaCommunity_NO_Norway_raw) %>% 
   #filter(Site %in% sites)
   community_NO_Norway = CleanCommunity_NO_Norway(community_NO_Norway_raw, taxa_NO_Norway) %>% 
@@ -113,7 +116,7 @@ ImportClean_NO_Norway <- function(g){
   
   # Make list
   NO_Norway = list(meta = meta_NO_Norway,
-                   #metaCommunity = metaCommunity_NO_Norway,
+                   #metaCommunity = metaCommunity_NO_Norway, # this is e.g. total cover of PFGs.
                    community = community_NO_Norway,
                    taxa = taxa_NO_Norway,
                    trait = trait_NO_Norway)
