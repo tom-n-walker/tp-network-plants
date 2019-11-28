@@ -76,9 +76,11 @@ MyPlan <- ImportDrakePlan
 #MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
 
 conf <- drake_config(MyPlan)
+conf
 make(MyPlan, keep_going = TRUE)
 loadd()
 failed()
 vis_drake_graph(conf, targets_only = TRUE)
 vis_drake_graph(conf)
+
 
