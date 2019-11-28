@@ -50,11 +50,13 @@ vignettes/*.pdf
 *.tiff
 *.xlsm
 
+
 #rasters & shapefiles
 *.bil
 *.blw
 *.hdr
 *.prj
+*.hproj
 
 #figures & output
 *.png
