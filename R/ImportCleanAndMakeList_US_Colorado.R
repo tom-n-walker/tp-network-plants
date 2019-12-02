@@ -4,7 +4,7 @@
 
 #### Import Community ####
 ImportCommunity_US_Colorado <- function(){
-  community_US_Colorado_raw<-read_csv(file = "data/US_Colorado/RMBLtransplant_speciesCover2018.csv")
+  community_US_Colorado_raw<-read_csv(file = "data/US_Colorado/US_Colorado_commdata/RMBLtransplant_speciesCover2018.csv")
   return(community_US_Colorado_raw)
 } 
 
