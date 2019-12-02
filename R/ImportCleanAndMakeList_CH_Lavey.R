@@ -29,11 +29,12 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(uniqueid = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
+    mutate(Rel_Cover = Cover / sum(Cover))
   comm <- dat %>% filter(!SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
   cover <- dat %>% filter(SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>% 
-    select(uniqueid, SpeciesName, Cover) %>%
-    rename(classcover=SpeciesName) 
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover))
   return(list(comm=comm, cover=cover))
 
 }
