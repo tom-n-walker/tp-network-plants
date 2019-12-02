@@ -22,50 +22,35 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     community_CH_Lavey_raw %>% 
     mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
                               "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
-           SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
-           Collector = ifelse(year==2017, 'Jean', 'Loic'),
-           cover = as.numeric(cover)) %>%
-    separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
-    # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("LocalControl", "Warm")) 
-  
-  return(dat)
-
-}
-
-# Clean taxa list (add these to end of above)
-CleanTaxa_CH_Lavey <- function(community_CH_Lavey_raw) {
-  dat <- 
-    community_CH_Lavey_raw %>% 
-    mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
-                              "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
-           SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
-           Collector = ifelse(year==2017, 'Jean', 'Loic'),
-           cover = as.numeric(cover)) %>%
-    separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
-    # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("LocalControl", "Warm")) 
-  taxa <- unique(dat$SpeciesName)
-  return(taxa)
-}
-
-# Clean metadata
-CleanMeta_CH_Lavey <- function(community_CH_Lavey_raw){
-  dat <- 
-    community_CH_Lavey_raw %>% 
-    mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
-                              "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
-           SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
+           #SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
            Collector = ifelse(year==2017, 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
     separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
     rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(destBlockID=NA) %>%
-    select(-SpeciesShort, -SpeciesName, -Cover) %>%
+    mutate(uniqueid = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))
+  comm <- dat %>% filter(!SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
+  cover <- dat %>% filter(SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>% 
+    select(uniqueid, SpeciesName, Cover) %>%
+    rename(classcover=SpeciesName) 
+  return(list(comm=comm, cover=cover))
+
+}
+
+
+# Clean taxa list (add these to end of above)
+CleanTaxa_CH_Lavey <- function(community_CH_Lavey) {
+  taxa <- data.frame(taxa=unique(community_CH_Lavey$SpeciesName))
+  return(taxa)
+}
+
+# Clean metadata
+CleanMeta_CH_Lavey <- function(community_CH_Lavey){
+  dat <- 
+    community_CH_Lavey %>%
+    #mutate(destBlockID=NA) %>%
+    select(-SpeciesName, -Cover) %>%
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'PRA'=1400, 'MAR'= 1750, 'CRE'=1950, 'RIO'=2200)),
            Gradient = "CH_Lavey",
@@ -76,21 +61,6 @@ CleanMeta_CH_Lavey <- function(community_CH_Lavey_raw){
   return(dat)
 }
 
-# Clean trait data (example)
-# CleanTrait_NO_Norway <- function(trait_NO_Norway_raw){
-#   dat2 <- trait_NO_Norway_raw %>% 
-#     rename(SpeciesName = Taxon, Collector = Data_collected_by, Leaf_Thickness_Ave_mm = Leaf_Thicness_Ave_mm, PlantID = ID) %>%
-#     mutate(SpeciesName = trimws(SpeciesName),
-#            Year = year(Date),
-#            Country = "Norway",
-#            Site = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske")) %>% 
-#     select(-X1, -Date, -Longitude, -Latitude, -Elevation, -Project, -Gradient) %>%
-#     gather(key = Trait, value = Value, -Country, -Year, -Site, -Individual_number, -SpeciesName, -PlantID, -Collector) %>% 
-#     filter(!is.na(Value))
-#   
-#   return(dat2)
-# }
-
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
 ImportClean_CH_Lavey <- function(){
@@ -99,14 +69,17 @@ ImportClean_CH_Lavey <- function(){
   community_CH_Lavey_raw = ImportCommunity_CH_Lavey()
   
   ### CLEAN DATA SETS
-  meta_CH_Lavey = CleanMeta_CH_Lavey(community_CH_Lavey_raw) 
-  community_CH_Lavey = CleanCommunity_CH_Lavey(community_CH_Lavey_raw)
-  taxa_CH_Lavey = CleanTaxa_CH_Lavey(community_CH_Lavey_raw)
+  cleaned_CH_Lavey = CleanCommunity_CH_Lavey(community_CH_Lavey_raw)
+  community_CH_Lavey = cleaned_CH_Lavey$comm
+  cover_CH_Lavey = cleaned_CH_Lavey$cover
+  meta_CH_Lavey = CleanMeta_CH_Lavey(community_CH_Lavey)
+  taxa_CH_Lavey = CleanTaxa_CH_Lavey(community_CH_Lavey)
   #trait_NO_Norway = CleanTrait_NO_Norway(trait_NO_Norway_raw) 
   
   # Make list
   CH_Lavey = list(meta = meta_CH_Lavey,
                   community = community_CH_Lavey,
+                  cover = cover_CH_Lavey,
                   taxa = taxa_CH_Lavey)
   
   return(CH_Lavey)
