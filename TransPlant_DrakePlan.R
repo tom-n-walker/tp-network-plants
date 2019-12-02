@@ -38,7 +38,7 @@ source("R/Analysis_SR.R")
 # Import Data
 ImportDrakePlan <- drake_plan(
 
-  NO_Ulvhaugen = ImportClean_NO_Norway(g = 1), # //DE: add metadata, check we have all data from 2017 onwards
+  NO_Ulvhaugen = ImportClean_NO_Norway(g = 1), 
   NO_Lavisdalen = ImportClean_NO_Norway(g = 2),
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),

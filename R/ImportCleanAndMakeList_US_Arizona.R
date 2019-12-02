@@ -19,7 +19,14 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
-    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) 
+    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
+    gather('SpeciesName', 'Cover', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
+    mutate(
+      SpeciesName = case_when(
+        SpeciesName=="unk.grass"~"Poacae sp.",
+        SpeciesName=="unk.forb"~"Forb sp.",
+        SpeciesName=="unk.germinant"~"Germinant sp.",
+        TRUE~SpeciesName))
     
 
   return(dat)
