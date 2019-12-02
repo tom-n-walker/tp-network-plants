@@ -31,7 +31,8 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
-    mutate(Rel_Cover = Cover / sum(Cover))
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+  dat %>% group_by(UniqueID) %>% filter(Total_Cover <100)
   comm <- dat %>% filter(!SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
   cover <- dat %>% filter(SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>% 
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover))
