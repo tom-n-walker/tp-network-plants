@@ -43,24 +43,24 @@ ImportDrakePlan <- drake_plan(
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),
 
-  CH_Lavey = ImportClean_CH_Lavey(),
-  CH_Calanda = ImportClean_CH_Calanda(),
-  CH_Calanda2 = ImportClean_CH_Calanda2(),
+  CH_Lavey = ImportClean_CH_Lavey(), 
+  CH_Calanda = ImportClean_CH_Calanda(), #CC
+  CH_Calanda2 = ImportClean_CH_Calanda2(), #CC
 
-  US_Colorado = ImportClean_US_Colorado(),
-  US_Montana = ImportClean_US_Montana(),
-  US_Arizona = ImportClean_US_Arizona(), 
+  US_Colorado = ImportClean_US_Colorado(), #CC
+  US_Montana = ImportClean_US_Montana(), #CC
+  US_Arizona = ImportClean_US_Arizona(), #DE
 
-  CN_Gongga = ImportClean_CN_Gongga(),
-  CN_Damxung = ImportClean_CN_Damxung(),
-  IN_Kashmir = ImportClean_IN_Kashmir(),
-  CN_Heibei = ImportClean_CN_Heibei(),
+  CN_Gongga = ImportClean_CN_Gongga(), #DE
+  CN_Damxung = ImportClean_CN_Damxung(), #CC
+  IN_Kashmir = ImportClean_IN_Kashmir(), #DE
+  CN_Heibei = ImportClean_CN_Heibei(), #DE
 
-  DE_Grainau = ImportClean_DE_Grainau(),
-  FR_AlpeHuez = ImportClean_FR_AlpeHuez(),
-  SE_Abisko = ImportClean_SE_Abisko(),
-  FR_Lautaret = ImportClean_FR_Lautaret(),
-  IT_MatschMazia = ImportClean_IT_MatschMazia()
+  DE_Grainau = ImportClean_DE_Grainau(), #DE
+  FR_AlpeHuez = ImportClean_FR_AlpeHuez(), #DE
+  SE_Abisko = ImportClean_SE_Abisko(), #CC
+  FR_Lautaret = ImportClean_FR_Lautaret(), #CC
+  IT_MatschMazia = ImportClean_IT_MatschMazia() #CC
 )
 
 #Make taxa vectors all a dataframe with column name 'speciesName', keep consistent across all dataframes
