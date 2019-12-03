@@ -10,9 +10,39 @@ ImportCommunity_US_Arizona <- function(){
   return(community_US_Arizona_raw)
 } 
 
+# Import Cover class #
+
+ImportCover_US_Arizona <- function(){
+  cover_US_Arizona_raw<-read_excel("data/US_Arizona/US_Arizona_commdata/Arizona percent cover data_TransplantNET_Rubin & Hungate 2019.xlsx", sheet = "% green 2014-2018")
+  return(cover_US_Arizona_raw)
+} 
+
+### Some extra steps ###
+# 1. Calculating number of individuals per plot:
+
+indplot <- community_US_Arizona_raw %>% 
+  select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
+  mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
+  rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
+  mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
+  gather('code', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
+#adding species names from species list (Taxa: splist) to dataframe
+  left_join(splist, by = c("code" = "Code")) %>% 
+  select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
+#creating unique ID
+  mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+  mutate_all(~replace(., is.na(.), 0)) %>% 
+  group_by(UniqueID) %>%
+  
+  summarise(IndPlot = sum ((Individuals)))
+  
+# 2. Create dataframe to calculate rel.cover
+vasccover <- classcover %>% 
+  select(-c('Year', 'Date', 'originSiteID', 'Treatment', 'destPlotID', 'destSiteID'))
 
 
 #### Cleaning Code ####
+
 # Cleaning Arizona community data
 CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
   dat <- community_US_Arizona_raw %>% 
@@ -20,13 +50,18 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
-    gather('SpeciesName', 'Cover', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
-    mutate(
-      SpeciesName = case_when(
-        SpeciesName=="unk.grass"~"Poacae sp.",
-        SpeciesName=="unk.forb"~"Forb sp.",
-        SpeciesName=="unk.germinant"~"Germinant sp.",
-        TRUE~SpeciesName))
+    gather('code', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
+#adding species names from species list (Taxa: splist) to dataframe
+    left_join(splist, by = c("code" = "Code")) %>% 
+    select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
+#creating unique ID
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
+    #group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment ) %>% why do we do this?
+#calculate percentage cover per individual
+    left_join(vasccover, by = c("UniqueID" )) %>% 
+    left_join(indplot, by = c("UniqueID" )) %>% 
+    mutate(Rel_Cover = (VascCover / IndPlot * Individuals)/100) %>% 
+    select(-c('code', 'OtherCover'))
     
 
   return(dat)
@@ -34,9 +69,10 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
 
 
 
+# Cleaning Arizona meta data
 CleanMeta_US_Arizona <- function(community_US_Arizona){
   dat <- community_US_Arizona %>% 
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Date', 'Individuals', 'VascCover', 'IndPlot', 'Rel_Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'MC' = '2620', 'PP' = '2344')),
            Gradient = 'US_Arizona',
@@ -49,8 +85,25 @@ CleanMeta_US_Arizona <- function(community_US_Arizona){
   return(dat)
 }
 
-# Cleaning species list 
-# NOTE This species list now can't talk to the community data. How do we think about this?
+# Clean Arizona Cover Class 
+CleanCover_US_Arizona <- function(cover_US_Arizona){
+  classcover <- cover_US_Arizona_raw %>% 
+    select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
+    mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
+    rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot', VascCover = '% cover at peak biomass') %>% 
+    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    #group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment ) %>% 
+    mutate(OtherCover = 100-VascCover)
+  
+  return(classcover)
+}
+
+
+
+
+
+# Cleaning Arizona species list 
 
 CleanTaxa_US_Arizona <- function(){
   splist <- read_excel(file_in("data/US_Arizona/US_Arizona_commdata/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx"), sheet = "Species List ") %>%
@@ -73,6 +126,8 @@ ImportClean_US_Arizona <- function(){
   
   ### IMPORT DATA
   community_US_Arizona_raw = ImportCommunity_US_Arizona()
+  cover_US_Arizona_raw = ImportCover_US_Arizona()
+  
   
   
   ### CLEAN DATA SETS
@@ -80,14 +135,18 @@ ImportClean_US_Arizona <- function(){
   
   community_US_Arizona = CleanCommunity_US_Arizona(community_US_Arizona_raw)
   meta_US_Arizona = CleanMeta_US_Arizona(community_US_Arizona)
+  cover_US_Arizona = CleanCover_US_Arizona()
   taxa_US_Arizona = CleanTaxa_US_Arizona()
   
   
+  
   # Make list
-  US_Arizona = list(meta =  meta_US_Arizona,
-                     community = community_US_Arizona,
+  US_Arizona = list(community = community_US_Arizona,
+                     meta =  meta_US_Arizona,
+                     cover = cover_US_Arizona,
                      taxa = taxa_US_Arizona,
                      trait = NA)
+  
   
   return(US_Arizona)
 }
