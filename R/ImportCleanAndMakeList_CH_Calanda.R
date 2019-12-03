@@ -18,20 +18,33 @@ ImportCommunity_CH_Calanda <- function(){
 # Cleaning Calanda community data
 CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
-    mutate(originSiteID = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "PEA",
+    mutate(originSiteID = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "Pea",
                                   Treatment == "veg_home" & Site == "Nes" ~ "Nes",
-                                  Treatment == "veg_home" & Site == "Pea" ~ "Pea"),
+                                  Treatment == "veg_home" & Site == "Pea" ~ "Pea",
+                                  Treatment == "veg_home" & Site == "Cal" ~ "Cal"),
            Treatment = case_when(Treatment == "veg_away" & Site == "Cal" ~ "Warm", 
                                  Treatment == "veg_away" & Site == "Nes" ~ "Warm",
+                                 Treatment == "veg_away" & Site == "Pea" ~ "Warm",
                                  Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
     rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
     mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
-    mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>% 
+    mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>%
+    filter(!is.na(Cover)) %>%
     #add block ID because blerg
-    mutate(destBlockID=NA) %>%
+    mutate(destBlockID=Block) %>% select(-Block) %>%
     # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("LocalControl", "Warm")) 
+    filter(Treatment %in% c("LocalControl", "Warm")) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    group_by(UniqueID, Year, originSiteID, destSiteID, destBlockID, destPlotID, Treatment, Collector) %>%
+    mutate(Total_Cover = sum(Cover), Other=100-Total_Cover) %>% Rel_Cover = Cover / Total_Cover)
+  dat %>% group_by(UniqueID) %>% filter(Total_Cover <100) %>% distinct(Total_Cover) #lots of plots <100
+  comm <- dat %>% filter(!SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
+  cover <- dat %>% filter(SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>% 
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover))
+  return(list(comm=comm, cover=cover))
   
+  #To check unique combos of sites*treatments
+  #distinct(expand.grid(community_CH_Calanda_raw$Treatment,community_CH_Calanda_raw$Site))#%>%
   return(dat)
 }
 
