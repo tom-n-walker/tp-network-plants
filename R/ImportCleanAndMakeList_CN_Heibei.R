@@ -26,7 +26,18 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
                                  destSiteID =="3400" & originSiteID == "3200" ~ "Cold" , 
                                  destSiteID =="3400" & originSiteID == "3800" ~ "Warm" , 
                                  destSiteID =="3800" & originSiteID == "3200" ~ "Cold" ,
-                                 destSiteID =="3800" & originSiteID == "3400" ~ "Cold"))
+                                 destSiteID =="3800" & originSiteID == "3400" ~ "Cold")) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment) %>%
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+  
+  #dat %>% group_by(UniqueID) %>% filter(Total_Cover <100)
+  #comm <- dat %>% filter(!SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
+  #cover <- dat %>% filter(SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>% 
+  #  select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% 
+  #  group_by(UniqueID) %>% 
+  #  summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover))
+  #return(list(comm=comm, cover=cover))
            
     return(dat2)
 }
@@ -67,14 +78,19 @@ ImportClean_CN_Heibei <- function(){
   ### CLEAN DATA SETS
   ## CN_Heibei
 
+  #cleaned_CN_Heibei = CleanCommunity_CN_Heibei(community_CN_Heibei_raw)
+  #community_CN_Heibei = cleaned_CN_Heibei$comm
+  #cover_CN_Heibei = cleaned_CN_Heibei$cover
+  
   community_CN_Heibei = CleanCommunity_CN_Heibei(community_CN_Heibei_raw)
   meta_CN_Heibei = CleanMeta_CN_Heibei(community_CN_Heibei)
   taxa_CN_Heibei = CleanTaxa_CN_Heibei(community_CN_Heibei)
   
   
   # Make list
-  CN_Heibei = list(meta =  meta_CN_Heibei,
-                   community = community_CN_Heibei,
+  CN_Heibei = list(community = community_CN_Heibei,
+                   #cover = cover_CN_Heibei,
+                   meta =  meta_CN_Heibei,
                    taxa = taxa_CN_Heibei,
                    trait = NA)
   
