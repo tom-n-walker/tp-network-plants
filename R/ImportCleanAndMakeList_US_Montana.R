@@ -6,8 +6,6 @@ source("R/community_US_Montana/loadcomm_Mon.r")
 
 #### Import Community ####
 ImportCommunity_US_Montana <- function(){
-  ## ---- load_community
-  
   #load cover data and metadata
   community_US_Montana_raw <- load_cover_US_Montana()
   
@@ -16,11 +14,30 @@ ImportCommunity_US_Montana <- function(){
 
 
 #### Cleaning Code ####
-# Cleaning Montana community data
+# Cleaning Montana community data *** NOTE MOST CODE FOR CLEANING IS IN THE COMM DATAFRAME, IT REQUIRED BINDING DATAFRAMES WHICH DIDN'T MATCH
 CleanCommunity_US_Montana <- function(community_US_Montana_raw){
   dat <- community_US_Montana_raw %>% 
     rename(destPlotID = turfID, Gradient=Region) %>% 
-    select(Gradient, Year, destSiteID, destPlotID, Treatment, SpeciesName, Cover)
+    select(Gradient, Year, originSiteID, destSiteID, destPlotID, Treatment, SpeciesName, Cover) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Tim?', Cover = as.numeric(Cover)) 
+  
+  dat2 <- dat %>%  
+    filter(!is.na(Cover)) %>%
+    group_by_at(vars(-SpeciesName, -Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    bind_rows(dat) %>% 
+    filter(Cover >= 0)  %>% #omg so inelegant
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+  
+  #Check relative cover sums to >=100
+  #dat2 %>% group_by(UniqueID) %>% filter(Total_Cover <100)
+  
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock'))
+  cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock')) %>% 
+    mutate(SpeciesName=recode(SpeciesName, Litter="litter", Bareground="bareground|bare", Moss='moss', Rock='rock')) %>%
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+    rename(CoverClass=SpeciesName)
+  return(list(comm=comm, cover=cover))
   
   return(dat)
 }
