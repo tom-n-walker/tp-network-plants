@@ -43,9 +43,9 @@ ImportDrakePlan <- drake_plan(
   NO_Gudmedalen = ImportClean_NO_Norway(g = 3),
   NO_Skjellingahaugen = ImportClean_NO_Norway(g = 4),
 
-  CH_Lavey = ImportClean_CH_Lavey(), 
-  CH_Calanda = ImportClean_CH_Calanda(), #CC
-  CH_Calanda2 = ImportClean_CH_Calanda2(), #CC
+  CH_Lavey = ImportClean_CH_Lavey(), #done
+  CH_Calanda = ImportClean_CH_Calanda(), #done
+  CH_Calanda2 = ImportClean_CH_Calanda2(), #done
 
   US_Colorado = ImportClean_US_Colorado(), #CC
   US_Montana = ImportClean_US_Montana(), #CC

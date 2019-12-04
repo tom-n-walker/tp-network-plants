@@ -36,7 +36,8 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     filter(Treatment %in% c("LocalControl", "Warm")) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
     
-  dat2 <- dat %>%
+  dat2 <- dat %>%  
+    filter(!is.na(Cover)) %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destBlockID, destPlotID, Treatment, Collector) %>%
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
