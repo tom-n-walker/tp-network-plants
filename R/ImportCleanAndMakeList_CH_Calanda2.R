@@ -6,8 +6,7 @@ source("R/community_CH_Calanda2/loadcomm_JL.r")
 
 #### Import Community ####
 ImportCommunity_CH_Calanda <- function(){
-  ## ---- load_community
-  
+
   #load cover data and metadata
   community_CH_Calanda_raw <- load_cover_CH_Calanda()
   

@@ -17,29 +17,6 @@ ImportCover_US_Arizona <- function(){
   return(cover_US_Arizona_raw)
 } 
 
-### Some extra steps ###
-# 1. Calculating number of individuals per plot:
-
-indplot <- community_US_Arizona_raw %>% 
-  select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
-  mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
-  rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
-  mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
-  gather('code', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
-#adding species names from species list (Taxa: splist) to dataframe
-  left_join(splist, by = c("code" = "Code")) %>% 
-  select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
-#creating unique ID
-  mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
-  mutate_all(~replace(., is.na(.), 0)) %>% 
-  group_by(UniqueID) %>%
-  
-  summarise(IndPlot = sum ((Individuals)))
-  
-# 2. Create dataframe to calculate rel.cover
-vasccover <- classcover %>% 
-  select(-c('Year', 'Date', 'originSiteID', 'Treatment', 'destPlotID', 'destSiteID'))
-
 
 #### Cleaning Code ####
 
@@ -50,16 +27,23 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
-    gather('code', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
+    gather('SpeciesName', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
 #adding species names from species list (Taxa: splist) to dataframe
-    left_join(splist, by = c("code" = "Code")) %>% 
-    select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
+ #   left_join(splist, by = c("code" = "Code")) %>% 
+ #   select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
 #creating unique ID
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Rubin') %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
     #group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment ) %>% why do we do this?
 #calculate percentage cover per individual
-    left_join(vasccover, by = c("UniqueID" )) %>% 
-    left_join(indplot, by = c("UniqueID" )) %>% 
+    left_join(cover_US_Arizona)  
+
+  dat2 <- dat %>%
+    group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
+    summarise(Rel_Cover = (VascCover / sum(Individuals, na.rm=T) * Individuals)/100) %>%
+    bind_rows(dat) %>% 
+    filter(Cover >= 0)  %>% #omg so inelegant
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+  
     mutate(Rel_Cover = (VascCover / IndPlot * Individuals)/100) %>% 
     select(-c('code', 'OtherCover'))
     
