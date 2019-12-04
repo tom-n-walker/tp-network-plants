@@ -58,12 +58,12 @@ ImportDrakePlan <- drake_plan(
 
   DE_Grainau = ImportClean_DE_Grainau(), #DE
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(), #DE
-  SE_Abisko = ImportClean_SE_Abisko(), #CC
+  SE_Abisko = ImportClean_SE_Abisko(), #done
   FR_Lautaret = ImportClean_FR_Lautaret(), #CC
   IT_MatschMazia = ImportClean_IT_MatschMazia() #CC
 )
 
-#Make taxa vectors all a dataframe with column name 'speciesName', keep consistent across all dataframes
+#Make taxa vectors all a dataframe with column name 'SpeciesName', keep consistent across all dataframes
 #destBlockID needs to be added to Norway data, Gongga, etc. destBlockID <- NA
 
 
