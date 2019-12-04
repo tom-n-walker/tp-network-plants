@@ -96,13 +96,36 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
                       Country = as.character("China"),
            Treatment = recode(Treatment, "control" = "Control", "local" = "LocalControl", "warm1" = "Warm", "cool1" = "Cold", "warm3" = "Warm", "cool3" = "Cold")) %>% 
     mutate(SpeciesName = recode(SpeciesName, "Potentilla stenophylla var. emergens" = "Potentilla stenophylla")) %>% 
-    filter(!is.na(Cover), !Cover == 0)
+    filter(!is.na(Cover), !Cover == 0) %>% 
+
+#New additions: 
+    
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))
+  
+  dat3<- dat2 %>%  
+    filter(!is.na(Cover)) %>%
+    group_by_at(vars(-SpeciesName, -Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    bind_rows(dat2) %>% 
+    filter(Cover > 0)  %>% #omg so inelegant
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+  
+  comm <- dat3 %>% filter(!SpeciesName %in% c('Other')) 
+  cover <- dat3 %>% filter(SpeciesName %in% c('Other')) %>% 
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%                                      #This calculates really high other cover values. divide by 100? Something else that's wrong?
+    rename(CoverClass=SpeciesName)
+  return(list(comm=comm, cover=cover)) 
+  return(dat2)
+  
+# end new additions 
   
   return(dat2)
 }
 
   
-# Cleaning China meta community data
+# Cleaning China Meta community (class cover) data
+
+
 CleanMetaCommunity_CN_Gongga <- function(metaCommunity_CN_Gongga_raw){
   dat2 <- metaCommunity_CN_Gongga_raw %>% 
     select(PlotID, Year, Moss, Lichen2, Litter, BareGround, Rock, Vascular, Bryophyte, Lichen, MedianHeight_cm, MedianMossHeight_cm) %>% 
@@ -154,3 +177,4 @@ ImportClean_CN_Gongga <- function(){
   
   return(CN_Gongga)
 }
+
