@@ -30,25 +30,30 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
            Year = year(as.Date(Date, format='%Y-%m-%d')),
            Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
            Cover= as.numeric(as.character(Cover))) %>% 
-      select(-Date)
-  return(dat2)
+      select(-Date) %>% 
+      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    
+    dat2 <- dat %>%  
+      filter(!is.na(Cover), Cover==0) %>%
+      group_by_at(vars(-SpeciesName, -Cover)) %>%
+      summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+      bind_rows(dat) %>% 
+      filter(Cover >= 0)  %>% #omg so inelegant
+      mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+    
+    comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
+    cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
+      select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+      rename(CoverClass=SpeciesName)
+    return(list(comm=comm, cover=cover)) 
+    
 }
 
 # Clean metadata
 
-CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
-  dat2 <- community_FR_AlpeHuez_raw %>% 
-    select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , destPlotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
-    filter(Treatment %in% c("HIGH_TURF", "LOW_TURF")) %>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
-           Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "HIGH" ~ "LocalControl"),
-           Year = year(as.Date(Date, format='%Y-%m-%d')),
-           Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
-           Cover= as.numeric(as.character(Cover))) %>% 
-    select(-c('Date', 'SpeciesName', 'Cover')) %>% 
+CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez){
+  dat2 <- community_FR_AlpeHuez %>%
+    select(-c('SpeciesName', 'Cover')) %>% 
     distinct()%>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '1714', 'LOW' = '773')),
            Gradient = 'FR_AlpeHuez',
@@ -61,20 +66,9 @@ CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
   return(dat2)
 }
 
-# Cleaning Kashmir species list
-CleanTaxa_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
-  dat2 <- community_FR_AlpeHuez_raw %>% 
-    select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , destPlotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
-           Treatment = case_when(Treatment =="LOW_TURF" & destSiteID == "LOW" ~ "LocalControl" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="HIGH_TURF" & destSiteID == "HIGH" ~ "LocalControl"),
-           Year = year(as.Date(Date, format='%Y-%m-%d')),
-           Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
-           Cover= as.numeric(as.character(Cover))) %>% 
-    select(-Date)
-  taxa<-unique(dat2$SpeciesName)
+# Cleaning species list
+CleanTaxa_FR_AlpeHuez <- function(community_FR_AlpeHuez){
+  taxa <- data.frame(taxa=unique(community_FR_AlpeHuez$SpeciesName))
   return(taxa)
 }
 
@@ -84,21 +78,21 @@ ImportClean_FR_AlpeHuez <- function(){
   
   ### IMPORT DATA
   community_FR_AlpeHuez_raw = ImportCommunity_FR_AlpeHuez()
- 
   
   ### CLEAN DATA SETS
-  ## FR_AlpeHuez
-
-  community_FR_AlpeHuez = CleanCommunity_FR_AlpeHuez(community_FR_AlpeHuez_raw)
-  meta_FR_AlpeHuez = CleanMeta_FR_AlpeHuez(community_FR_AlpeHuez_raw)
-  taxa_FR_AlpeHuez = CleanTaxa_FR_AlpeHuez(community_FR_AlpeHuez_raw)
+  cleaned_FR_AlpeHuez = CleanCommunity_FR_AlpeHuez(community_FR_AlpeHuez_raw)
+  community_FR_AlpeHuez = cleaned_FR_AlpeHuez$comm
+  cover_FR_AlpeHuez = cleaned_FR_AlpeHuez$cover
+  meta_FR_AlpeHuez = CleanMeta_FR_AlpeHuez(community_FR_AlpeHuez) 
+  taxa_FR_AlpeHuez = CleanTaxa_FR_AlpeHuez(community_FR_AlpeHuez)
   
   
   # Make list
-  FR_AlpeHuez = list(meta =  meta_FR_AlpeHuez,
-                   community = community_FR_AlpeHuez,
-                   taxa = taxa_FR_AlpeHuez,
-                   trait = NA)
+  FR_AlpeHuez = list(meta = meta_FR_AlpeHuez,
+                        community = community_FR_AlpeHuez,
+                        cover = cover_FR_AlpeHuez,
+                        taxa = taxa_FR_AlpeHuez)
+  
   
   return(FR_AlpeHuez)
 }

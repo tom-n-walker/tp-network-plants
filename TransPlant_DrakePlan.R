@@ -56,8 +56,8 @@ ImportDrakePlan <- drake_plan(
   IN_Kashmir = ImportClean_IN_Kashmir(), #DE
   CN_Heibei = ImportClean_CN_Heibei(),
 
-  DE_Grainau = ImportClean_DE_Grainau(), #DE
-  FR_AlpeHuez = ImportClean_FR_AlpeHuez(), #DE
+  DE_Grainau = ImportClean_DE_Grainau(), 
+  FR_AlpeHuez = ImportClean_FR_AlpeHuez(), 
   SE_Abisko = ImportClean_SE_Abisko(),
   FR_Lautaret = ImportClean_FR_Lautaret(), 
   IT_MatschMazia = ImportClean_IT_MatschMazia() 
