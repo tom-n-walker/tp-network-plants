@@ -21,7 +21,7 @@ load_cover_US_Montana <- function(){
       reps == "LC" & destSiteID == "middle" ~ "Cold")) %>%
     filter(Treatment %in% c('LocalControl', 'Warm', 'Cold'), !is.na(Cover)) %>%
     mutate(destSiteID=recode(destSiteID, low='Low', middle='Middle', high='High'),
-           originSiteID=recode(reps, Low='LC', Middle="AC", High="HC")) %>%
+           originSiteID=recode(reps, 'LC'='Low', "AC"='Middle', "HC"='High')) %>%
     select(-reps)
     
   cover14_15 <- dat14_15 %>% select(1:8) %>% #seems to be only low and middle communities here
@@ -33,7 +33,7 @@ load_cover_US_Montana <- function(){
                                  Disturb_treat == "lowland_community" & destSiteID == "Middle" ~ "Cold",
                                  Disturb_treat == "Alpine_community" & destSiteID == "Middle" ~ "Warm")) %>% #I remember Tim saying they transplanted alpine turfs downward to both middle and low. so here we are...
     filter(Treatment %in% c('LocalControl', 'Warm', 'Cold'), !is.na(Cover)) %>%
-    mutate(originSiteID=recode(Disturb_treat, Low="lowland_community", Middle="Alpine_community")) %>%
+    mutate(originSiteID=recode(Disturb_treat, "lowland_community"='Low', "Alpine_community"='Alpine')) %>%
     select(-Disturb_treat)
   
   cover <- bind_rows(cover13, cover14_15)

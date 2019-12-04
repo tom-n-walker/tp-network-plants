@@ -37,6 +37,7 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
   
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss'))
   cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss')) %>%
+    mutate(SpeciesName=recode(SpeciesName, "Bare Soil"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover))

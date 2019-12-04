@@ -47,12 +47,12 @@ ImportDrakePlan <- drake_plan(
   CH_Calanda = ImportClean_CH_Calanda(), #done
   CH_Calanda2 = ImportClean_CH_Calanda2(), #done
 
-  US_Colorado = ImportClean_US_Colorado(), #CC
-  US_Montana = ImportClean_US_Montana(), #CC
+  US_Colorado = ImportClean_US_Colorado(), #done
+  US_Montana = ImportClean_US_Montana(), #done
   US_Arizona = ImportClean_US_Arizona(), 
 
   CN_Gongga = ImportClean_CN_Gongga(), #DE
-  CN_Damxung = ImportClean_CN_Damxung(), #CC
+  CN_Damxung = ImportClean_CN_Damxung(), #done
   IN_Kashmir = ImportClean_IN_Kashmir(), #DE
   CN_Heibei = ImportClean_CN_Heibei(),
 

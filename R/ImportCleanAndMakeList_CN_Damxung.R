@@ -15,28 +15,37 @@ ImportCommunity_CN_Damxung <- function(){
 #### Cleaning Code ####
 # Cleaning Damxung community data
 CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
-    dat2 <- community_CN_Damxung_raw %>% 
+    dat <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
     rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
     mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
-      mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) 
-  return(dat2)
+      #Convert cover classes to percent values (taking mid-point)
+      mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) %>% 
+      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    
+    dat2 <- dat %>%  
+      filter(!is.na(Cover)) %>%
+      group_by_at(vars(-SpeciesName, -Cover)) %>%
+      summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+      bind_rows(dat) %>% 
+      filter(Cover >= 0)  %>% #omg so inelegant
+      mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+    
+    comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Litter', 'litter', 'moss', 'rock', 'bareground', 'Bare', 'Moss', 'Rock'))
+    cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Litter', 'litter', 'moss', 'rock', 'bareground', 'Bare', 'Moss', 'Rock')) %>% 
+      mutate(SpeciesName=recode(SpeciesName, 'litter'="Litter", "bareground"='Bareground', "Bare"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
+      select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+      rename(CoverClass=SpeciesName)
+    return(list(comm=comm, cover=cover)) 
 }
 
 # Clean metadata
 
-CleanMeta_CN_Damxung <- function(community_CN_Damxung_raw){
-  dat2 <- community_CN_Damxung_raw %>% 
-    select(c(SITE:`cover class`), -PLOT) %>% 
-    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
-           Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
-                                 Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
-    mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) %>% 
+CleanMeta_CN_Damxung <- function(community_CN_Damxung){
+  dat2 <- community_CN_Damxung %>%
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct()%>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '4800', 'LOW' = '4313')),
@@ -51,17 +60,8 @@ CleanMeta_CN_Damxung <- function(community_CN_Damxung_raw){
 }
 
 # Cleaning Damxung species list
-CleanTaxa_CN_Damxung <- function(community_CN_Damxung_raw){
-  dat2 <- community_CN_Damxung_raw %>% 
-    select(c(SITE:`cover class`), -PLOT) %>% 
-    rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
-           Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
-                                 Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
-                                 Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
-    mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) 
-  
-  taxa<-unique(dat2$SpeciesName)
+CleanTaxa_CN_Damxung <- function(community_CN_Damxung){
+  taxa<-data.frame(taxa=unique(community_CN_Damxung$SpeciesName))
   return(taxa)
 }
 
@@ -71,21 +71,20 @@ ImportClean_CN_Damxung <- function(){
   
   ### IMPORT DATA
   community_CN_Damxung_raw = ImportCommunity_CN_Damxung()
- 
   
   ### CLEAN DATA SETS
-  ## CN_Damxung
-
-  community_CN_Damxung = CleanCommunity_CN_Damxung(community_CN_Damxung_raw)
-  meta_CN_Damxung = CleanMeta_CN_Damxung(community_CN_Damxung_raw)
-  taxa_CN_Damxung = CleanTaxa_CN_Damxung(community_CN_Damxung_raw)
+  cleaned_CN_Damxung = CleanCommunity_CN_Damxung(community_CN_Damxung_raw)
+  community_CN_Damxung = cleaned_CN_Damxung$comm
+  cover_CN_Damxung = cleaned_CN_Damxung$cover
+  meta_CN_Damxung = CleanMeta_CN_Damxung(community_CN_Damxung) 
+  taxa_CN_Damxung = CleanTaxa_CN_Damxung(community_CN_Damxung)
   
   
   # Make list
-  CN_Damxung = list(meta =  meta_CN_Damxung,
-                   community = community_CN_Damxung,
-                   taxa = taxa_CN_Damxung,
-                   trait = NA)
+  CN_Damxung = list(meta = meta_CN_Damxung,
+                    community = community_CN_Damxung,
+                    cover = cover_CN_Damxung,
+                    taxa = taxa_CN_Damxung)
   
   return(CN_Damxung)
 }

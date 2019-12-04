@@ -34,7 +34,7 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
   
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock'))
   cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock')) %>% 
-    mutate(SpeciesName=recode(SpeciesName, Litter="litter", Bareground="bareground|bare", Moss='moss', Rock='rock')) %>%
+    mutate(SpeciesName=recode(SpeciesName, litter="Litter", "bareground"='Bareground', "bare"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover))
@@ -43,19 +43,14 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
 }
 
 # Clean taxa list (add these to end of above)
-CleanTaxa_US_Montana <- function(community_US_Montana_raw){
-  dat <- community_US_Montana_raw %>% 
-    rename(destPlotID = turfID, Gradient=Region) %>% 
-    select(Gradient, Year, destSiteID, destPlotID, Treatment, SpeciesName, Cover)
-  taxa <- unique(dat$SpeciesName)
+CleanTaxa_US_Montana <- function(community_US_Montana){
+  taxa <- data.frame(taxa=unique(community_US_Montana$SpeciesName))
   return(taxa)
 }
 
 # Clean metadata
-CleanMeta_US_Montana <- function(community_US_Montana_raw){
-  dat <- community_US_Montana_raw %>% 
-    rename(destPlotID = turfID, Gradient=Region) %>% 
-    select(Gradient, Year, destSiteID, destPlotID, Treatment, SpeciesName, Cover) %>%
+CleanMeta_US_Montana <- function(community_US_Montana){
+  dat <- community_US_Montana %>% 
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1985', 'Middle'= '2185', 'High'='2620')), #need to figure this out
@@ -70,24 +65,22 @@ CleanMeta_US_Montana <- function(community_US_Montana_raw){
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
 ImportClean_US_Montana <- function(){
-  
   ### IMPORT DATA
   community_US_Montana_raw = ImportCommunity_US_Montana()
   
-  
   ### CLEAN DATA SETS
-  ## US_Montana
-  ### CLEAN DATA SETS
-  meta_US_Montana = CleanMeta_US_Montana(community_US_Montana_raw) 
-  community_US_Montana = CleanCommunity_US_Montana(community_US_Montana_raw)
-  taxa_US_Montana = CleanTaxa_US_Montana(community_US_Montana_raw)
+  cleaned_US_Montana = CleanCommunity_US_Montana(community_US_Montana_raw)
+  community_US_Montana = cleaned_US_Montana$comm
+  cover_US_Montana = cleaned_US_Montana$cover
+  meta_US_Montana = CleanMeta_US_Montana(community_US_Montana) 
+  taxa_US_Montana = CleanTaxa_US_Montana(community_US_Montana)
   
   
   # Make list
   US_Montana = list(meta = meta_US_Montana,
                      community = community_US_Montana,
-                     taxa = taxa_US_Montana,
-                     trait = NA)
+                     cover = cover_US_Montana,
+                     taxa = taxa_US_Montana)
   
   return(US_Montana)
 }
