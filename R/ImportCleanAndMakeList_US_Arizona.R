@@ -31,11 +31,11 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
 #adding species names from species list (Taxa: splist) to dataframe
  #   left_join(splist, by = c("code" = "Code")) %>% 
  #   select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
-#creating unique ID
+    #creating unique ID
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Rubin') %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
-    #group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment ) %>% why do we do this?
 #calculate percentage cover per individual
-    left_join(cover_US_Arizona)  
+    left_join(cover_US_Arizona)  %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
 
   dat2 <- dat %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
@@ -76,9 +76,10 @@ CleanCover_US_Arizona <- function(cover_US_Arizona_raw){
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot', VascCover = '% cover at peak biomass') %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
-    #group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment ) %>% 
-    mutate(OtherCover = 100-VascCover)
-  
+    mutate(OtherCover = 100-VascCover) %>%
+    gather('CoverClass', 'OtherCover', c(VascCover, OtherCover)) %>% 
+    mutate(Rel_OtherCover=100) #and all this sums to 100 which is perfect
+    
   return(classcover)
 }
 
@@ -91,14 +92,17 @@ CleanCover_US_Arizona <- function(cover_US_Arizona_raw){
 CleanTaxa_US_Arizona <- function(){
   splist <- read_excel(file_in("data/US_Arizona/US_Arizona_commdata/Arizona community data & Climate data_TransplantNET_Rubin & Hungate 2019.xlsx"), sheet = "Species List ") %>%
     mutate(
-    SpeciesName = paste(Genus, Species),
-    SpeciesName = case_when(
-      Code=="unk.grass"~"Poacae sp.",
-      Code=="unk.forb"~"Forb sp.",
-      Code=="unk.germinant"~"Germinant sp.",
-      TRUE~SpeciesName)
-  )
-  taxa <- splist$SpeciesName
+    Species_FullName = paste(Genus, Species)) %>%
+    rename(SpeciesName='Code')
+  
+  #,
+    #SpeciesName = case_when(
+    #  Code=="unk.grass"~"Poacae sp.",
+    #  Code=="unk.forb"~"Forb sp.",
+    # Code=="unk.germinant"~"Germinant sp.",
+    #  TRUE~SpeciesName))
+  
+  taxa <- splist
       
   return(taxa)
 }
@@ -112,7 +116,6 @@ ImportClean_US_Arizona <- function(){
   cover_US_Arizona_raw = ImportCover_US_Arizona()
   
   
-  
   ### CLEAN DATA SETS
   ## US_Arizona
   cover_US_Arizona = CleanCover_US_Arizona(cover_US_Arizona_raw)
@@ -121,13 +124,11 @@ ImportClean_US_Arizona <- function(){
   taxa_US_Arizona = CleanTaxa_US_Arizona()
   
   
-  
   # Make list
   US_Arizona = list(community = community_US_Arizona,
                      meta =  meta_US_Arizona,
                      cover = cover_US_Arizona,
-                     taxa = taxa_US_Arizona,
-                     trait = NA)
+                     taxa = taxa_US_Arizona)
   
   
   return(US_Arizona)
