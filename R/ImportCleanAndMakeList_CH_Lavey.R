@@ -39,7 +39,8 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
   #Create comm and cover class dataframes
   comm <- dat %>% filter(!SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
   cover <- dat %>% filter(SpeciesName %in% c('Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>% 
-    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover))
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+    rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover))
 
 }

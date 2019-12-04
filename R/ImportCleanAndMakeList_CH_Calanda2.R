@@ -26,7 +26,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   
   dat2 <- dat %>%
     filter(!is.na(Cover)) %>%
-    group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
+    group_by_at(vars(-SpeciesName, -Cover)) %>%
     summarise(SpeciesName = "Other", Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
     filter(Cover >= 0)  %>% #omg so inelegant
@@ -34,7 +34,8 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
-    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover))
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+    rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover))
   
   return(dat)
