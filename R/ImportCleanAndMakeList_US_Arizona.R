@@ -21,7 +21,7 @@ ImportCover_US_Arizona <- function(){
 #### Cleaning Code ####
 
 # Cleaning Arizona community data
-CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
+CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona){
   dat <- community_US_Arizona_raw %>% 
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
@@ -44,10 +44,10 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
     filter(Rel_Cover >= 0)   #omg so inelegant
    
 
-    select(-'OtherCover'))
+   dat3 <- dat2 %>% select(-'OtherCover', -'VascCover')
     
 
-  return(dat)
+  return(dat3)
 }
 
 
@@ -55,7 +55,7 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
 # Cleaning Arizona meta data
 CleanMeta_US_Arizona <- function(community_US_Arizona){
   dat <- community_US_Arizona %>% 
-    select(-c('SpeciesName', 'Date', 'Individuals', 'VascCover', 'IndPlot', 'Rel_Cover')) %>% 
+    select(-c('SpeciesName', 'Date', 'Individuals', 'Rel_Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'MC' = '2620', 'PP' = '2344')),
            Gradient = 'US_Arizona',
@@ -69,7 +69,7 @@ CleanMeta_US_Arizona <- function(community_US_Arizona){
 }
 
 # Clean Arizona Cover Class 
-CleanCover_US_Arizona <- function(cover_US_Arizona){
+CleanCover_US_Arizona <- function(cover_US_Arizona_raw){
   classcover <- cover_US_Arizona_raw %>% 
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
@@ -115,10 +115,9 @@ ImportClean_US_Arizona <- function(){
   
   ### CLEAN DATA SETS
   ## US_Arizona
-  
-  community_US_Arizona = CleanCommunity_US_Arizona(community_US_Arizona_raw)
+  cover_US_Arizona = CleanCover_US_Arizona(cover_US_Arizona_raw)
+  community_US_Arizona = CleanCommunity_US_Arizona(community_US_Arizona_raw, cover_US_Arizona)
   meta_US_Arizona = CleanMeta_US_Arizona(community_US_Arizona)
-  cover_US_Arizona = CleanCover_US_Arizona()
   taxa_US_Arizona = CleanTaxa_US_Arizona()
   
   
