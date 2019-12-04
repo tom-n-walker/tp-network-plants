@@ -53,7 +53,7 @@ ImportDrakePlan <- drake_plan(
 
   CN_Gongga = ImportClean_CN_Gongga(), #DE
   CN_Damxung = ImportClean_CN_Damxung(), 
-  IN_Kashmir = ImportClean_IN_Kashmir(), #DE
+  IN_Kashmir = ImportClean_IN_Kashmir(), 
   CN_Heibei = ImportClean_CN_Heibei(),
 
   DE_Grainau = ImportClean_DE_Grainau(), 
