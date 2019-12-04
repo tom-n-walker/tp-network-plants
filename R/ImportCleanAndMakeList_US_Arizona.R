@@ -39,13 +39,12 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw){
 
   dat2 <- dat %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
-    summarise(Rel_Cover = (VascCover / sum(Individuals, na.rm=T) * Individuals)/100) %>%
+    mutate(Rel_Cover = (VascCover / sum(Individuals, na.rm=T) * Individuals)/100) %>%
     bind_rows(dat) %>% 
-    filter(Cover >= 0)  %>% #omg so inelegant
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
-  
-    mutate(Rel_Cover = (VascCover / IndPlot * Individuals)/100) %>% 
-    select(-c('code', 'OtherCover'))
+    filter(Rel_Cover >= 0)   #omg so inelegant
+   
+
+    select(-'OtherCover'))
     
 
   return(dat)
