@@ -31,7 +31,7 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
     group_by_at(vars(-SpeciesName, -Cover)) %>%
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
-    filter(Cover >= 0)  %>% #omg so inelegant
+    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   #dat2 %>% filter(Total_Cover<100) #There are plots with <100, so we need to create an Other cover class
   

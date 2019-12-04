@@ -31,7 +31,7 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>% filter(Cover>0)
   
   #Check relative cover sums to >=100
   #dat %>% group_by(UniqueID) %>% filter(Total_Cover <100) #nothing, no need to add an other category

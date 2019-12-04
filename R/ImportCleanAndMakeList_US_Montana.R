@@ -26,7 +26,7 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
     group_by_at(vars(-SpeciesName, -Cover)) %>%
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
-    filter(Cover >= 0)  %>% #omg so inelegant
+    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
   #Check relative cover sums to >=100

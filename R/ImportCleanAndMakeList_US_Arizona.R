@@ -34,17 +34,17 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
     #creating unique ID
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Rubin') %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
 #calculate percentage cover per individual
-    left_join(cover_US_Arizona)  %>% 
+    left_join(cover_US_Arizona)  %>% spread('CoverClass', 'OtherCover') %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
 
   dat2 <- dat %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
     mutate(Rel_Cover = (VascCover / sum(Individuals, na.rm=T) * Individuals)/100) %>%
     bind_rows(dat) %>% 
-    filter(Rel_Cover >= 0)   #omg so inelegant
+    filter(Rel_Cover > 0)   #omg so inelegant
    
 
-   dat3 <- dat2 %>% select(-'OtherCover', -'VascCover')
+   dat3 <- dat2 %>% select(-'OtherCover', -'VascCover', -'Rel_OtherCover', -'<NA>') #what's with this NA? Fix it...
     
 
   return(dat3)

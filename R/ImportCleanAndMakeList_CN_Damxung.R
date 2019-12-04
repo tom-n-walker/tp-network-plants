@@ -31,7 +31,7 @@ CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
       group_by_at(vars(-SpeciesName, -Cover)) %>%
       summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
       bind_rows(dat) %>% 
-      filter(Cover >= 0)  %>% #omg so inelegant
+      filter(Cover > 0)  %>% #omg so inelegant
       mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
     
     comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Litter', 'litter', 'moss', 'rock', 'bareground', 'Bare', 'Moss', 'Rock'))

@@ -19,7 +19,7 @@ ImportCommunity_FR_AlpeHuez <- function(){
 #### Cleaning Code ####
 # Cleaning AlpeHuez community data
 CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
-    dat2 <- community_FR_AlpeHuez_raw %>% 
+    dat <- community_FR_AlpeHuez_raw %>% 
     select(c(site:cover.class), -plot) %>% 
     rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , destPlotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
       filter(Treatment %in% c("HIGH_TURF", "LOW_TURF")) %>% 
@@ -34,11 +34,11 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
       mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
     
     dat2 <- dat %>%  
-      filter(!is.na(Cover), Cover==0) %>%
+      filter(!is.na(Cover)) %>%
       group_by_at(vars(-SpeciesName, -Cover)) %>%
       summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
       bind_rows(dat) %>% 
-      filter(Cover >= 0)  %>% #omg so inelegant
+      filter(Cover > 0)  %>% #omg so inelegant
       mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
     
     comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 

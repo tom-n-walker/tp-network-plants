@@ -37,11 +37,11 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
   
   dat2 <- dat %>%  
-    filter(!is.na(Cover), Cover==0) %>%
+    filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
-    filter(Cover >= 0)  %>% #omg so inelegant
+    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) #there are Litter, Lichen and Moss in the species list below, but nothing here? Hmmm...
@@ -49,7 +49,6 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover)) 
-  return(dat)
 }
 
 # Clean metadata
@@ -75,8 +74,8 @@ CleanTaxa_SE_Abisko <- function(){
     grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
   splist <- map_df(files, ~ read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", .), sheet = "Species list 2012"))
   taxa <- data.frame(Code=c(splist$Code...1, splist$Code...3), SpeciesName=c(splist$Name...2, splist$Name...4))
-  taxa <- rar[!is.na(rar)]
-  taxa <- rar[!rar %in% c('Lichen', 'Litter', 'Moss')] 
+  taxa <- taxa[!is.na(taxa)]
+  taxa <- taxa[!taxa %in% c('Lichen', 'Litter', 'Moss')] 
   
   return(taxa)
 }
