@@ -61,7 +61,7 @@ CleanMeta_CN_Damxung <- function(community_CN_Damxung){
 
 # Cleaning Damxung species list
 CleanTaxa_CN_Damxung <- function(community_CN_Damxung){
-  taxa<-data.frame(taxa=unique(community_CN_Damxung$SpeciesName))
+  taxa<-unique(community_CN_Damxung$SpeciesName)
   return(taxa)
 }
 

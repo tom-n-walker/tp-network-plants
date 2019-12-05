@@ -3,11 +3,12 @@
 
 AnalyzeSR <- function(x) {
   
-  alldat = list(CH_Lavey, CH_Calanda, CH_Calanda2, CN_Gongga, CN_Damxung, NO_Gudmedalen, NO_Lavisdalen, NO_Skjellingahaugen, NO_Ulvhaugen,
+  alldat = list(CH_Lavey, CH_Calanda, CH_Calanda2, CN_Damxung,
                 US_Colorado, US_Montana, IN_Kashmir, DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
-  names(alldat) = c('CH_Lavey', 'CH_Calanda', 'CH_Calanda2',
+  names(alldat) = c('CH_Lavey', 'CH_Calanda', 'CH_Calanda2', "CN_Damxung", 
                     'US_Colorado', 'US_Montana', 'IN_Kashmir', 'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia')
   
+  dat <- alldat %>% map_df(~.$taxa) #%>% c() 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
   #fix block issue and then bind
     
@@ -29,7 +30,7 @@ AnalyzeSR <- function(x) {
     # filter(!Treatment %in% c('NettedControl','Control')) 
 
   #add metadata to organize elevations
-  meta <- alldat %>% map(~mutate(.$meta, destBlockID=as.character(destBlockID))) %>%
+  meta <- alldat %>% map(~mutate(.$meta)) %>%#, destBlockID=as.character(destBlockID))) %>%
     bind_rows(.id='Region') %>% 
     select(Region, destSiteID, Elevation) %>% 
     distinct()

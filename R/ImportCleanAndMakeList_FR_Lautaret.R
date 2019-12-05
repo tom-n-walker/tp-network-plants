@@ -46,7 +46,7 @@ CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_FR_Lautaret <- function(community_FR_Lautaret){
-taxa <- data.frame(taxa=unique(community_FR_Lautaret$SpeciesName))
+taxa <- unique(community_FR_Lautaret$SpeciesName)
   return(taxa)
 }
 

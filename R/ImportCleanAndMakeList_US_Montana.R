@@ -44,7 +44,7 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_US_Montana <- function(community_US_Montana){
-  taxa <- data.frame(taxa=unique(community_US_Montana$SpeciesName))
+  taxa <- unique(community_US_Montana$SpeciesName)
   return(taxa)
 }
 

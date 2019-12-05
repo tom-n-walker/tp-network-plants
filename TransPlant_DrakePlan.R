@@ -9,6 +9,8 @@ library("readxl")
 library("lubridate")
 library("e1071")
 library("DBI")
+library("RSQLite")
+library("visNetwork")
 
 # drake configurations
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
