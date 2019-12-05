@@ -157,7 +157,7 @@ ImportClean_CN_Gongga <- function(){
   meta_CN_Gongga = CleanMeta_CN_Gongga(meta_CN_Gongga_raw)
   cover_CN_Gongga = CleanMetaCommunity_CN_Gongga(metaCommunity_CN_Gongga_raw)
   community_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw)
-  taxa_CN_Gongga = ImportTaxa_CN_Gongga()
+  taxa_CN_Gongga = ImportTaxa_CN_Gongga() %>% .$speciesName
   #trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
   
   cleaned_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw) 

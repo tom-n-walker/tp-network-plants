@@ -3,12 +3,18 @@
 
 AnalyzeSR <- function(x) {
   
-  alldat = list(CH_Lavey, CH_Calanda, CH_Calanda2, CN_Damxung,
-                US_Colorado, US_Montana, IN_Kashmir, DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
-  names(alldat) = c('CH_Lavey', 'CH_Calanda', 'CH_Calanda2', "CN_Damxung", 
-                    'US_Colorado', 'US_Montana', 'IN_Kashmir', 'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia')
+  alldat = list(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+                CH_Lavey, CH_Calanda, CH_Calanda2, 
+                US_Colorado, US_Montana, US_Arizona,
+                CN_Gongga, CN_Damxung, IN_Kashmir, 
+                DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
+  names(alldat) = c("NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen",
+                    'CH_Lavey', 'CH_Calanda', 'CH_Calanda2', 
+                    'US_Colorado', 'US_Montana', 'US_Arizona',
+                    "CN_Gongga", "CN_Damxung", 'IN_Kashmir', 
+                    'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia')
   
-  dat <- alldat %>% map_df(~.$taxa) #%>% c() 
+  dat <- alldat %>% map(~.$taxa) #%>% c() 
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
   #fix block issue and then bind
     
