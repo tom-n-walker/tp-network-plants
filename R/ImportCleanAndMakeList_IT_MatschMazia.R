@@ -48,7 +48,7 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_IT_MatschMazia <- function(community_IT_MatschMazia){
-  taxa <- data.frame(taxa=unique(community_IT_MatschMazia$SpeciesName))
+  taxa <- unique(community_IT_MatschMazia$SpeciesName)
   return(taxa)
 }
 

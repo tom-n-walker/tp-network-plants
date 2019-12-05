@@ -62,9 +62,7 @@ CleanMeta_IN_Kashmir <- function(community_IN_Kashmir){
 
 # Cleaning Kashmir species list
 CleanTaxa_IN_Kashmir <- function(community_IN_Kashmir){
-  dat2 <- community_IN_Kashmir 
-
-  taxa <- unique(dat2$SpeciesName)
+  taxa <- unique(community_IN_Kashmir$SpeciesName)
   return(taxa)
 }
 

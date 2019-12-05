@@ -73,7 +73,7 @@ CleanTaxa_SE_Abisko <- function(){
   files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
     grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
   splist <- map_df(files, ~ read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", .), sheet = "Species list 2012"))
-  taxa <- data.frame(Code=c(splist$Code...1, splist$Code...3), SpeciesName=c(splist$Name...2, splist$Name...4))
+  taxa <- c(splist$Name...2, splist$Name...4)
   taxa <- taxa[!is.na(taxa)]
   taxa <- taxa[!taxa %in% c('Lichen', 'Litter', 'Moss')] 
   

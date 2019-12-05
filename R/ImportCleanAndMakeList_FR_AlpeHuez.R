@@ -68,7 +68,7 @@ CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez){
 
 # Cleaning species list
 CleanTaxa_FR_AlpeHuez <- function(community_FR_AlpeHuez){
-  taxa <- data.frame(taxa=unique(community_FR_AlpeHuez$SpeciesName))
+  taxa <- unique(community_FR_AlpeHuez$SpeciesName)
   return(taxa)
 }
 

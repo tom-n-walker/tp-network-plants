@@ -53,7 +53,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_CH_Calanda <- function(community_CH_Calanda) {
-  taxa <- data.frame(taxa = unique(community_CH_Calanda$SpeciesName))
+  taxa <- unique(community_CH_Calanda$SpeciesName)
   return(taxa)
 }
 

@@ -47,7 +47,7 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_US_Colorado <- function(community_US_Colorado){
-taxa <- unique(community_US_Colorado$dat$SpeciesName)
+taxa <- unique(community_US_Colorado$SpeciesName)
 return(taxa)
 }
 

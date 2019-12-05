@@ -102,7 +102,7 @@ CleanTaxa_US_Arizona <- function(){
     # Code=="unk.germinant"~"Germinant sp.",
     #  TRUE~SpeciesName))
   
-  taxa <- splist
+  taxa <- splist$Species_FullName
       
   return(taxa)
 }

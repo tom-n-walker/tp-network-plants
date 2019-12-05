@@ -68,28 +68,27 @@ return(taxa_CN_Gongga)
 
 #### Cleaning Code ####
 # Clean trait data
-CleanTrait_CN_Gongga <- function(dat){
-  dat2 <- dat %>% 
-    filter(Project %in% c("LOCAL", "0", "C")) %>% 
-    mutate(Treatment = plyr::mapvalues(Project, c("C", "0", "LOCAL"), c("C", "O", "Gradient"))) %>% 
-    mutate(Taxon = trimws(Taxon)) %>% 
-    mutate(Year = year(Date),
-           Country = "CH",
-           Gradient = as.character(1),
-           Project = "T") %>% 
-    rename(BlockID = Location) %>%
-    mutate(PlotID = paste(BlockID, Treatment, sep = "-"),
-           ID = paste(Site, Treatment, Taxon, Individual_number, Leaf_number, sep = "_")) %>% 
-    select(Country, Year, Site, Gradient, BlockID, PlotID, Taxon, Wet_Mass_g, Dry_Mass_g, Leaf_Thickness_Ave_mm, Leaf_Area_cm2, SLA_cm2_g, LDMC, C_percent, N_percent , CN_ratio, dN15_percent, dC13_percent, P_AVG, P_Std_Dev, P_Co_Var) %>% 
-    gather(key = Trait, value = Value, -Country, -Year, -Site, -Gradient, -BlockID, -PlotID, -Taxon) %>% 
-    filter(!is.na(Value))
-  
-  return(dat2)
-}
+# CleanTrait_CN_Gongga <- function(dat){
+#   dat2 <- dat %>% 
+#     filter(Project %in% c("LOCAL", "0", "C")) %>% 
+#     mutate(Treatment = plyr::mapvalues(Project, c("C", "0", "LOCAL"), c("C", "O", "Gradient"))) %>% 
+#     mutate(Taxon = trimws(Taxon)) %>% 
+#     mutate(Year = year(Date),
+#            Country = "CH",
+#            Gradient = as.character(1),
+#            Project = "T") %>% 
+#     rename(BlockID = Location) %>%
+#     mutate(PlotID = paste(BlockID, Treatment, sep = "-"),
+#            ID = paste(Site, Treatment, Taxon, Individual_number, Leaf_number, sep = "_")) %>% 
+#     select(Country, Year, Site, Gradient, BlockID, PlotID, Taxon, Wet_Mass_g, Dry_Mass_g, Leaf_Thickness_Ave_mm, Leaf_Area_cm2, SLA_cm2_g, LDMC, C_percent, N_percent , CN_ratio, dN15_percent, dC13_percent, P_AVG, P_Std_Dev, P_Co_Var) %>% 
+#     gather(key = Trait, value = Value, -Country, -Year, -Site, -Gradient, -BlockID, -PlotID, -Taxon) %>% 
+#     filter(!is.na(Value)) 
+#   return(dat2)
+# }
 
 # Cleaning community data
 CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
-  dat2 <- community_CN_Gongga_raw %>% 
+  dat <- community_CN_Gongga_raw %>% 
     filter(TTtreat != c("OTC")) %>% 
     rename(Year = year, Treatment = TTtreat, Cover = cover, SpeciesName = speciesName) %>% 
     mutate(Gradient = "CN_Gongga",
@@ -97,43 +96,36 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
            Treatment = recode(Treatment, "control" = "Control", "local" = "LocalControl", "warm1" = "Warm", "cool1" = "Cold", "warm3" = "Warm", "cool3" = "Cold")) %>% 
     mutate(SpeciesName = recode(SpeciesName, "Potentilla stenophylla var. emergens" = "Potentilla stenophylla")) %>% 
     filter(!is.na(Cover), !Cover == 0) %>% 
-
-#New additions: 
-    
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))
+    select(-flag, -species, -Gradient, -Country) %>%
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, Treatment, destPlotID, turfID, sep='_')) 
   
-  dat3<- dat2 %>%  
+  dat2<- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
-    bind_rows(dat2) %>% 
-    filter(Cover > 0)  %>% #omg so inelegant
+    bind_rows(dat) %>% 
+    filter(Cover > 0) %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat3 %>% filter(!SpeciesName %in% c('Other')) 
-  cover <- dat3 %>% filter(SpeciesName %in% c('Other')) %>% 
-    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%                                      #This calculates really high other cover values. divide by 100? Something else that's wrong?
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
+  cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
+    select(UniqueID, destSiteID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, destSiteID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover)) 
-  return(dat2)
-  
-# end new additions 
-  
-  return(dat2)
+
 }
 
   
 # Cleaning China Meta community (class cover) data
-
-
-CleanMetaCommunity_CN_Gongga <- function(metaCommunity_CN_Gongga_raw){
-  dat2 <- metaCommunity_CN_Gongga_raw %>% 
-    select(PlotID, Year, Moss, Lichen2, Litter, BareGround, Rock, Vascular, Bryophyte, Lichen, MedianHeight_cm, MedianMossHeight_cm) %>% 
-    mutate(Gradient = "CN_Gongga",
-           destBlockID = NA,
-           Country = as.character("China"))
-  return(dat2)
-}
+# CleanMetaCommunity_CN_Gongga <- function(metaCommunity_CN_Gongga_raw){
+#   dat2 <- metaCommunity_CN_Gongga_raw %>% 
+#     select(PlotID, Year, Moss, Lichen2, Litter, BareGround, Rock, Vascular, Bryophyte, Lichen, MedianHeight_cm, MedianMossHeight_cm) %>% 
+#     #recode(Bryophyte=Moss, )
+#     mutate(Gradient = "CN_Gongga",
+#            destBlockID = NA,
+#            Country = as.character("China"))
+#   return(dat2)
+# }
 
 CleanMeta_CN_Gongga <- function(dat){
   dat2 <- dat %>% 
@@ -155,25 +147,29 @@ ImportClean_CN_Gongga <- function(){
   
   ### IMPORT DATA
   meta_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/metaCN_Gongga.Rdata")))
-  metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/metaCommunityCN_Gongga_2012_2016.Rdata")))
+  #metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/metaCommunityCN_Gongga_2012_2016.Rdata")))
   community_CN_Gongga_raw = ImportCommunity_CN_Gongga()
   taxa_CN_Gongga = ImportTaxa_CN_Gongga()
-  trait_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/traits_2015_2016_China.Rdata")))
+  #trait_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/traits_2015_2016_China.Rdata")))
 
   ### CLEAN DATA SETS
   ## CN_Gongga
   meta_CN_Gongga = CleanMeta_CN_Gongga(meta_CN_Gongga_raw)
-  metaCommunity_CN_Gongga = CleanMetaCommunity_CN_Gongga(metaCommunity_CN_Gongga_raw)
+  cover_CN_Gongga = CleanMetaCommunity_CN_Gongga(metaCommunity_CN_Gongga_raw)
   community_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw)
-  taxa_CN_Gongga = ImportTaxa_CN_Gongga()
-  trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
+  taxa_CN_Gongga = ImportTaxa_CN_Gongga() %>% .$speciesName
+  #trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
+  
+  cleaned_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw) 
+  community_CN_Gongga = cleaned_CN_Gongga$comm %>% filter(destSiteID %in% sites)
+  cover_CN_Gongga = cleaned_CN_Gongga$cover %>% filter(destSiteID %in% sites)
+  
   
   # Make list
   CN_Gongga = list(meta = meta_CN_Gongga,
-                   metaCommunity = metaCommunity_CN_Gongga,
+                   cover = cover_CN_Gongga,
                    community = community_CN_Gongga,
-                   taxa = taxa_CN_Gongga,
-                   trait = trait_CN_Gongga)
+                   taxa = taxa_CN_Gongga)
   
   return(CN_Gongga)
 }

@@ -57,7 +57,7 @@ CleanMeta_DE_Grainau <- function(community_DE_Grainau){
 
 # Cleaning Grainau species list
 CleanTaxa_DE_Grainau <- function(community_DE_Grainau){
-  taxa <- data.frame(taxa=unique(community_DE_Grainau$SpeciesName))
+  taxa <- unique(community_DE_Grainau$SpeciesName)
   return(taxa)
 }
 

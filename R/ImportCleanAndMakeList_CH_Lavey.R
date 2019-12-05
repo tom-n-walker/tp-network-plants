@@ -49,7 +49,7 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
 
 # Clean taxa list (add these to end of above)
 CleanTaxa_CH_Lavey <- function(community_CH_Lavey) {
-  taxa <- data.frame(taxa=unique(community_CH_Lavey$SpeciesName))
+  taxa <- unique(community_CH_Lavey$SpeciesName)
   return(taxa)
 }
 
