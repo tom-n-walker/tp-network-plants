@@ -26,7 +26,7 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
-    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
+    mutate(Treatment = recode (Treatment, "Warming" = "Warm",  "Control" = "LocalControl"))%>%
     gather('SpeciesName', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
 #adding species names from species list (Taxa: splist) to dataframe
  #   left_join(splist, by = c("code" = "Code")) %>% 
@@ -74,7 +74,7 @@ CleanCover_US_Arizona <- function(cover_US_Arizona_raw){
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
     rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot', VascCover = '% cover at peak biomass') %>% 
-    mutate(Treatment = recode (Treatment, "Warming" = "Warm")) %>%
+    mutate(Treatment = recode (Treatment, "Warming" = "Warm",  "Control" = "LocalControl"))%>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
     mutate(OtherCover = 100-VascCover) %>%
     gather('CoverClass', 'OtherCover', c(VascCover, OtherCover)) %>% 
