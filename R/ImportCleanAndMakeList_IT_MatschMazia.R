@@ -17,12 +17,11 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
   dat <- community_IT_MatschMazia_raw %>% 
     rename(Year=year, Elevation=elevation, treat = Treatment) %>%
     gather(SpeciesName, Cover, -destSiteID, -destPlotID, -Elevation, -treat, -Year) %>%
-    filter(!is.na(Cover)) %>%
+    filter(!is.na(Cover), Elevation !=1950) %>%
     mutate(SpeciesName = gsub('\\_', ' ', SpeciesName)) %>%
     mutate(Treatment = case_when(treat == "receiving" & destSiteID == 'Low' & Elevation == 1000 ~ "LocalControl",
-                                treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm",
-                                treat == "donor" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
-                                treat == "donor" & destSiteID == 'High' & Elevation == 1950 ~ "Warm"),
+                                 treat == "receiving" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
+                                treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm"),
             originSiteID = case_when(Elevation == 1000 ~ "Low",
                                    Elevation == 1500 ~ "Middle",
                                    Elevation == 1950 ~ "High")) %>%
