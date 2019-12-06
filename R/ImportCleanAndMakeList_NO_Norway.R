@@ -41,7 +41,9 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw){
     filter(Treatment %in% c("TTC", "TT1", "TT2")) %>% 
     mutate(Treatment = recode(Treatment, "TTC" = "Control", "TT1" = "LocalControl", "TT2" = "Warm")) %>% 
     filter(Year != 2016) %>% 
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    mutate(destBLockID = as.numeric(destBLockID))
+
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
