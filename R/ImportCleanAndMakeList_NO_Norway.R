@@ -42,7 +42,7 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw){
     mutate(Treatment = recode(Treatment, "TT1" = "LocalControl", "TT2" = "Warm")) %>% 
     filter(Year != 2016) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
-    mutate(destBLockID = as.numeric(destBLockID))
+    mutate(destBlockID = as.numeric(destBlockID))
 
   
   dat2 <- dat %>%  
@@ -83,7 +83,6 @@ CleanMeta_NO_Norway <- function(meta_NO_Norway_raw){
            Country = as.character("Norway"),
            YearEstablished = 2009,
            PlotSize_m2 = 0.0625,
-           destBlockID = NA,
            destSiteID = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske")) %>% 
     mutate(Gradient = case_when(destSiteID %in% c("Ulvhaugen", "Alrust", "Fauske")~ 1 ,
                                 destSiteID %in% c("Lavisdalen", "Hogsete", "Vikesland")~ 2 ,
