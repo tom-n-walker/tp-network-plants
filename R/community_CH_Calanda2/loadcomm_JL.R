@@ -2,7 +2,7 @@
 #These are all taken from Jacob's ladder
 #Chelsea Chisholm, 03.11.2019
 
-load_cover_CH_Calanda <- function(){
+load_cover_CH_Calanda2 <- function(){
   #import data
     dat <- read.csv('./data/CH_JacobsLadder/CH_JacobsLadder_commdata/covmat.csv', stringsAsFactors = FALSE)
   cover <- dat %>% 

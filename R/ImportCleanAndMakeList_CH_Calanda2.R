@@ -1,22 +1,22 @@
 #####################
-#### CH_CALANDA2  ###
+#### CH_Calanda2  ###
 #####################
 
 source("R/community_CH_Calanda2/loadcomm_JL.r")
 
 #### Import Community ####
-ImportCommunity_CH_Calanda <- function(){
+ImportCommunity_CH_Calanda2 <- function(){
 
   #load cover data and metadata
-  community_CH_Calanda_raw <- load_cover_CH_Calanda()
+  community_CH_Calanda2_raw <- load_cover_CH_Calanda2()
   
-  return(community_CH_Calanda_raw)
+  return(community_CH_Calanda2_raw)
 }
 
 #### Cleaning Code ####
 # Cleaning Calanda2 community data
-CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
-  dat <- community_CH_Calanda_raw %>% 
+CleanCommunity_CH_Calanda2 <- function(community_CH_Calanda2_raw) {
+  dat <- community_CH_Calanda2_raw %>% 
     mutate(Collector='Jacob', originSiteID = 'Cal',
            Treatment = case_when(Site == "Cal" ~ "LocalControl", 
                                  Site != "Cal" ~ "Warm")) %>%
@@ -44,14 +44,14 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
 
 
 # Clean taxa list (add these to end of above)
-CleanTaxa_CH_Calanda <- function(community_CH_Calanda) {
-  taxa <- unique(community_CH_Calanda$SpeciesName)
+CleanTaxa_CH_Calanda2 <- function(community_CH_Calanda2) {
+  taxa <- unique(community_CH_Calanda2$SpeciesName)
   return(taxa)
 }
 
 # Clean metadata
-CleanMeta_CH_Calanda <- function(community_CH_Calanda) {
-  dat <- community_CH_Calanda %>%
+CleanMeta_CH_Calanda2 <- function(community_CH_Calanda2) {
+  dat <- community_CH_Calanda2 %>%
     select(-SpeciesName, -Cover) %>%
     distinct() %>% 
     # only select control, local control, warm/down transplant
@@ -69,21 +69,21 @@ CleanMeta_CH_Calanda <- function(community_CH_Calanda) {
 ImportClean_CH_Calanda2 <- function(){
   
   ### IMPORT DATA
-  community_CH_Calanda_raw = ImportCommunity_CH_Calanda()
+  community_CH_Calanda2_raw = ImportCommunity_CH_Calanda2()
   
   ### CLEAN DATA SETS
-  cleaned_CH_Calanda = CleanCommunity_CH_Calanda(community_CH_Calanda_raw)
-  community_CH_Calanda = cleaned_CH_Calanda$comm
-  cover_CH_Calanda = cleaned_CH_Calanda$cover
-  meta_CH_Calanda = CleanMeta_CH_Calanda(community_CH_Calanda) 
-  taxa_CH_Calanda = CleanTaxa_CH_Calanda(community_CH_Calanda)
+  cleaned_CH_Calanda2 = CleanCommunity_CH_Calanda2(community_CH_Calanda2_raw)
+  community_CH_Calanda2 = cleaned_CH_Calanda2$comm
+  cover_CH_Calanda2 = cleaned_CH_Calanda2$cover
+  meta_CH_Calanda2 = CleanMeta_CH_Calanda2(community_CH_Calanda2) 
+  taxa_CH_Calanda2 = CleanTaxa_CH_Calanda2(community_CH_Calanda2)
   
   
   # Make list
-  CH_Calanda2 = list(meta = meta_CH_Calanda,
-                    community = community_CH_Calanda,
-                    cover = cover_CH_Calanda,
-                    taxa = taxa_CH_Calanda)
+  CH_Calanda2 = list(meta = meta_CH_Calanda2,
+                    community = community_CH_Calanda2,
+                    cover = cover_CH_Calanda2,
+                    taxa = taxa_CH_Calanda2)
   
   
   return(CH_Calanda2)
