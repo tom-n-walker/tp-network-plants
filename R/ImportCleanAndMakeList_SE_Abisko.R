@@ -53,12 +53,12 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
 }
 
 # Clean metadata
-
+#Paul wasn't particular about these elevations, check this!
 CleanMeta_SE_Abisko <- function(community_SE_Abisko){
   dat <- community_SE_Abisko %>% 
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '690', 'Mid' = '690', 'Low' = '500')),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '1000', 'Mid' = '690', 'Low' = '500')),
            Gradient = 'SE_Abisko',
            Country = 'Sweden',
            YearEstablished = 2012,
