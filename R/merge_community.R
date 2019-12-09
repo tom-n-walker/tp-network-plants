@@ -16,7 +16,10 @@ merge_comm_data <- function(x) {
   
   dat <- alldat %>% 
     map(~.$community) %>% 
-    bind_rows(.id='Region') 
+    bind_rows(.id='Region') %>%
+    filter(!Treatment %in% c('NettedControl', 'Cold', 'Control')) %>%
+    ungroup() %>%
+    select(-notbad, -Gradient, -collector, -originPlotID, -Individuals, -Date)
   
   #add metadata to organize elevations
   meta <- alldat %>% map(~ungroup(.$meta) %>% mutate(Gradient=as.character(Gradient))) %>%
@@ -26,6 +29,14 @@ merge_comm_data <- function(x) {
     distinct()
   
   fulldat <- left_join(dat, meta, by=c('Region', 'destSiteID'))
+  
+  #sanity checks:
+  # unique(dat$destSiteID) %in% unique(meta$destSiteID) #all true
+  # fulldat[is.na(fulldat$Rel_Cover),] #no NA Rel_covers (cover yes, arizona only has rel_cover)
+  # dat[is.na(dat$Treatment),] #no NA treatments
+  # fulldat %>% filter(Region %in% c("NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen", "CN_Gongga")) %>% 
+  #   group_by(Region, destSiteID) %>%
+  #   distinct(Elevation) %>% arrange(Region, destSiteID) %>% View
   
   return(fulldat) 
   

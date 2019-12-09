@@ -1,72 +1,26 @@
-##### Functions for analyses ####
+##### Basic functions for analyses ####
 #C&D 14.12.2018
 
-
-AnalyzeSR <- function(x) {
-  
-  alldat = list(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
-                CH_Lavey, CH_Calanda, CH_Calanda2, 
-                US_Colorado, US_Montana, US_Arizona,
-                CN_Gongga, CN_Damxung, IN_Kashmir, 
-                DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
-  names(alldat) = c("NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen",
-                    'CH_Lavey', 'CH_Calanda', 'CH_Calanda2', 
-                    'US_Colorado', 'US_Montana', 'US_Arizona',
-                    "CN_Gongga", "CN_Damxung", 'IN_Kashmir', 
-                    'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia')
-  
-  dat <- alldat %>% 
-    map(~.$community) %>% 
-    bind_rows(.id='Region') 
-  
-  #add metadata to organize elevations
-  meta <- alldat %>% map(~mutate(.$meta, Gradient = as.character(Gradient))) %>%
-    bind_rows(.id='Region') %>% 
-    select(Region, destSiteID, Elevation) %>% 
-    distinct()
-  
-  taxa <- bind_rows(lapply(alldat, '[[', 'taxa'))
-  
-  dat <- left_join(meta, SR)
-  
-  return(dat) 
-  
-}
-
-#Issues found:
-# US_Colorado$community$destBlockID<- as.numeric(US_Colorado$community$destBlockID) 
-# US_Montana$community$destPlotID<- as.character(US_Montana$community$destPlotID) 
-# NO_Ulvhaugen$community$destBlockID<- as.numeric(NO_Ulvhaugen$community$destBlockID) 
-# NO_Lavisdalen$community$destBlockID<- as.numeric(NO_Lavisdalen$community$destBlockID) 
-# NO_Gudmedalen$community$destBlockID<- as.numeric(NO_Gudmedalen$community$destBlockID) 
-# NO_Skjellingahaugen$community$destBlockID<- as.numeric(NO_Skjellingahaugen$community$destBlockID) 
-
-#Also for treatments: Control vs. local control in Norway, Colorado, Arizona
-#For Italy there is a NA category
-  # dat <- alldat %>% 
-  #   map(~select(.$community, UniqueID, Year, destSiteID, Treatment, destPlotID, SpeciesName, Rel_Cover)) %>% 
-  #   bind_rows(.id='Region') 
-
-
-#destPlot ID needs to be in character for Montana
 # Species Richness per plot across sites
-
-
-  dat %>%
-  group_by(Region, destSiteID, Treatment, destPlotID) %>% 
-  filter(Year==max(Year), !Treatment %in% c('NettedControl', 'Cold', NA, 'Control')) %>%
+  dat %>% 
+  group_by(Region) %>%
+  mutate(Turf = case_when(Elevation == max(Elevation) & Treatment == "LocalControl" ~ "Alpine Control",
+                               Elevation == min(Elevation) & Treatment == "LocalControl" ~ "Low Control",
+                               Elevation == min(Elevation) & Treatment == "Warm" ~ "Warmed Turfs")) %>%
+  filter(Year==max(Year), !is.na(Turf)) %>%
+  group_by(Region, destSiteID, Turf, destPlotID) %>% 
   summarise(SR = n_distinct(SpeciesName)) %>%
-  ggplot(aes(x=Treatment, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
+  ggplot(aes(x=Turf, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
     theme_bw()
 
+
+  dat %>% group_by(Region, Elevation) %>%
+    distinct(Treatment) %>% arrange(Region, Elevation, Treatment) %>% View
 # Average relative cover across sites
   dat %>% 
-  map(~select(.$community, UniqueID, Year, destSiteID, Treatment, destPlotID, SpeciesName, Rel_Cover)) %>% 
-  bind_rows(.id='Region') %>%
   group_by(Region, destSiteID, destPlotID) %>% 
-  filter(Year==max(Year), !Treatment %in% c('NettedControl', 'Cold', NA, 'Control')) %>%
   #summarise(SR = n_distinct(SpeciesName), ra=mean(Rel_Cover)) %>%
-  ggplot(aes(x=Treatment, y=Rel_Cover)) + geom_boxplot() + facet_wrap(~Region, ncol = 3)+
+  ggplot(aes(x=Treatment, y=Rel_Cover)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
     theme_bw()
 
 
