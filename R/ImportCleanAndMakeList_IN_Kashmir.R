@@ -25,7 +25,9 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
       mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 70 , `11` = 90)) %>% 
       mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
-      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)  %>% 
+      ungroup()
+    
 
     
  dat2<- dat %>%  
@@ -34,7 +36,9 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
       summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
       bind_rows(dat) %>% 
       filter(Cover > 0)  %>% #omg so inelegant
-      mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+      mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)  %>% 
+      ungroup()
+ 
     
     comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
     cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 

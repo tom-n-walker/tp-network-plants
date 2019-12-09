@@ -2,21 +2,30 @@
 #C&D 14.12.2018
 
 # Species Richness per plot across sites
-  dat %>% 
+  fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n()) %>% View
+#It appears Gongga is wrongly labelled (likely warmed is actually local control, from what I can guess)
+#India Kashmir looks fine, wtf is going on
+#Also US_Montana is fine too
+#Calanda there are no Local Controls labelled at the lower sites. Fixed.
+#Calanda2 there may be no local controls at all (were they all transplanted downwards?)
+
+  dat1 <- fulldat %>%
   group_by(Region) %>%
-  filter(Elevation==min(Elevation)|max(Elevation)) %>%
-  mutate(Turf = case_when(Elevation == max(Elevation) & Treatment == "LocalControl" ~ "Alpine Control",
-                               Elevation == min(Elevation) & Treatment == "LocalControl" ~ "Low Control",
-                               Elevation == min(Elevation) & Treatment == "Warm" ~ "Warmed Turfs")) %>%
-  filter(Year==max(Year), !is.na(Turf)) %>%
+  mutate(Rel_Elevation = case_when(Elevation==min(Elevation) ~ 'Low',
+                                   Elevation==max(Elevation) ~ 'High')) %>% 
+  filter(Year==max(Year), !is.na(Rel_Elevation)) %>% 
+  mutate(Turf = case_when(Rel_Elevation == 'High' & Treatment == "LocalControl" ~ "Alpine Control",
+                               Rel_Elevation == 'Low' & Treatment == "LocalControl" ~ "Low Control",
+                               Rel_Elevation == 'Low' & Treatment == "Warm" ~ "Warmed Turfs")) %>%
+  ungroup() %>%
   group_by(Region, destSiteID, Turf, destPlotID) %>% 
-  summarise(SR = n_distinct(SpeciesName)) %>%
+  summarise(SR = n_distinct(SpeciesName)) 
+  
+  
   ggplot(aes(x=Turf, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
     theme_bw()
 
 
-  dat %>% group_by(Region, Elevation) %>%
-    distinct(Treatment) %>% arrange(Region, Elevation, Treatment) %>% View
 # Average relative cover across sites
   dat %>% 
   group_by(Region, destSiteID, destPlotID) %>% 
@@ -25,8 +34,11 @@
     theme_bw()
 
 
-
-  
+dat %>% filter(Region=='CH_Calanda') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
+dat %>% filter(Region=='CH_Calanda2') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
+dat %>% filter(Region=='CH_Lavey') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
+dat %>% filter(Region=='CH_Calanda') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
+dat %>% filter(Region=='IN_Kashmir') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
   
   #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
   #fix block issue and then bind

@@ -2,6 +2,7 @@
 ### TRANSPLANT DRAKE PLAN ###
 #############################
 
+rm(list=ls())
 # Load library
 library("drake")
 library("tidyverse")
@@ -72,10 +73,10 @@ ImportDrakePlan <- drake_plan(
 
 
 MergeDrakePlan <- drake_plan(
-  dat = merge_comm_data(list(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
-                             CH_Lavey, CH_Calanda, CH_Calanda2, 
+  dat = merge_comm_data(list(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+                             CH_Lavey, CH_Calanda, #CH_Calanda2,
                              US_Colorado, US_Montana, US_Arizona,
-                             CN_Gongga, CN_Damxung, IN_Kashmir, 
+                             CN_Damxung, IN_Kashmir, #CN_Gongga, 
                              DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
 )
 
@@ -85,8 +86,8 @@ MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 
 conf <- drake_config(MyPlan)
 conf
-make(MyPlan, keep_going = TRUE)
-loadd(dat)
+make(MyPlan)
+loadd()
 failed()
 vis_drake_graph(conf, targets_only = TRUE)
 vis_drake_graph(conf)
