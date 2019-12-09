@@ -23,8 +23,7 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
                                  treat == "receiving" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
                                 treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm"),
             originSiteID = case_when(Elevation == 1000 ~ "Low",
-                                   Elevation == 1500 ~ "Middle",
-                                   Elevation == 1950 ~ "High")) %>%
+                                   Elevation == 1500 ~ "Middle")) %>%
     select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
@@ -57,7 +56,8 @@ CleanMeta_IT_MatschMazia <- function(community_IT_MatschMazia){
   dat <- community_IT_MatschMazia %>%
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct()  %>% 
-    mutate(Gradient = 'IT_MatschMazia', #Already fixed this, just add dat above
+    mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1000', 'High'= '1500')),
+           Gradient = 'IT_MatschMazia', #Already fixed this, just add dat above
            Country = 'IT',
            YearEstablished = 2010,
            PlotSize_m2 = NA) #need to figure this out!

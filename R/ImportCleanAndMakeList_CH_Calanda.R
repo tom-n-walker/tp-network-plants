@@ -21,9 +21,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
                                   Treatment == "veg_home" & Site == "Nes" ~ "Nes",
                                   Treatment == "veg_home" & Site == "Pea" ~ "Pea",
                                   Treatment == "veg_home" & Site == "Cal" ~ "Cal"),
-           Treatment = case_when(Treatment == "veg_away" & Site == "Cal" ~ "Warm", 
-                                 Treatment == "veg_away" & Site == "Nes" ~ "Warm",
-                                 Treatment == "veg_away" & Site == "Pea" ~ "Warm",
+           Treatment = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "Warm", 
                                  Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
     rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
     mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
@@ -45,9 +43,9 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
 
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))
-  cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
+  cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% ungroup() %>% 
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
-    rename(CoverClass=SpeciesName)
+    rename(CoverClass=SpeciesName) 
   return(list(comm=comm, cover=cover))
 }
 
@@ -60,8 +58,8 @@ CleanTaxa_CH_Calanda <- function(community_CH_Calanda) {
 
 # Clean metadata
 CleanMeta_CH_Calanda <- function(community_CH_Calanda) {
-  dat <- community_CH_Calanda %>% 
-    select(-c('SpeciesName', 'Cover')) %>% 
+  dat <- community_CH_Calanda %>% ungroup() %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()  %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'Pea'='2800', 'Cal'='2000', 'Nes'='1400')),
            Gradient = "CH_Calanda",

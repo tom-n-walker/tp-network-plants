@@ -34,8 +34,8 @@ merge_comm_data <- function(x) {
   # unique(dat$destSiteID) %in% unique(meta$destSiteID) #all true
   # fulldat[is.na(fulldat$Rel_Cover),] #no NA Rel_covers (cover yes, arizona only has rel_cover)
   # dat[is.na(dat$Treatment),] #no NA treatments
-  # fulldat %>% filter(Region %in% c("NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen", "CN_Gongga")) %>% 
-  #   group_by(Region, destSiteID) %>%
+  # fulldat %>%
+  #   group_by(Region, destSiteID, Treatment) %>%
   #   distinct(Elevation) %>% arrange(Region, destSiteID) %>% View
   
   return(fulldat) 

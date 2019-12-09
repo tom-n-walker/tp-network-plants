@@ -4,6 +4,7 @@
 # Species Richness per plot across sites
   dat %>% 
   group_by(Region) %>%
+  filter(Elevation==min(Elevation)|max(Elevation)) %>%
   mutate(Turf = case_when(Elevation == max(Elevation) & Treatment == "LocalControl" ~ "Alpine Control",
                                Elevation == min(Elevation) & Treatment == "LocalControl" ~ "Low Control",
                                Elevation == min(Elevation) & Treatment == "Warm" ~ "Warmed Turfs")) %>%

@@ -58,7 +58,7 @@ CleanMeta_SE_Abisko <- function(community_SE_Abisko){
   dat <- community_SE_Abisko %>% 
     select(-c('SpeciesName', 'Cover')) %>% 
     distinct() %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '690', 'Mid' = '690', 'LOW' = '500')),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '690', 'Mid' = '690', 'Low' = '500')),
            Gradient = 'SE_Abisko',
            Country = 'Sweden',
            YearEstablished = 2012,
