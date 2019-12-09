@@ -18,7 +18,7 @@ pkgconfig::set_config("drake::strings_in_dots" = "literals")
 # trick
 pn <- . %>% print(n = Inf)
 
-# source scripts
+# source cleaning scripts
 source("R/ImportCleanAndMakeList_CH_Calanda.R")
 source("R/ImportCleanAndMakeList_CH_Calanda2.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
@@ -35,7 +35,9 @@ source("R/ImportCleanAndMakeList_US_Montana.R")
 source("R/ImportCleanAndMakeList_IT_MatschMazia.R")
 source("R/ImportCleanAndMakeList_US_Arizona.R")
 source("R/ImportCleanAndMakeList_CN_Heibei.R")
-source("R/Analysis_SR.R")
+
+#Source downstream scripts
+source("R/merge_community.R")
 
 # Import Data
 ImportDrakePlan <- drake_plan(
@@ -69,18 +71,22 @@ ImportDrakePlan <- drake_plan(
 #destBlockID needs to be added to Norway data, Gongga, etc. destBlockID <- NA
 
 
-AnalyzeDrakePlan <- drake_plan(
-  CN_Gongga_lm = AnalyzeSR(CN_Gongga)
+MergeDrakePlan <- drake_plan(
+  dat = merge_comm_data(list(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+                             CH_Lavey, CH_Calanda, CH_Calanda2, 
+                             US_Colorado, US_Montana, US_Arizona,
+                             CN_Gongga, CN_Damxung, IN_Kashmir, 
+                             DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
 )
 
 MyPlan <- ImportDrakePlan
 
-#MyPlan <- bind_rows(ImportDrakePlan, AnalyzeDrakePlan)
+MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 
 conf <- drake_config(MyPlan)
 conf
 make(MyPlan, keep_going = TRUE)
-loadd()
+loadd(dat)
 failed()
 vis_drake_graph(conf, targets_only = TRUE)
 vis_drake_graph(conf)

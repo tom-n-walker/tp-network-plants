@@ -31,7 +31,8 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
            Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
            Cover= as.numeric(as.character(Cover))) %>% 
       select(-Date) %>% 
-      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
     
     dat2 <- dat %>%  
       filter(!is.na(Cover)) %>%

@@ -97,7 +97,8 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
     mutate(SpeciesName = recode(SpeciesName, "Potentilla stenophylla var. emergens" = "Potentilla stenophylla")) %>% 
     filter(!is.na(Cover), !Cover == 0) %>% 
     select(-flag, -species, -Gradient, -Country) %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, Treatment, destPlotID, turfID, sep='_')) 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, Treatment, destPlotID, turfID, sep='_')) %>% 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2<- dat %>%  
     filter(!is.na(Cover)) %>%

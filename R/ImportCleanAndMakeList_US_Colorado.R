@@ -25,7 +25,7 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
     rename(destPlotID = turfID) %>% 
     select(-date_yyyymmdd, -comments) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, destPlotID, sep='_'), Collector='Laura', SpeciesName = recode(SpeciesName, 'Rock' = "rock", 'Moss' = "moss")) %>% 
-    mutate(destBlockID = as.numeric(destBlockID))
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%

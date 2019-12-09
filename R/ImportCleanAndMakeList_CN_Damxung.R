@@ -24,7 +24,8 @@ CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
       #Convert cover classes to percent values (taking mid-point)
       mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 80 )) %>% 
-      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
     
     dat2 <- dat %>%  
       filter(!is.na(Cover)) %>%

@@ -34,7 +34,8 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
                                  originSiteID =="Low" & destSiteID == "High" ~ "Cold" ,
                                  originSiteID =="Mid" & destSiteID == "High" ~ "Cold")) %>%
     gather(SpeciesName, 'Cover', -destSiteID, -originSiteID, -destPlotID, -destBlockID, -Treatment, -Year) %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%

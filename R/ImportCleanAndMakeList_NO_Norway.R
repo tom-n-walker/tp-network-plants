@@ -42,7 +42,7 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw){
     mutate(Treatment = recode(Treatment, "TT1" = "LocalControl", "TT2" = "Warm")) %>% 
     filter(Year != 2016) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
-    mutate(destBlockID = as.numeric(destBlockID))
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
 
   
   dat2 <- dat %>%  

@@ -19,13 +19,14 @@ merge_comm_data <- function(x) {
     bind_rows(.id='Region') 
   
   #add metadata to organize elevations
-  meta <- alldat %>% map(~mutate(.$meta, Gradient = as.character(Gradient))) %>%
+  meta <- alldat %>% map(~ungroup(.$meta) %>% mutate(Gradient=as.character(Gradient))) %>%
     bind_rows(.id='Region') %>% 
+    mutate(Gradient=recode(Gradient, '1'='NO_Ulvhaugen', '2'='NO_Lavisdalen', '3'='NO_Gudmedalen', '4'='NO_Skjellingahaugen')) %>%
     select(Region, destSiteID, Elevation) %>% 
     distinct()
   
-  dat <- left_join(meta, SR)
+  fulldat <- left_join(dat, meta, by=c('Region', 'destSiteID'))
   
-  return(dat) 
+  return(fulldat) 
   
 }

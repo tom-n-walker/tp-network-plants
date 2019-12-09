@@ -26,7 +26,8 @@ CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
                                   destSiteID == "G" & Treatment == 'CP' ~ "G")) %>% 
     mutate(Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
     select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -plot) %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%

@@ -35,7 +35,8 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Rubin') %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
 #calculate percentage cover per individual
     left_join(cover_US_Arizona)  %>% spread('CoverClass', 'OtherCover') %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
 
   dat2 <- dat %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%

@@ -33,7 +33,8 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     rename(destBlockID=Block) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>% 
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))  %>% 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) 
     
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%

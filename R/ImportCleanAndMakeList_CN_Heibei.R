@@ -29,7 +29,8 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
                                  destSiteID =="3800" & originSiteID == "3400" ~ "Cold")) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment) %>%
-    select(-PlotID)
+    select(-PlotID) %>% ungroup() %>%
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
