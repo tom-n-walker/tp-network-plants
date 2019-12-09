@@ -17,13 +17,9 @@ ImportCommunity_CH_Calanda <- function(){
 # Cleaning Calanda community data
 CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
-    mutate(originSiteID = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "Pea",
-                                  Treatment == "veg_home" & Site == "Nes" ~ "Nes",
-                                  Treatment == "veg_home" & Site == "Pea" ~ "Pea",
-                                  Treatment == "veg_home" & Site == "Cal" ~ "Cal"),
-           Treatment = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "Warm", 
+    mutate(Treatment = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "Warm", 
                                  Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
-    rename(destSiteID = Site, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
+    rename(destSiteID = Site, originSiteID = turf_type, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
     mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
     mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
@@ -32,7 +28,8 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))  %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>% 
+    ungroup()
     
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
@@ -40,7 +37,8 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
     filter(Cover > 0)  %>% #omg so inelegant
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>% 
+    ungroup()
 
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% ungroup() %>% 

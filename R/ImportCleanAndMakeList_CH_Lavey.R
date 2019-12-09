@@ -25,8 +25,8 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
            #SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
            Collector = ifelse(year==2017, 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
-    separate(siteID, c('siteID', 'destsiteID'), sep='_') %>%
-    rename(originSiteID = siteID, Cover = cover, Year = year, destSiteID = destsiteID, destPlotID = turfID  ) %>% 
+    separate(siteID, c('destSiteID', 'originSiteID'), sep='_') %>%
+    rename(Cover = cover, Year = year, destPlotID = turfID  ) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%

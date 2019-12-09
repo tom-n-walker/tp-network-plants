@@ -20,7 +20,8 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
     rename(destPlotID = turfID, Gradient=Region) %>% 
     select(Gradient, Year, originSiteID, destSiteID, destPlotID, Treatment, SpeciesName, Cover) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Tim?', Cover = as.numeric(Cover)) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)%>% 
+    ungroup()
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
@@ -28,7 +29,8 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
     filter(Cover > 0)  %>% #omg so inelegant
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>% 
+    ungroup()
   
   #Check relative cover sums to >=100
   #dat2 %>% group_by(UniqueID) %>% filter(Total_Cover <100)
