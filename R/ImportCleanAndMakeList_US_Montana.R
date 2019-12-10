@@ -19,7 +19,7 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
   dat <- community_US_Montana_raw %>% 
     rename(destPlotID = turfID, Gradient=Region) %>% 
     select(Gradient, Year, originSiteID, destSiteID, destPlotID, Treatment, SpeciesName, Cover) %>% 
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Tim?', Cover = as.numeric(Cover)) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Tim', Cover = as.numeric(Cover)) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)%>% 
     ungroup()
   
