@@ -87,9 +87,14 @@ MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 conf <- drake_config(MyPlan)
 conf
 make(MyPlan)
-loadd()
+
 failed()
 vis_drake_graph(conf, targets_only = TRUE)
 vis_drake_graph(conf)
 
-
+loadd(dat)
+#It appears Gongga is wrongly labelled (likely warmed is actually local control, from what I can guess)
+#India Kashmir had issues with years labelling, fixed
+#US_montana issues with labelling of sites, fixed.
+#Calanda there are no Local Controls labelled at the lower sites. Fixed.
+#Calanda2 there may be no local controls at all (were they all transplanted downwards?) Removed for now.

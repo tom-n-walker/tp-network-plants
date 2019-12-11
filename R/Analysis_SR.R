@@ -1,134 +1,56 @@
 ##### Basic functions for analyses ####
 #C&D 14.12.2018
 
-# Species Richness per plot across sites
-  fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n()) %>% View
-#It appears Gongga is wrongly labelled (likely warmed is actually local control, from what I can guess)
-#India Kashmir looks fine, wtf is going on
-#Also US_Montana is fine too
-#Calanda there are no Local Controls labelled at the lower sites. Fixed.
-#Calanda2 there may be no local controls at all (were they all transplanted downwards?)
+# Checking dataset
+fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n()) %>% View
 
-  dat1 <- fulldat %>%
+#### PLOT-LEVEL SUMMARY DATA (SR, ABUND, EVENNESS) for final year ####
+  dat1 <- dat %>%
   group_by(Region) %>%
   mutate(Rel_Elevation = case_when(Elevation==min(Elevation) ~ 'Low',
                                    Elevation==max(Elevation) ~ 'High')) %>% 
-  filter(Year==max(Year), !is.na(Rel_Elevation)) %>% 
+  filter(!is.na(Rel_Elevation)) %>% 
   mutate(Turf = case_when(Rel_Elevation == 'High' & Treatment == "LocalControl" ~ "Alpine Control",
                                Rel_Elevation == 'Low' & Treatment == "LocalControl" ~ "Low Control",
                                Rel_Elevation == 'Low' & Treatment == "Warm" ~ "Warmed Turfs")) %>%
-  ungroup() %>%
-  group_by(Region, destSiteID, Turf, destPlotID) %>% 
-  summarise(SR = n_distinct(SpeciesName)) 
-  
-  
-  ggplot(aes(x=Turf, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
-    theme_bw()
-
-
-# Average relative cover across sites
-  dat %>% 
-  group_by(Region, destSiteID, destPlotID) %>% 
-  #summarise(SR = n_distinct(SpeciesName), ra=mean(Rel_Cover)) %>%
-  ggplot(aes(x=Treatment, y=Rel_Cover)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
-    theme_bw()
-
-
-dat %>% filter(Region=='CH_Calanda') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
-dat %>% filter(Region=='CH_Calanda2') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
-dat %>% filter(Region=='CH_Lavey') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
-dat %>% filter(Region=='CH_Calanda') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
-dat %>% filter(Region=='IN_Kashmir') %>% group_by(Elevation, Treatment) %>% summarize(n=n())
-  
-  #GET SPECIES RICHNESS AT PLOT LEVEL PER TREATMENT*SITE
-  #fix block issue and then bind
+  ungroup() 
     
-  comm <- alldat %>% map(~mutate(.$community, destPlotID=as.numeric(destPlotID), 
-                                    Cover=as.numeric(Rel_Cover))) %>%
-  bind_rows(.id='Region')
+  SR <- dat1 %>% 
+    group_by(Region, destSiteID, Turf, destPlotID) %>% 
+  filter(Year==max(Year)) %>%
+  summarise(SR = n_distinct(SpeciesName), ra=mean(Rel_Cover))
   
-  SR <- alldat %>% map(~mutate(.$community, .id="Region")) %>%
-    map_dfr(.$community, .id='Region') %>% 
-    filter(!Cover==0, !Cover==is.na(Cover)) %>%
-    select(Region, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>% 
-    group_by(Region, destSiteID, Treatment, destPlotID) %>% 
-    filter(Year==max(Year), !Treatment %in% c('NettedControl','Control')) %>%
-    summarise(SR = n_distinct(SpeciesName)) 
+    # Average SR across sites  
+  ggplot(SR, aes(x=Turf, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
+    theme_classic() + xlab('Treatment') + ylab('Species Richness')
   
+  # Average relative cover across sites
+  ggplot(SR, aes(x=Turf, y=ra)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
+    theme_classic() + xlab('Treatment') + ylab('Ave. Relative Abundance')
 
 
+ #### RDA per site (for final year, low site treatments) ####
+  library(vegan)
+
+  #need to remove a duplicate for Lavey, for now added mean function in pivot 
+  dat_wide <- dat1 %>%
+  group_by(Region) %>%
+  filter(Year==max(Year), Rel_Elevation=="Low") %>%
+  select(-Year, -destSiteID, -Elevation, -Rel_Elevation) %>%
+  nest() %>%
+  mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover), values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum)))
   
-  
+  rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+                                    comm <- select(., -(originSiteID:Turf))
+                                    comm1 <- comm %>% replace(is.na(.), 0)
+                                    pred <- select(., originSiteID:Turf)
+                                    rda(comm1 ~ Turf, pred)}),
+                              rda_output = map2(.x=rda, .y=wide, ~plot(.x, display = c("wa","cn"))))
 
-
- #### Code to produce RDA per site (for final year, low site treatments)
-   library(vegan)
-
-   rda1<- alldat %>% map(~mutate(.$community, destBlockID=as.character(destBlockID), Cover=as.numeric(Cover))) %>%
-     bind_rows(.id='Region') #%>%
-     select(Region, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover)  %>%
-     filter(!Cover==0, !Cover==is.na(Cover)) %>%
-     select(Region, destSiteID, destPlotID, Treatment, Year, SpeciesName, Cover) %>%
-     group_by(Region, destSiteID, Treatment, destPlotID) %>%
-     filter(Year==max(Year), !Treatment %in% c('NettedControl','Control'))
-
- #   
- #   dat <- left_join(meta, rda1)
- #   dat<- tibble::rowid_to_column(dat)
- #      rar <- dat %>% 
- #        filter(!is.na(SpeciesName), Treatment %in% c('Warm', 'LocalControl')) %>%
- #        group_by(Region) %>% 
- #        filter(Elevation==min(Elevation)) %>% 
- #        select(-Year, -destSiteID, -Elevation) %>%
- #        nest() %>%
- #        mutate(comm = map(data, ~spread(., SpeciesName, Cover, fill=0)))
- #      blah <- rar %>% mutate(rda = map(comm, ~{
- #               com <- select(., -(rowid:Treatment))
- #               pred <- select(., destPlotID:Treatment)
- #               rda(com ~ Treatment, pred)}),
- #             rda_output = map2(.x=rda, .y=comm, ~plot(.x, display = c("wa","cn")))) 
- #             
- #             
- #             
+ #
+ #
  #      blah %>% map(.x=rda, .y=comm, ~autoplot)
  #      #old option:   rda_output = map2(.x=rda, .y=comm, ~fortify(.x, display = c("wa","cn"))))
- #   
- #      
- #      #GET OVERLAP OF HIGH AND LOW SPECIES from control plots
- #      blerg1 <- dat %>% filter(Treatment == 'LocalControl') %>% 
- #        select(Region, Elevation, SpeciesName, Cover) %>% 
- #        group_by(Region, Elevation) %>% 
- #        nest() %>% 
- #        mutate(splist = map(data, ~select(., SpeciesName))) %>%
- #        select(-data) %>%
- #        arrange(Region, Elevation) %>%
- #        group_by(Region) %>%
- #        filter(Elevation == min(Elevation) | Elevation == max(Elevation)) %>%
- #        group_by(Region) %>%
- #        mutate(Elevation = ifelse(Elevation == min(Elevation), 'Low', 'High')) %>%
- #        spread(Elevation, splist) %>%
- #        mutate(overlap = map2(.x=High[[1]], .y=Low[[1]], intersect), 
- #               tot = map2(.x=High[[1]], .y=Low[[1]], union),
- #               prop=map2(.x=overlap, .y=tot, ~length(.x)/length(.y))) %>% 
- #        unnest(prop) 
- #      #GET SPECIES LIST FROM WARM TRANSPLANTED TURFS AT LOW ELEVATION
- #      dat %>% filter(Treatment == 'Warm') %>% #filter for warmed plots at low elevation to just get that species list, then join with above
- #        select(Region, Elevation, SpeciesName, Cover) %>% 
- #        group_by(Region) %>% 
- #        filter(Elevation==min(Elevation)) %>%
- #        nest() %>% 
- #        mutate(splist_warmed = map(data, ~select(., SpeciesName))) %>%
- #        select(-data) %>%
- #        left_join(., blerg1) %>%
- #        mutate(lowinhigh = map2(.x=splist_warmed[[1]], .y=Low[[1]], intersect),
- #               nooverlap = map2(.x=High[[1]], .y=Low[[1]], setdiff), 
- #               #lowinhigh = map2(.x=overlap, .y=Low, union),
- #               prop=map2(.x=lowinhigh, .y=splist_warmed, ~as.numeric(.x)/length(.y))) %>% 
- #        unnest(prop) 
- #      
- #      
- #      #species present in alpine at low elevation not present in alpine at high
- #        
- #               #old code, still use intersect but need to figure out how to use map2 with lists...
- #        #        mutate(overlap = map(splist, ~summarise(overlap = length(intersect(.[[1]]$SpeciesName, .[[2]]$SpeciesName))))) %>%
- #        # unnest(overlap)
+ #
+ #
+ 
