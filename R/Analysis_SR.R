@@ -1,8 +1,9 @@
 ##### Basic functions for analyses ####
 #C&D 14.12.2018
 
-# Checking dataset
-fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n()) %>% View
+
+# Sanity checks for dataset
+#fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n()) %>% View
 
 #### PLOT-LEVEL SUMMARY DATA (SR, ABUND, EVENNESS) for final year ####
   dat1 <- dat %>%
@@ -29,28 +30,43 @@ fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n
     theme_classic() + xlab('Treatment') + ylab('Ave. Relative Abundance')
 
 
- #### RDA per site (for final year, low site treatments) ####
+ #### RDA PER SITE (for final year, low site treatments) ####
   library(vegan)
-
+  
+  #Base plot version
   #need to remove a duplicate for Lavey, for now added mean function in pivot 
   dat_wide <- dat1 %>%
   group_by(Region) %>%
-  filter(Year==max(Year), Rel_Elevation=="Low") %>%
+  filter(Year==max(Year)) %>%
   select(-Year, -destSiteID, -Elevation, -Rel_Elevation) %>%
   nest() %>%
-  mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover), values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum)))
+  mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
   
   rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
                                     comm <- select(., -(originSiteID:Turf))
                                     comm1 <- comm %>% replace(is.na(.), 0)
                                     pred <- select(., originSiteID:Turf)
                                     rda(comm1 ~ Turf, pred)}),
-                              rda_output = map2(.x=rda, .y=wide, ~plot(.x, display = c("wa","cn"))))
+                              rda_output = map2(.x=rda, .y=wide, ~{plot(.x, display = c("sites"), type = 'p')
+                                                                  ordiellipse(.x, group = .y$Turf, scaling = "symmetric",
+                                                                              kind = "ehull", col = 1:3, lwd=3)
+                                                                  grouped = levels(.y$Turf)
+                                                                  legend('topright', legend=unique(.y$Turf), col=1:3, lty = 1)
+                                                                  }))
 
- #
- #
- #      blah %>% map(.x=rda, .y=comm, ~autoplot)
- #      #old option:   rda_output = map2(.x=rda, .y=comm, ~fortify(.x, display = c("wa","cn"))))
- #
- #
- 
+  #ggoplot version
+  library(ggordiplots)
+  par(mfrow = c(6,2))
+  rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+    comm <- select(., -(originSiteID:Turf))
+    comm1 <- comm %>% replace(is.na(.), 0)
+    pred <- select(., originSiteID:Turf)
+    rda(comm1 ~ Turf, pred)}),
+    rda_output = map2(.x=rda, .y=wide, ~{gg_ordiplot(.x,groups=.y$Turf, kind='sd', pt.size = 2)+
+                                        theme_classic()}))
+  
+  # gg_ordiplot(ord, groups, scaling = 1, choices = c(1, 2),
+  #             kind = c("sd", "se", "ehull"), conf = NULL, show.groups = "all",
+  #             ellipse = TRUE, label = FALSE, hull = FALSE, spiders = FALSE,
+  #             pt.size = 3, plot = TRUE)
+  
