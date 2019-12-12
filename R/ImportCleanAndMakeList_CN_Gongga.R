@@ -98,7 +98,8 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
     filter(!is.na(Cover), !Cover == 0) %>% 
     select(-flag, -species, -Gradient, -Country) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, Treatment, destPlotID, turfID, sep='_')) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>% 
+    ungroup()
   
   dat2<- dat %>%  
     filter(!is.na(Cover)) %>%
@@ -106,7 +107,8 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
     summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
     bind_rows(dat) %>% 
     filter(Cover > 0) %>% #omg so inelegant
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>%
+    ungroup()
   
   comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
@@ -156,8 +158,6 @@ ImportClean_CN_Gongga <- function(){
   ### CLEAN DATA SETS
   ## CN_Gongga
   meta_CN_Gongga = CleanMeta_CN_Gongga(meta_CN_Gongga_raw)
-  # cover_CN_Gongga = CleanMetaCommunity_CN_Gongga(metaCommunity_CN_Gongga_raw)
-  community_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw)
   taxa_CN_Gongga = ImportTaxa_CN_Gongga() %>% .$speciesName
   #trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
   

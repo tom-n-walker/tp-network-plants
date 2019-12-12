@@ -27,7 +27,7 @@
   # ggsave("./figures/Speciesrichness.png")
   
   # Average relative cover across sites
-  ggplot(SR, aes(x=Turf, y=ra)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
+  ggplot(SR, aes(x=Turf, y=ra)) + geom_boxplot() + facet_wrap(~Region, ncol = 3, scales='free') +
     theme_classic() + xlab('Treatment') + ylab('Ave. Relative Abundance')
   # ggsave("./figures/Rel_abundance.png")
 
@@ -61,7 +61,7 @@
   #ggoplot version
   
   library(ggordiplots)
-  library(cowplot)
+  #library(cowplot)
   
   rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
     comm <- dplyr::select(., -(originSiteID:Turf))
