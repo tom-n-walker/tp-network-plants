@@ -22,8 +22,8 @@
   summarise(SR = n_distinct(SpeciesName), ra=mean(Rel_Cover))
   
     # Average SR across sites  
-  ggplot(SR, aes(x=Turf, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3) +
-    theme_classic() + xlab('Treatment') + ylab('Species Richness')
+  ggplot(SR, aes(x=Turf, y=SR)) + geom_boxplot() + facet_wrap(~Region, ncol = 3, scales='free') +
+    theme_classic() + xlab('Treatment') + ylab('Species Richness')  
   # ggsave("./figures/Speciesrichness.png")
   
   # Average relative cover across sites
@@ -82,6 +82,16 @@
             plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
             plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
             ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
+  
+  #Exclude rare species, just choose common (use percentile)
+  #For species pool, colonisers at low elevation should be species at high abundance, but what if relatively rare, seed bank, 
+  #Centroid distance? Maybe some summary of variation in the groups
+  #Are warmed turfs becoming more similar to low because of selective loss vs. colonisation?
+    #extinction debt vs colonisation lag? Increasing SR/decreasing SR and what causes it.
+  
+  #For species which are completely new (seed bank?) check with site owners, maybe we send a list of the full species and then get them to key.
+    #Highlight issues species.
+  #Through loss or gain of species?
   # ggsave("./figures/RDA.png",
   #                width = 40, height = 20, units = "cm")
   # gg_ordiplot(ord, groups, scaling = 1, choices = c(1, 2),

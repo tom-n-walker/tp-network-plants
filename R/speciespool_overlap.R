@@ -13,14 +13,15 @@
        group_by(Region) %>%
        mutate(Elevation = ifelse(Elevation == min(Elevation), 'Low', 'High')) %>%
        spread(Elevation, splist) %>%
-       mutate(High_n = map(High[[1]], length),
-              Low_n = map(High[[1]], length),
+       mutate(High_n = map(High[[1]], length(unique(.))),
+              Low_n = map(High[[1]], length(unique(.))),
               overlap = map2(.x=High[[1]], .y=Low[[1]], intersect),
               overlap_n = map(overlap, length),
               tot = map2(.x=High[[1]], .y=Low[[1]], union),
               prop=map2(.x=overlap, .y=tot, ~length(.x)/length(.y))) %>%
        unnest(prop, High_n, Low_n, overlap_n)
      
+     #Check numbers, look at time since establishment.
      #Plot number of species in each pool + overlap
      overlap %>% select(Region, High_n, Low_n, overlap_n) %>% 
       gather(key = 'Total', value = 'Value', -Region) %>%
