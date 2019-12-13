@@ -13,8 +13,8 @@
        group_by(Region) %>%
        mutate(Elevation = ifelse(Elevation == min(Elevation), 'Low', 'High')) %>%
        spread(Elevation, splist) %>%
-       mutate(High_n = map(High[[1]], length(unique(.))),
-              Low_n = map(High[[1]], length(unique(.))),
+       mutate(High_n = map(High[[1]], ~length(unique(.))),
+              Low_n = map(Low[[1]], ~length(unique(.))),
               overlap = map2(.x=High[[1]], .y=Low[[1]], intersect),
               overlap_n = map(overlap, length),
               tot = map2(.x=High[[1]], .y=Low[[1]], union),
@@ -26,9 +26,11 @@
      overlap %>% select(Region, High_n, Low_n, overlap_n) %>% 
       gather(key = 'Total', value = 'Value', -Region) %>%
        ggplot(aes(x=Region, y=Value, fill=Total)) + 
+       theme_classic() + 
+       scale_fill_manual(values=c('High_n'='navyblue', 'Low_n'='goldenrod', 'overlap_n'='forestgreen')) +
        geom_bar(stat = "identity", position = position_dodge()) + xlab("Region") + ylab("Species Count")
-     # ggsave("./figures/Speciespool_count.png",
-     #        width = 40, height = 20, units = "cm")
+      ggsave("./figures/Speciespool_count.png",
+             width = 40, height = 20, units = "cm")
      
      
 #GET SPECIES LIST FROM WARM TRANSPLANTED TURFS AT LOW ELEVATION
