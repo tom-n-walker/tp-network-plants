@@ -100,8 +100,8 @@ library(vegan)
             plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
             plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
             ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
-   ggsave("./figures/RDA.png",
-                  width = 40, height = 20, units = "cm")
+   # ggsave("./figures/RDA.png",
+   #                width = 40, height = 20, units = "cm")
   
   #Find centroid per turf per year per site
   dat1 <- dat %>%
@@ -123,17 +123,37 @@ library(vegan)
     mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
   
   rda2 <- dat_wide %>% mutate(rda = map(wide, ~{
-    comm <- dplyr::select(., -(originSiteID:Turf))
-    comm1 <- comm %>% replace(is.na(.), 0) %>% decostand(method='hellinger')
-    pred <- dplyr::select(., originSiteID:Turf)
-    rda(comm1 ~ Turf, pred)}),
-    rda_centroids = map(rda, ~{summary(.)$centroids}))  #,
-    rda_dist1_warm_low = map(rda, ~{summary(.)$centroids[3,1]-summary(.)$centroids[1][2,1]}), #first axis
-    rda_dist2_warm_low= map(rda, ~{summary(.)$centroids[1][3,2]-summary(.)$centroids[1][2,2]})) %>% #second axis
-  #alpine is first, low second and warmed 3rd in rda output
-    unnest(rda_dist1_warm_low, rda_dist2_warm_low)
+                                        comm <- dplyr::select(., -(originSiteID:Turf))
+                                        comm1 <- comm %>% replace(is.na(.), 0) %>% decostand(method='hellinger')
+                                        pred <- dplyr::select(., originSiteID:Turf)
+                                        rda(comm1 ~ Turf, pred)}),
+                                        d_centroid = map(rda, ~{dist(summary(.)$centroids)})) %>% 
+                      select(-data, -wide, -rda) %>%
+                      mutate(low_high = map(d_centroid, ~{.[1]}),
+                             warm_high = map(d_centroid, ~{.[2]}),
+                             warm_low = map(d_centroid, ~{.[3]})) %>%
+    select(-d_centroid) %>%                  
+    unnest() %>%
+    gather(key='Treatment', value='Distance', -Region, -Year)
   
-  rda1 %>% ggplot(aes(x=Year, y=rda_dist1_warm_low))
+  gd <- rda2 %>% group_by(Year, Treatment) %>% summarize(Distance=mean(Distance))
+  rda2 <-rda2 %>% mutate(Treatment=as.factor(Treatment))
+  levels(rda2$Treatment)
+  levels(rda2$Treatment) <- c("Low_High", "Warmed_High", "Warmed_Low")
+  
+  rda2 %>% ggplot(aes(x=Year, y=Distance, col=Treatment), alpha = .3) + 
+    geom_point() + 
+    scale_color_manual(values = c("darkblue", "lightblue", "darkred")) +
+    geom_line(stat="smooth",method = "lm", se=F, aes(group = Region), alpha = .3) +
+    #stat_summary(aes(group=Treatment), fun.y=mean, geom='pointrange', se=F, alpha=0.8, size=2) +
+    #geom_line(stat="smooth",method = "lm",data = gd, se=F, alpha = .8, size = 2) +
+    labs(colour="Treatment Comparisons",
+      x = "Year",
+      y = "Distance between centroids") +
+    theme_classic() + 
+    facet_wrap(~Treatment)
+  
+  ggsave("./figures/RDA_centroid_distances.png")
   #For species pool, colonisers at low elevation should be species at high abundance, but what if relatively rare, seed bank, 
   #Centroid distance? Maybe some summary of variation in the groups
   #Are warmed turfs becoming more similar to low because of selective loss vs. colonisation?
