@@ -96,12 +96,12 @@ library(vegan)
                                                    scale_color_manual(values=c('Alpine Control'='navyblue', 'Low Control'='goldenrod', 'Warmed Turfs'='red')) +
                                                    theme_classic()))
   
-  ggarrange(plots1[[1]], plots1[[2]],plots1[[3]], plots1[[4]],
-            plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
-            plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
+  ggarrange(plots1[[3]], plots1[[11]],plots1[[1]], plots1[[7]],
+            plots1[[4]], plots1[[5]],plots1[[10]], plots1[[12]],
+            plots1[[9]], plots1[[8]],plots1[[6]], plots1[[2]],
             ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
-   # ggsave("./figures/RDA.png",
-   #                width = 40, height = 20, units = "cm")
+   ggsave("./figures/RDA.png",
+                  width = 40, height = 20, units = "cm")
   
   #Find centroid per turf per year per site
   dat1 <- dat %>%
