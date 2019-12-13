@@ -141,7 +141,7 @@ library(vegan)
   levels(rda2$Treatment)
   levels(rda2$Treatment) <- c("Low_High", "Warmed_High", "Warmed_Low")
   
-  rda2 %>% ggplot(aes(x=Year, y=Distance, col=Treatment), alpha = .3) + 
+  rda2 %>% ggplot(aes(x=Year, y=Distance, col=Treatment, shape=Region), alpha = .3) + 
     geom_point() + 
     scale_color_manual(values = c("darkblue", "lightblue", "darkred")) +
     geom_line(stat="smooth",method = "lm", se=F, aes(group = Region), alpha = .3) +
