@@ -3,12 +3,12 @@
 merge_comm_data <- function(x) {
   
   loadd()
-  alldat = list(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+  alldat = list(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, #removing Norway for no until database updated
                 CH_Lavey, CH_Calanda, #CH_Calanda2, 
                 US_Colorado, US_Montana, US_Arizona,
                 CN_Damxung, IN_Kashmir, CN_Gongga, 
                 DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
-  names(alldat) = c("NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen",
+  names(alldat) = c(#"NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen", #removing Norway for no until database updated
                     'CH_Lavey', 'CH_Calanda', #'CH_Calanda2', 
                     'US_Colorado', 'US_Montana', 'US_Arizona',
                     "CN_Damxung", 'IN_Kashmir', "CN_Gongga", 
@@ -20,7 +20,7 @@ merge_comm_data <- function(x) {
     bind_rows(.id='Region') %>%
     ungroup() %>%
     filter(!Treatment %in% c('NettedControl', 'Cold', 'Control')) #%>%
-    #select(-notbad, -Gradient, -collector, -originPlotID, -Individuals, -Date)
+    #select(-notbad, -Gradient, -collector, -Collector, -originPlotID, -Individuals, -Date) #This was for norway
   
   #add metadata to organize by elevations
   meta <- alldat %>% map(~ungroup(.$meta) %>% mutate(Gradient=as.character(Gradient))) %>%

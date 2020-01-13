@@ -4,8 +4,6 @@ library(ggordiplots)
 library(ggpubr)
 library(vegan)
 
-# Sanity checks for dataset
-#fulldat %>% group_by(Region, Elevation, Treatment, destPlotID) %>% summarize(n=n()) %>% View
 
 #### PLOT-LEVEL SUMMARY DATA (SR, ABUND, EVENNESS) for final year ####
   dat1 <- dat %>%
@@ -17,6 +15,9 @@ library(vegan)
                                Rel_Elevation == 'Low' & Treatment == "LocalControl" ~ "Low Control",
                                Rel_Elevation == 'Low' & Treatment == "Warm" ~ "Warmed Turfs")) %>%
   ungroup() 
+
+# Sanity checks for dataset
+#dat1 %>% group_by(Region, Elevation, Turf, destPlotID) %>% summarize(n=n(), max=max(Rel_Cover)) %>% View
     
   SR <- dat1 %>% 
     group_by(Region, destSiteID, Turf, destPlotID) %>% 
@@ -33,32 +34,32 @@ library(vegan)
     theme_classic() + xlab('Treatment') + ylab('Ave. Relative Abundance')
   # ggsave("./figures/Rel_abundance.png")
 
- #### RDA PER SITE (for final year, low site treatments) ####
+ #### RDA PER SITE (for final year) ####
   
-  #need to remove a duplicate for Lavey, for now added mean function in pivot 
-  dat_wide <- dat1 %>%
-  group_by(Region) %>%
+dat_wide <- dat1 %>%
+  group_by(Region, destSiteID) %>%
   filter(Year==max(Year)) %>%
-  select(-Year, -destSiteID, -Elevation, -Rel_Elevation) %>%
+  group_by(Region) %>%
+  select(originSiteID, destBlockID, destPlotID, Elevation, Turf, SpeciesName, Rel_Cover) %>%
   nest() %>%
   mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
                         
-  rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
     comm <- dplyr::select(., -(originSiteID:Turf))
     comm1 <- comm %>% replace(is.na(.), 0)
     pred <- dplyr::select(., originSiteID:Turf)
     rda(comm1 ~ Turf, pred)}),
     rda_output = map2(.x=rda, .y=wide, ~{gg_ordiplot(.x ,groups=.y$Turf, kind='sd', pt.size = 1 )}))
   
-  plots1 <- map2(rda1$rda_output, rda1$Region, ~(.x$plot +
-                                                  theme(plot.margin = unit(c(1,1,1,1),"cm")) +
-                                                  labs(title = .y) + 
-                                                  theme_classic()))
-
-  ggarrange(plots1[[1]], plots1[[2]],plots1[[3]], plots1[[4]],
-            plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
-            plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
-            ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
+# plots1 <- map2(rda1$rda_output, rda1$Region, ~(.x$plot +
+#                                                   theme(plot.margin = unit(c(1,1,1,1),"cm")) +
+#                                                   labs(title = .y) + 
+#                                                   theme_classic()))
+# 
+# ggarrange(plots1[[1]], plots1[[2]],plots1[[3]], plots1[[4]],
+#           plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
+#           plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
+#           ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
 
   
   #Excluding rare species
@@ -75,11 +76,11 @@ library(vegan)
     ungroup()
   
   dat1 %>% group_by(Region) %>% summarize(m=min(Rel_Cover))
-    
+  dat1 %>% group_by(Region) %>% summarize(years=max(Year)-min(Year))
   dat_wide <- dat1 %>%
     group_by(Region) %>%
     filter(Year==max(Year)) %>%
-    select(-Year, -destSiteID, -Elevation, -Rel_Elevation) %>%
+    select(originSiteID, destBlockID, destPlotID, Turf, SpeciesName, Rel_Cover) %>%
     nest() %>%
     mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
   
@@ -96,10 +97,9 @@ library(vegan)
                                                    scale_color_manual(values=c('Alpine Control'='navyblue', 'Low Control'='goldenrod', 'Warmed Turfs'='red')) +
                                                    theme_classic()))
   
-  ggarrange(plots1[[3]], plots1[[11]],plots1[[1]], plots1[[7]],
-            plots1[[4]], plots1[[5]],plots1[[10]], plots1[[12]],
-            plots1[[9]], plots1[[8]],plots1[[6]], plots1[[2]],
-            ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
+  ggarrange(plots1[[3]], plots1[[12]],plots1[[1]], plots1[[7]], plots1[[4]], plots1[[5]], plots1[[11]], 
+            plots1[[13]], plots1[[10]], plots1[[9]],plots1[[8]], plots1[[6]], plots1[[2]],
+            ncol=7, nrow=2, common.legend = TRUE, legend="bottom")
    ggsave("./figures/RDA.png",
                   width = 40, height = 20, units = "cm")
   
