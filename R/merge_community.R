@@ -3,15 +3,15 @@
 merge_comm_data <- function(x) {
   
   loadd()
-  alldat = list(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+  alldat = list(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
                 CH_Lavey, CH_Calanda, #CH_Calanda2, 
                 US_Colorado, US_Montana, US_Arizona,
-                CN_Damxung, IN_Kashmir, #CN_Gongga, 
+                CN_Damxung, IN_Kashmir, CN_Gongga, 
                 DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
-  names(alldat) = c(#"NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen",
+  names(alldat) = c("NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen",
                     'CH_Lavey', 'CH_Calanda', #'CH_Calanda2', 
                     'US_Colorado', 'US_Montana', 'US_Arizona',
-                    "CN_Damxung", 'IN_Kashmir', #"CN_Gongga", 
+                    "CN_Damxung", 'IN_Kashmir', "CN_Gongga", 
                     'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia')
   
   #fix up community dat

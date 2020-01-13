@@ -56,7 +56,7 @@ ImportDrakePlan <- drake_plan(
   US_Montana = ImportClean_US_Montana(), 
   US_Arizona = ImportClean_US_Arizona(), 
 
-  CN_Gongga = ImportClean_CN_Gongga(), #DE
+  CN_Gongga = ImportClean_CN_Gongga(), 
   CN_Damxung = ImportClean_CN_Damxung(), 
   IN_Kashmir = ImportClean_IN_Kashmir(), 
   CN_Heibei = ImportClean_CN_Heibei(),
@@ -73,14 +73,8 @@ ImportDrakePlan <- drake_plan(
 
 
 MergeDrakePlan <- drake_plan(
-  dat = merge_comm_data(list(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
-                             CH_Lavey, CH_Calanda, #CH_Calanda2,
-                             US_Colorado, US_Montana, US_Arizona,
-                             CN_Damxung, IN_Kashmir, #CN_Gongga, 
-                             DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
+  dat = merge_comm_data()
 )
-
-MyPlan <- ImportDrakePlan
 
 MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 

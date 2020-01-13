@@ -135,9 +135,9 @@ CleanMeta_CN_Gongga <- function(){
   meta_CN_Gongga <- tibble(Gradient = rep(x = "CN_Gongga", 4),
                            Country = rep(x = "China", 4), 
                               destSiteID = c("L", "M", "A", "H"),
-                              Elevation = c("3000", "3500", "3850", "4100"),
-                           Latitude = c("29.84347", "29.86192", "29.88911", "29.90742"),
-                              Longitude = c("102.0343", "102.0360", "102.0173", "102.0118"),
+                              Elevation = c(3000, 3500, 3850, 4100),
+                           Latitude = c(29.84347, 29.86192, 29.88911, 29.90742),
+                              Longitude = c(102.0343, 102.0360, 102.0173, 102.0118),
                               YearEstablished = rep(2012, 4),
                               PlotSize_m2 = rep(0.0625, 4),
                               destBlockID= rep(NA, 4))
@@ -152,13 +152,14 @@ ImportClean_CN_Gongga <- function(){
   
   ### IMPORT DATA
   #metaCommunity_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/metaCommunityCN_Gongga_2012_2016.Rdata")))
+  #meta_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/metaCN_Gongga.Rdata")))
   community_CN_Gongga_raw = ImportCommunity_CN_Gongga()
   taxa_CN_Gongga = ImportTaxa_CN_Gongga()
   #trait_CN_Gongga_raw = get(load(file = file_in("data/CN_Gongga/traits_2015_2016_China.Rdata")))
 
   ### CLEAN DATA SETS
   ## CN_Gongga
-  meta_CN_Gongga = CleanMeta_CN_Gongga(meta_CN_Gongga_raw)
+  meta_CN_Gongga = CleanMeta_CN_Gongga()
   taxa_CN_Gongga = ImportTaxa_CN_Gongga() %>% .$speciesName
   #trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
   
