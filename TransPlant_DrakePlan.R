@@ -21,7 +21,7 @@ pn <- . %>% print(n = Inf)
 
 # source cleaning scripts
 source("R/ImportCleanAndMakeList_CH_Calanda.R")
-source("R/ImportCleanAndMakeList_CH_Calanda2.R")
+#source("R/ImportCleanAndMakeList_CH_Calanda2.R")
 source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
@@ -50,7 +50,7 @@ ImportDrakePlan <- drake_plan(
 
   CH_Lavey = ImportClean_CH_Lavey(),
   CH_Calanda = ImportClean_CH_Calanda(),
-  CH_Calanda2 = ImportClean_CH_Calanda2(), 
+#  CH_Calanda2 = ImportClean_CH_Calanda2(), 
 
   US_Colorado = ImportClean_US_Colorado(), 
   US_Montana = ImportClean_US_Montana(), 
