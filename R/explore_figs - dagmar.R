@@ -197,14 +197,28 @@ rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
     group_by(Region) %>% 
     filter(Year==max(Year) | Year == min(Year)) %>% 
     mutate(EndStart = case_when(Year==max(Year) ~ "End",
-                                Year==min(Year) ~ "Start")) #,
-        #   Duration = #max year - min year - per region!) 
-    
+                                Year==min(Year) ~ "Start")) %>%
+    select(-Year) %>% 
+    pivot_wider(names_from = c(Treatment, EndStart), values_from = Distance) %>% 
+    mutate(Controls = (low_high_End) - (low_high_Start),
+           TP_Alpine = (warm_high_End) - (warm_high_Start),
+           TP_Lowland = (warm_low_End) - (warm_low_Start)) %>% 
+    select(-c( low_high_Start:warm_low_End)) %>% 
+    pivot_longer(cols = -Region, names_to = "Compare", values_to = "Difference") %>% 
+    mutate(Compare = factor(Compare, levels = c("Controls", "TP_Lowland", "TP_Alpine")))
   
-  #a column that calculates duration of experiment (Time)
-    # mutate(Controls = (low_high ~ end ) - (low_high ~ start)
-    #       TP_Alpine = (warm_high ~ end) - (warm_high ~ start)
-    #       TP_Lowland = (warm_low ~ end) - (warm_low ~ start)
-    # 
+  #left_join with year / duration info!
+  
+ggplot(divcon, aes(x = Difference, y = Compare))+
+  facet_wrap(~Region)+
+  geom_point()+
+  geom_vline(xintercept = 0)
+    #
+
+ggplot(divcon, aes(x = Difference))+
+  facet_wrap(~Region)+
+  geom_bar()+
+  coord_flip()+
+  geom_vline(xintercept = 0)
     # Then plot in horizontal bar graphs, sort by duration.
     # Next: 
