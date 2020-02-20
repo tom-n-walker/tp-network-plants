@@ -1,6 +1,7 @@
 library("drake")
 
 r_make(source = "TransPlant_DrakePlan.R")
+loadd()
 
 failed()
 
