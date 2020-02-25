@@ -18,6 +18,8 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
   dat <- community_CN_Heibei_raw %>% 
     rename(SpeciesName = `species` , Cover = `Coverage(%)` , PlotID = Treatment , destSiteID = `away` , originSiteID = `home`, Year = year, destPlotID = `replicate`)%>% 
     filter(!(destSiteID == 3600 | originSiteID == 3600)) %>% 
+    mutate(originSiteID = as.character(originSiteID),
+           destSiteID = as.character(destSiteID)) %>% 
     mutate(Treatment = case_when(destSiteID =="3200" & originSiteID == "3200" ~ "LocalControl" , 
                                  destSiteID =="3400" & originSiteID == "3400" ~ "LocalControl" , 
                                  destSiteID =="3800" & originSiteID == "3800" ~ "LocalControl" , 
@@ -55,7 +57,7 @@ CleanMeta_CN_Heibei <- function(community_CN_Heibei){
   dat2 <- community_CN_Heibei %>% 
   select(-SpeciesName, -Cover) %>% 
     distinct()%>% 
-    mutate(Elevation = destSiteID , 
+    mutate(Elevation = as.numeric(destSiteID), 
            Gradient = 'CN_Heibei',
            Country = 'China',
            YearEstablished = 2007,
