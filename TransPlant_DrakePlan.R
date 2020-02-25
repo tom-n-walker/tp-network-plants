@@ -73,7 +73,7 @@ ImportDrakePlan <- drake_plan(
 
 
 MergeDrakePlan <- drake_plan(
-  dat = merge_comm_data(alldat = tibble::lst(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, #removing Norway for no until database updated
+  dat = merge_comm_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, #removing Norway for no until database updated
     CH_Lavey, CH_Calanda, #CH_Calanda2,
     US_Colorado, US_Montana, US_Arizona,
     CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
