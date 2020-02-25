@@ -5,15 +5,16 @@ merge_comm_data <- function(alldat) {
   
   #fix up community dat
   dat <- alldat %>% 
-    map(~.$community) %>% 
-    bind_rows(.id='Region') %>%
+    map_df("community", .id='Region') %>%
     ungroup() %>%
     filter(!Treatment %in% c('NettedControl', 'Cold', 'Control')) #%>%
     #select(-notbad, -Gradient, -collector, -Collector, -originPlotID, -Individuals, -Date) #This was for norway
   
   #add metadata to organize by elevations
-  meta <- alldat %>% map(~ungroup(.$meta) %>% mutate(Gradient=as.character(Gradient))) %>%
-    bind_rows(.id='Region') %>% 
+  meta <- alldat %>% 
+    map("meta") %>% 
+    map(ungroup) %>% 
+    map_df(mutate, Gradient = as.character(Gradient), .id='Region') %>% 
     mutate(Gradient=recode(Gradient, '1'='NO_Ulvhaugen', '2'='NO_Lavisdalen', '3'='NO_Gudmedalen', '4'='NO_Skjellingahaugen')) %>%
     select(Region, destSiteID, Elevation) %>% 
     distinct()
