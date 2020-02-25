@@ -33,7 +33,8 @@ library(wesanderson)
     ungroup()
   
   
-  ### Make wide ###
+  
+### Make wide ###
   dat_wide <- dat1 %>%
     group_by(Region, destSiteID) %>%
     filter(Year==max(Year)) %>%
@@ -41,6 +42,9 @@ library(wesanderson)
     select(originSiteID, destBlockID, destPlotID, Elevation, Turf, SpeciesName, Rel_Cover) %>%
     nest() %>%
     mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
+  
+
+  
   
 
 ### Do RDA ###
@@ -61,10 +65,50 @@ library(wesanderson)
   #           plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
   #           ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
   
+### Make RDA2
+  rda2 <- dat_wide %>% mutate(rda = map(wide, ~{
+    comm <- dplyr::select(., -(originSiteID:Turf))
+    comm1 <- comm %>% replace(is.na(.), 0) %>% decostand(method='hellinger')
+    pred <- dplyr::select(., originSiteID:Turf)
+    rda(comm1 ~ Turf, pred)}),
+    d_centroid = map(rda, ~{dist(summary(.)$centroids)})) %>% 
+    select(-data, -wide, -rda) %>%
+    mutate(low_high = map(d_centroid, ~{.[1]}),
+           warm_high = map(d_centroid, ~{.[2]}),
+           warm_low = map(d_centroid, ~{.[3]})) %>%
+    select(-d_centroid) %>%                  
+    unnest() %>%
+    gather(key='Treatment', value='Distance', -Region, -Year)  
+  
+### Divergence / Convergence graph
+  divcon<- rda2 %>% 
+    group_by(Region) %>% 
+    filter(Year==max(Year) | Year == min(Year)) %>% 
+    mutate(EndStart = case_when(Year==max(Year) ~ "End",
+                                Year==min(Year) ~ "Start")) %>%
+    select(-Year) %>% 
+    pivot_wider(names_from = c(Treatment, EndStart), values_from = Distance) %>% 
+    mutate(Controls = (low_high_End) - (low_high_Start),
+           TP_Alpine = (warm_high_End) - (warm_high_Start),
+           TP_Lowland = (warm_low_End) - (warm_low_Start)) %>% 
+    select(-c( low_high_Start:warm_low_End)) %>% 
+    pivot_longer(cols = -Region, names_to = "Compare", values_to = "Difference") %>% 
+    mutate(Compare = factor(Compare, levels = c("Controls", "TP_Lowland", "TP_Alpine")))
+  
 
+# PLOTS
+  ggplot(divcon, aes(x = Difference, y = Compare, color = Compare, size = 5))+     
+    facet_wrap(~Region)+
+    geom_point()+
+    geom_vline(xintercept = 0)
+  
+  # left_join with year / duration info!
+  # Then plot in horizontal bar graphs, sort by duration.
+  # Next: 
+  
     
 ##################################
-  #Continue organizing this!!!
+#          OLD CODE BELOW        # 
 ##################################
   
 #### Sanity checks for dataset #####
@@ -234,19 +278,4 @@ library(wesanderson)
     select(-c( low_high_Start:warm_low_End)) %>% 
     pivot_longer(cols = -Region, names_to = "Compare", values_to = "Difference") %>% 
     mutate(Compare = factor(Compare, levels = c("Controls", "TP_Lowland", "TP_Alpine")))
-  
-  #left_join with year / duration info!
-  
-ggplot(divcon, aes(x = Difference, y = Compare, color = Compare, size = 5))+
-  facet_wrap(~Region)+
-  geom_point()+
-  geom_vline(xintercept = 0)
-    #
-
-ggplot(divcon, aes(x = Difference))+
-  facet_wrap(~Region)+
-  geom_bar()+
-  coord_flip()+
-  geom_vline(xintercept = 0)
-    # Then plot in horizontal bar graphs, sort by duration.
-    # Next: 
+v
