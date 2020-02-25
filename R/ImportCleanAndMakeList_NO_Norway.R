@@ -38,8 +38,8 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw){
     rename(originSiteID = siteID, originBlockID = blockID, Treatment = TTtreat, Cover = cover, SpeciesName = species, Year = year, Collector = recorder) %>% 
     mutate(destPlotID = paste(destBlockID, originBlockID, turfID, sep='_')) %>%
     # only select control, local control, warm/down transplant
-    filter(Treatment %in% c("TT1", "TT2")) %>% 
-    mutate(Treatment = recode(Treatment, "TT1" = "LocalControl", "TT2" = "Warm")) %>% 
+    filter(Treatment %in% c("TTC", "TT2")) %>% 
+    mutate(Treatment = recode(Treatment, "TTC" = "LocalControl", "TT2" = "Warm")) %>% 
     filter(Year != 2016) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
@@ -117,7 +117,7 @@ ImportClean_NO_Norway <- function(g){
   metaCommunity_NO_Norway_raw = get(load(file = file_in("data/NO_Norway/metaCommunity_NO_Norway.Rdata")))
   
   #make database connection
-  con <- src_sqlite(path = "data/NO_Norway/seedclim.sqlite", create = FALSE)
+  con <- src_sqlite(path = file_in("data/NO_Norway/seedclim.sqlite"), create = FALSE)
   community_NO_Norway_raw = ImportCommunity_NO_Norway(con)
   taxa_NO_Norway = ImportTaxa_NO_Norway(con)
   #trait_NO_Norway_raw = read_csv(file = file_in("data/NO_Norway/traitdata_NO.csv"))
