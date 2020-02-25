@@ -2,7 +2,7 @@
 ### TRANSPLANT DRAKE PLAN ###
 #############################
 
-rm(list=ls())
+
 # Load library
 library("drake")
 library("tidyverse")
@@ -73,20 +73,24 @@ ImportDrakePlan <- drake_plan(
 
 
 MergeDrakePlan <- drake_plan(
-  dat = merge_comm_data()
+  dat = merge_comm_data(alldat = tibble::lst(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, #removing Norway for no until database updated
+    CH_Lavey, CH_Calanda, #CH_Calanda2,
+    US_Colorado, US_Montana, US_Arizona,
+    CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
+    DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
 )
 
 MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 
 conf <- drake_config(MyPlan)
 conf
-make(MyPlan)
-
-failed()
-vis_drake_graph(conf, targets_only = TRUE)
-vis_drake_graph(conf)
-
-loadd(dat)
+# make(MyPlan)
+# 
+# failed()
+# vis_drake_graph(conf, targets_only = TRUE)
+# vis_drake_graph(conf)
+# 
+# loadd(dat)
 #It appears Gongga is wrongly labelled (likely warmed is actually local control, from what I can guess)
 #India Kashmir had issues with years labelling, fixed
 #US_montana issues with labelling of sites, fixed.

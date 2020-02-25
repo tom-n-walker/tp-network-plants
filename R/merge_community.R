@@ -1,18 +1,7 @@
 #### Code to merge all community data (with metadata) together ####
 
-merge_comm_data <- function(x) {
+merge_comm_data <- function(alldat) {
   
-  loadd()
-  alldat = list(#NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, #removing Norway for no until database updated
-                CH_Lavey, CH_Calanda, #CH_Calanda2, 
-                US_Colorado, US_Montana, US_Arizona,
-                CN_Damxung, IN_Kashmir, CN_Gongga, 
-                DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia) 
-  names(alldat) = c(#"NO_Ulvhaugen", "NO_Lavisdalen", "NO_Gudmedalen", "NO_Skjellingahaugen", #removing Norway for no until database updated
-                    'CH_Lavey', 'CH_Calanda', #'CH_Calanda2', 
-                    'US_Colorado', 'US_Montana', 'US_Arizona',
-                    "CN_Damxung", 'IN_Kashmir', "CN_Gongga", 
-                    'DE_Grainau', 'FR_AlpeHuez', 'SE_Abisko', 'FR_Lautaret', 'IT_MatschMazia')
   
   #fix up community dat
   dat <- alldat %>% 
