@@ -3,6 +3,7 @@
 library(ggordiplots)
 library(ggpubr)
 library(vegan)
+library(wesanderson)
 
 
 #### PLOT-LEVEL SUMMARY DATA (SR, ABUND, EVENNESS) for final year ####
@@ -15,8 +16,58 @@ library(vegan)
                                Rel_Elevation == 'Low' & Treatment == "LocalControl" ~ "Low Control",
                                Rel_Elevation == 'Low' & Treatment == "Warm" ~ "Warmed Turfs")) %>%
   ungroup() 
+  
+  
+#### RDA PER SITE (for final year) ####
+### Exclude rare species ###
+  dat1 <- dat %>%
+    group_by(Region) %>%
+    mutate(Rel_Elevation = case_when(Elevation==min(Elevation) ~ 'Low',
+                                     Elevation==max(Elevation) ~ 'High')) %>% 
+    filter(!is.na(Rel_Elevation)) %>% 
+    mutate(Turf = case_when(Rel_Elevation == 'High' & Treatment == "LocalControl" ~ "Alpine Control",
+                            Rel_Elevation == 'Low' & Treatment == "LocalControl" ~ "Low Control",
+                            Rel_Elevation == 'Low' & Treatment == "Warm" ~ "Warmed Turfs")) %>%
+    group_by(Region, Year, UniqueID) %>%
+    filter(Rel_Cover >= quantile(Rel_Cover, 0.5)) %>% #filter by percentile
+    ungroup()
+  
+  
+  ### Make wide ###
+  dat_wide <- dat1 %>%
+    group_by(Region, destSiteID) %>%
+    filter(Year==max(Year)) %>%
+    group_by(Region) %>%
+    select(originSiteID, destBlockID, destPlotID, Elevation, Turf, SpeciesName, Rel_Cover) %>%
+    nest() %>%
+    mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
+  
 
-# Sanity checks for dataset
+### Do RDA ###
+  rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+    comm <- dplyr::select(., -(originSiteID:Turf))
+    comm1 <- comm %>% replace(is.na(.), 0)
+    pred <- dplyr::select(., originSiteID:Turf)
+    rda(comm1 ~ Turf, pred)})) 
+  #    rda_output = map2(.x=rda, .y=wide, ~{gg_ordiplot(.x ,groups=.y$Turf, kind='sd', pt.size = 1 )}))
+  
+  # plots1 <- map2(rda1$rda_output, rda1$Region, ~(.x$plot +
+  #                                                   theme(plot.margin = unit(c(1,1,1,1),"cm")) +
+  #                                                   labs(title = .y) + 
+  #                                                   theme_classic()))
+  # 
+  # ggarrange(plots1[[1]], plots1[[2]],plots1[[3]], plots1[[4]],
+  #           plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
+  #           plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
+  #           ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
+  
+
+    
+##################################
+  #Continue organizing this!!!
+##################################
+  
+#### Sanity checks for dataset #####
 #dat1 %>% group_by(Region, Elevation, Turf, destPlotID) %>% summarize(n=n(), max=max(Rel_Cover)) %>% View
     
   SR <- dat1 %>% 
@@ -34,32 +85,9 @@ library(vegan)
     theme_classic() + xlab('Treatment') + ylab('Ave. Relative Abundance')
   # ggsave("./figures/Rel_abundance.png")
 
- #### RDA PER SITE (for final year) ####
+
   
-dat_wide <- dat1 %>%
-  group_by(Region, destSiteID) %>%
-  filter(Year==max(Year)) %>%
-  group_by(Region) %>%
-  select(originSiteID, destBlockID, destPlotID, Elevation, Turf, SpeciesName, Rel_Cover) %>%
-  nest() %>%
-  mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
-                        
-rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
-    comm <- dplyr::select(., -(originSiteID:Turf))
-    comm1 <- comm %>% replace(is.na(.), 0)
-    pred <- dplyr::select(., originSiteID:Turf)
-    rda(comm1 ~ Turf, pred)})) 
-#    rda_output = map2(.x=rda, .y=wide, ~{gg_ordiplot(.x ,groups=.y$Turf, kind='sd', pt.size = 1 )}))
   
-# plots1 <- map2(rda1$rda_output, rda1$Region, ~(.x$plot +
-#                                                   theme(plot.margin = unit(c(1,1,1,1),"cm")) +
-#                                                   labs(title = .y) + 
-#                                                   theme_classic()))
-# 
-# ggarrange(plots1[[1]], plots1[[2]],plots1[[3]], plots1[[4]],
-#           plots1[[5]], plots1[[6]],plots1[[7]], plots1[[8]],
-#           plots1[[9]], plots1[[10]],plots1[[11]], plots1[[12]],
-#           ncol=6, nrow=2, common.legend = TRUE, legend="bottom")
 
   
   #Excluding rare species
@@ -209,7 +237,7 @@ rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
   
   #left_join with year / duration info!
   
-ggplot(divcon, aes(x = Difference, y = Compare))+
+ggplot(divcon, aes(x = Difference, y = Compare, color = Compare, size = 5))+
   facet_wrap(~Region)+
   geom_point()+
   geom_vline(xintercept = 0)
