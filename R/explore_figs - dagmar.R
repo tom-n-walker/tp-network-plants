@@ -199,7 +199,7 @@ library(wesanderson)
                                         comm1 <- comm %>% replace(is.na(.), 0) %>% decostand(method='hellinger')
                                         pred <- dplyr::select(., originSiteID:Turf)
                                         rda(comm1 ~ Turf, pred)}),
-                                        d_centroid = map(rda, ~{dist(summary(.)$centroids)})) %>% 
+                              d_centroid = map(rda, ~{dist(summary(.)$centroids)})) %>% 
                       select(-data, -wide, -rda) %>%
                       mutate(low_high = map(d_centroid, ~{.[1]}),
                              warm_high = map(d_centroid, ~{.[2]}),
