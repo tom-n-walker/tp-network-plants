@@ -25,17 +25,22 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
   dat <- community_US_Arizona_raw %>% 
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
-    rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot') %>% 
+    rename(Date = 'Date Collected', 
+           originSiteID = 'Ecosystem', 
+           Treatment = 'Warming.Treat', 
+           plotID = 'Plot') %>% 
+    # DDE: Created Unique destPlotID
+    mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm",  "Control" = "LocalControl"))%>%
-    gather('SpeciesName', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID) %>%
+    gather('SpeciesName', 'Individuals', -Year, -Date, -originSiteID, -destSiteID, -Treatment,-destPlotID, -plotID) %>%
 #adding species names from species list (Taxa: splist) to dataframe
  #   left_join(splist, by = c("code" = "Code")) %>% 
  #   select(-c('Genus', 'Species', 'Family', 'Group', 'Common name')) %>% 
     #creating unique ID
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Rubin') %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID..
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'), Collector='Rubin') %>% # I think we can leave out the destSiteID here because it is embedded in destPlotID.. 
 #calculate percentage cover per individual
     left_join(cover_US_Arizona)  %>% spread('CoverClass', 'OtherCover') %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
 
   dat2 <- dat %>%
@@ -74,9 +79,15 @@ CleanCover_US_Arizona <- function(cover_US_Arizona_raw){
   classcover <- cover_US_Arizona_raw %>% 
     select(-c('Teabag number', 'TransplantNET Treatment')) %>% 
     mutate(destSiteID = str_extract(Plot, pattern = "^.{2}")) %>% 
-    rename(Date = 'Date Collected', originSiteID = 'Ecosystem', Treatment = 'Warming.Treat', destPlotID = 'Plot', VascCover = '% cover at peak biomass') %>% 
+    rename(Date = 'Date Collected', 
+           originSiteID = 'Ecosystem', 
+           Treatment = 'Warming.Treat', 
+           plotID = 'Plot', 
+           VascCover = '% cover at peak biomass') %>% 
+  # DDE: Created Unique destPlotID
+  mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm",  "Control" = "LocalControl"))%>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>%
     mutate(OtherCover = 100-VascCover) %>%
     gather('CoverClass', 'OtherCover', c(VascCover, OtherCover)) %>% 
     mutate(Rel_OtherCover=100) #and all this sums to 100 which is perfect
