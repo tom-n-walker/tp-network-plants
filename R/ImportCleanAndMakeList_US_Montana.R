@@ -17,9 +17,11 @@ ImportCommunity_US_Montana <- function(){
 # Cleaning Montana community data *** NOTE MOST CODE FOR CLEANING IS IN THE COMM DATAFRAME, IT REQUIRED BINDING DATAFRAMES WHICH DIDN'T MATCH
 CleanCommunity_US_Montana <- function(community_US_Montana_raw){
   dat <- community_US_Montana_raw %>% 
-    rename(destPlotID = turfID, Gradient=Region) %>% 
-    select(Gradient, Year, originSiteID, destSiteID, destPlotID, Treatment, SpeciesName, Cover) %>% 
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'), Collector='Tim', Cover = as.numeric(Cover)) %>% 
+    rename(plotID = turfID, Gradient=Region) %>% 
+    mutate(destPlotID =  paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
+    # DDE: renamed turfID to plotID and created unique destPlotID below.
+    select(Gradient, Year, originSiteID, destSiteID, destPlotID, Treatment, SpeciesName, Cover, plotID) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'), Collector='Tim', Cover = as.numeric(Cover)) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)%>% 
     ungroup()
   
