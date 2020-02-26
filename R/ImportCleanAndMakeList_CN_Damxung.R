@@ -18,7 +18,8 @@ CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
     dat <- community_CN_Damxung_raw %>% 
     select(c(SITE:`cover class`), -PLOT) %>% 
     rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , destPlotID = PLOT.ID , Treatment = TREATMENT , Year = YEAR)%>% 
-    mutate(originSiteID = strsplit(Treatment, '_')[[1]][1], 
+    mutate(originSiteID = str_replace(Treatment, '(.*)_.*', "\\1"), 
+           originSiteID = toupper(originSiteID),
            Treatment = case_when(Treatment =="low_turf" & destSiteID == "LOW" ~ "LocalControl" , 
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
