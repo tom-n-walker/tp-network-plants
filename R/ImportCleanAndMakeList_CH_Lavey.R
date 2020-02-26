@@ -26,10 +26,12 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
            Collector = ifelse(year==2017, 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
     separate(siteID, c('destSiteID', 'originSiteID'), sep='_') %>%
-    rename(Cover = cover, Year = year, destPlotID = turfID  ) %>% 
+    rename(Cover = cover, Year = year, plotID = turfID  ) %>%         
+    # DDE: What now is plotID - used to be destPlotID. I now created a destPlotID below, including origin and dest siteID.
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'),
+           destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>%
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
     #transmute_at(vars(one_of(destBlockID, destPlotID)), as.character) #%>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
