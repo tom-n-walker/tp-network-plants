@@ -19,14 +19,16 @@ CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
     mutate(SpeciesName = gsub('\\.', ' ', SpeciesName)) %>%
     mutate(Year = 2017, 
            destSiteID = substr(plot, 1, 1),
-           destPlotID = substr(plot, 3, 4),
+           plotID = substr(plot, 3, 4),
            Treatment = substr(plot, 6, 7),
            originSiteID = case_when(destSiteID == "L" & Treatment == 'TP' ~ "G", 
                                   destSiteID == "L" & Treatment == 'CP' ~ "L",
                                   destSiteID == "G" & Treatment == 'CP' ~ "G")) %>% 
     mutate(Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
-    select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -plot) %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    select(Year, destSiteID, originSiteID, plotID, Treatment, SpeciesName, Cover, -plot) %>%
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
+    mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
+    select(-plotID) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
