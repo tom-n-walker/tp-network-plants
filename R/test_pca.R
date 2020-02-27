@@ -36,14 +36,15 @@ dd2 <- dd %>%
 library("patchwork")
 colour_otd <- c("orange", "blue","green3")
  
-  pmap(dd, function(scores, Region, originSiteID, ...){
-    ggplot(scores, aes(x = PC1, y = PC2, colour  = ODT, group = destPlotID)) +
-      geom_point() +
-      scale_colour_manual(values = colour_otd) +
-      geom_path() +
-      coord_equal() +
-      labs(title = paste(Region, originSiteID))
-  }) %>%
+pmap(dd, function(scores, Region, originSiteID, ...){
+  scores %>% arrange(Year) %>% 
+    ggplot(aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
+    geom_point(mapping = aes(shape = Year == min(Year))) +
+    scale_colour_manual(values = colour_otd) + 
+    geom_path() +
+    coord_equal() +
+    labs(title = paste(Region, originSiteID), shape = "First Year")
+  })%>%
     wrap_plots() +
   plot_layout(guides = 'collect')
   
@@ -51,18 +52,32 @@ colour_otd <- c("orange", "blue","green3")
   
 colour_otd <- c("orange", "blue","green3")
 
-dd %>% filter(Region == "US_Arizona") %>% #Insert desired region name
+dd %>% filter(Region == "SE_Abisko") %>% #Insert desired region name
   pmap(function(scores, Region, originSiteID, ...){
-    ggplot(scores, aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
-      geom_point() +
+    scores %>% arrange(Year) %>% 
+    ggplot(aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
+      geom_point(mapping = aes(size = Year == min(Year))) +
       scale_colour_manual(values = colour_otd) + 
       geom_path() +
       coord_equal() +
-      labs(title = paste(Region, originSiteID))
+      labs(title = paste(Region, originSiteID), size = "First Year")
   })
 
+#Next!: remove rare species by region, max cover e.g. 1% or n occur ==1
 
 
-#remove rare species by region, max cover e.g. 1% or n occur ==1
-#
+### Plot centroid distance over time ####
+colour_cd <- c("black", "darkgoldenrod1", "cyan4")
 
+
+dd2 %>%  
+  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko")) %>% 
+ggplot(aes(x = Year, y = dist, color = what)) + 
+  geom_point() +
+  scale_colour_manual(values = colour_cd) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ Region)
+
+#TRY TO DO: 
+#Order by duration
+#change shape to up and down triangle
