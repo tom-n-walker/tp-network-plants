@@ -41,6 +41,7 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
 #calculate percentage cover per individual
     left_join(cover_US_Arizona)  %>% spread('CoverClass', 'OtherCover') %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
+    select(-plotID) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
 
   dat2 <- dat %>%
@@ -88,6 +89,7 @@ CleanCover_US_Arizona <- function(cover_US_Arizona_raw){
   mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     mutate(Treatment = recode (Treatment, "Warming" = "Warm",  "Control" = "LocalControl"))%>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>%
+    select(-plotID) %>% 
     mutate(OtherCover = 100-VascCover) %>%
     gather('CoverClass', 'OtherCover', c(VascCover, OtherCover)) %>% 
     mutate(Rel_OtherCover=100) #and all this sums to 100 which is perfect
