@@ -18,10 +18,12 @@ ImportCommunity_US_Montana <- function(){
 CleanCommunity_US_Montana <- function(community_US_Montana_raw){
   dat <- community_US_Montana_raw %>% 
     rename(plotID = turfID, Gradient=Region) %>% 
-    mutate(destPlotID =  paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     # DDE: renamed turfID to plotID and created unique destPlotID below.
-    select(Gradient, Year, originSiteID, destSiteID, destPlotID, Treatment, SpeciesName, Cover, plotID) %>% 
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'), Collector='Tim', Cover = as.numeric(Cover)) %>% 
+    select(Gradient, Year, originSiteID, destSiteID, plotID, Treatment, SpeciesName, Cover) %>% 
+    mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'), 
+           Collector ='Tim', Cover = as.numeric(Cover),
+           destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
+    select(-plotID) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)%>% 
     ungroup()
   
