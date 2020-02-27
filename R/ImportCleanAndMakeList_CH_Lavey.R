@@ -32,6 +32,7 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     filter(Treatment %in% c("LocalControl", "Warm")) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'),
            destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>%
+    select(-plotID) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
     #transmute_at(vars(one_of(destBlockID, destPlotID)), as.character) #%>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
