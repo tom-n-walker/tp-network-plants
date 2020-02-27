@@ -24,8 +24,9 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
                                 treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm"),
             originSiteID = case_when(Elevation == 1000 ~ "Low",
                                    Elevation == 1500 ~ "Middle")) %>%
-    select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat) %>%
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+    select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat) %>% 
+    mutate(destPlotID = paste(originSiteID, destSiteID, destPlotID, sep='_')) %>%  
+    mutate(UniqueID = paste(Year, destPlotID, sep='_')) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
