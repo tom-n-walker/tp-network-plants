@@ -39,7 +39,7 @@ map_data <- base_world +
   geom_point(data=metadat, 
              aes(x=as.numeric(long), y=as.numeric(lat), fill=Yearrange, size=Elevrange), 
              ,pch=21, alpha=I(0.7)) + 
-  theme(legend.position="right") + # omit plot title saying 'color'
+  theme(legend.position="bottom") + # omit plot title saying 'color'
   scale_fill_distiller(palette ="OrRd", direction = 1) +
   labs(size="Elevation (m)", fill="Year Range") +
   ggtitle('TransPlant Network Sites')

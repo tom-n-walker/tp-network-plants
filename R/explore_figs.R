@@ -42,9 +42,9 @@ dat_wide <- dat1 %>%
   group_by(Region) %>%
   select(originSiteID, destBlockID, destPlotID, Elevation, Turf, SpeciesName, Rel_Cover) %>%
   nest() %>%
-  mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
+  mutate(wide = purrr::map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
                         
-rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+rda1 <- dat_wide %>% mutate(rda = purrr::map(wide, ~{
     comm <- dplyr::select(., -(originSiteID:Turf))
     comm1 <- comm %>% replace(is.na(.), 0)
     pred <- dplyr::select(., originSiteID:Turf)
@@ -82,9 +82,9 @@ rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
     filter(Year==max(Year)) %>%
     select(originSiteID, destBlockID, destPlotID, Turf, SpeciesName, Rel_Cover) %>%
     nest() %>%
-    mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
+    mutate(wide = purrr::map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
   
-  rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+  rda1 <- dat_wide %>% mutate(rda = purrr::map(wide, ~{
     comm <- dplyr::select(., -(originSiteID:Turf))
     comm1 <- comm %>% replace(is.na(.), 0) %>% decostand(method='hellinger')
     pred <- dplyr::select(., originSiteID:Turf)
@@ -103,6 +103,7 @@ rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
    ggsave("./figures/RDA.png",
                   width = 40, height = 20, units = "cm")
   
+   
   #Find centroid per turf per year per site
   dat1 <- dat %>%
     group_by(Region) %>%
@@ -120,18 +121,18 @@ rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
     group_by(Region, Year) %>%
     select(-destSiteID, -Elevation, -Rel_Elevation) %>%
     nest() %>%
-    mutate(wide = map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
+    mutate(wide = purrr::map(data, ~pivot_wider(., names_from = SpeciesName, values_from = Rel_Cover, values_fill=list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))))
   
-  rda2 <- dat_wide %>% mutate(rda = map(wide, ~{
+  rda2 <- dat_wide %>% mutate(rda = purrr::map(wide, ~{
                                         comm <- dplyr::select(., -(originSiteID:Turf))
                                         comm1 <- comm %>% replace(is.na(.), 0) %>% decostand(method='hellinger')
                                         pred <- dplyr::select(., originSiteID:Turf)
                                         rda(comm1 ~ Turf, pred)}),
-                                        d_centroid = map(rda, ~{dist(summary(.)$centroids)})) %>% 
+                                        d_centroid = purrr::map(rda, ~{dist(summary(.)$centroids)})) %>% 
                       select(-data, -wide, -rda) %>%
-                      mutate(low_high = map(d_centroid, ~{.[1]}),
-                             warm_high = map(d_centroid, ~{.[2]}),
-                             warm_low = map(d_centroid, ~{.[3]})) %>%
+                      mutate(low_high = purrr::map(d_centroid, ~{.[1]}),
+                             warm_high = purrr::map(d_centroid, ~{.[2]}),
+                             warm_low = purrr::map(d_centroid, ~{.[3]})) %>%
     select(-d_centroid) %>%                  
     unnest() %>%
     gather(key='Treatment', value='Distance', -Region, -Year)
@@ -176,7 +177,7 @@ rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
   #             pt.size = 3, plot = TRUE)
   
   #Base plot version
-  # rda1 <- dat_wide %>% mutate(rda = map(wide, ~{
+  # rda1 <- dat_wide %>% mutate(rda = purrr::map(wide, ~{
   #                                   comm <- select(., -(originSiteID:Turf))
   #                                   comm1 <- comm %>% replace(is.na(.), 0)
   #                                   pred <- select(., originSiteID:Turf)
