@@ -3,7 +3,7 @@
 
 load_cover_CH_Calanda <- function(){
   #import data
-  dat <- read.csv('./data/CH_Calanda/relevee_database.csv', sep=';', stringsAsFactors = FALSE)
+  dat <- read.csv('./data/CH_Calanda/CH_Calanda_commdata/relevee_database.csv', sep=';', stringsAsFactors = FALSE)
   cover <- dat %>% 
     select(year, Treatment, Block, plot_id, Site, turf_type, Species_Name, Cov_Rel1, Botanist_Rel1)
   
