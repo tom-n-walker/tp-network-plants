@@ -1,4 +1,3 @@
-rm(list = ls())
 library(tidyverse)
 library(data.table)
 library(drake)
@@ -11,8 +10,9 @@ library(taxize)
 get_species <- function(){
   # load drake environment
   loadd()
+  alldat <- mget(ls(pattern = "_"))
   # map all taxa to one unique vector
-  taxa <- dat %>% 
+  taxa <- alldat %>% 
     map(~.$taxa) %>%
     do.call(c, .) %>%
     unique
@@ -29,8 +29,9 @@ resolve_species <- function(taxa){
   # copy taxa into modified version for database calling
   copy_taxa <- taxa
   # resolve easy fixes
-  copy_taxa[514] <- "Stellaria umbellata"
+  copy_taxa[570] <- "Stellaria umbellata"
   copy_taxa[copy_taxa == "Entire Meconopsis"] <- "Meconopsis"
+  copy_taxa[copy_taxa == "Leuc. Vulg."] <- "Leucanthemum vulgare"
   copy_taxa[copy_taxa == "unknown aster serrated"] <- "Aster"
   copy_taxa[copy_taxa == "Unknown aster serrated"] <- "Aster"
   copy_taxa[copy_taxa == "Haemarocalus fulva"] <- "Hemerocallis fulva"
@@ -126,7 +127,7 @@ load_wrangle_try <- function(cleaned) {
                                                accepted_name = matched_name2)
   # subset try names
   try_names <- try_data$species %>% select(try_name = accepted_name, 
-                                           genus:group)
+                                           genus:order)
   # species only
   try_spp <- try_spp %>%
     bind_cols(., try_names[all_matches$species_match, ]) %>%
@@ -150,6 +151,9 @@ clean_species <- function(){
   # load and clean species
   taxa <- get_species()
   cleaned <- resolve_species(taxa)
+  try_data <- load_wrangle_try(cleaned)
+  # return data
+  return(try_data)
 }
 
 
