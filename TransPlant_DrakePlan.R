@@ -26,6 +26,7 @@ source("R/ImportCleanAndMakeList_CH_Lavey.R")
 source("R/ImportCleanAndMakeList_CN_Damxung.R")
 source("R/ImportCleanAndMakeList_CN_Gongga.R")
 source("R/ImportCleanAndMakeList_DE_Grainau.R")
+source("R/ImportCleanAndMakeList_DE_Susalps.R")
 source("R/ImportCleanAndMakeList_FR_AlpeHuez.R")
 source("R/ImportCleanAndMakeList_FR_Lautaret.R")
 source("R/ImportCleanAndMakeList_IN_Kashmir.R")
@@ -62,6 +63,7 @@ ImportDrakePlan <- drake_plan(
   CN_Heibei = ImportClean_CN_Heibei(),
 
   DE_Grainau = ImportClean_DE_Grainau(), 
+  DE_Susalps = ImportClean_DE_Susalps(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(), 
   SE_Abisko = ImportClean_SE_Abisko(),
   FR_Lautaret = ImportClean_FR_Lautaret(), 
@@ -73,26 +75,18 @@ ImportDrakePlan <- drake_plan(
 
 
 MergeDrakePlan <- drake_plan(
-  dat = merge_comm_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, #removing Norway for no until database updated
+  dat = merge_comm_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
     CH_Lavey, CH_Calanda, #CH_Calanda2,
     US_Colorado, US_Montana, US_Arizona,
     CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
-    DE_Grainau, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
+    DE_Grainau, DE_Susalps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
 )
 
 MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 
 conf <- drake_config(MyPlan)
 conf
-# make(MyPlan)
-# 
-# failed()
-# vis_drake_graph(conf, targets_only = TRUE)
-# vis_drake_graph(conf)
-# 
+make(MyPlan)
+
 # loadd(dat)
-#It appears Gongga is wrongly labelled (likely warmed is actually local control, from what I can guess)
-#India Kashmir had issues with years labelling, fixed
-#US_montana issues with labelling of sites, fixed.
-#Calanda there are no Local Controls labelled at the lower sites. Fixed.
-#Calanda2 there may be no local controls at all (were they all transplanted downwards?) Removed for now.
+# map(dat, ~sum(is.na(.)))
