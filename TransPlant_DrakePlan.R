@@ -51,7 +51,7 @@ ImportDrakePlan <- drake_plan(
   
   CH_Lavey = ImportClean_CH_Lavey(),
   CH_Calanda = ImportClean_CH_Calanda(),
-#  CH_Calanda2 = ImportClean_CH_Calanda2(), 
+# CH_Calanda2 = ImportClean_CH_Calanda2(), 
 
   US_Colorado = ImportClean_US_Colorado(), 
   US_Montana = ImportClean_US_Montana(), 
@@ -89,4 +89,4 @@ conf
 make(MyPlan)
 
 # loadd(dat)
-# map(dat, ~sum(is.na(.)))
+# map(dat, ~sum(is.na(.))) %>% as.data.frame(.) %>% t() %>% View()
