@@ -86,7 +86,6 @@ MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
 
 conf <- drake_config(MyPlan)
 conf
-make(MyPlan)
 
 # loadd(dat)
 # map(dat, ~sum(is.na(.))) %>% as.data.frame(.) %>% t() %>% View()
