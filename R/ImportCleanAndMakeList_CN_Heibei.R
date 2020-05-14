@@ -16,7 +16,7 @@ ImportCommunity_CN_Heibei <- function(){
 
 CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
   dat <- community_CN_Heibei_raw %>% 
-    rename(SpeciesName = `species` , Cover = `Coverage(%)` , PlotID = Treatment , destSiteID = `away` , originSiteID = `home`, Year = year, destPlotID = `replicate`)%>% 
+    rename(SpeciesName = `species` , Cover = `Coverage(%)` , PlotID = Treatment , destSiteID = `away` , originSiteID = `home`, Year = year, plotNo = `replicate`)%>% 
     filter(!(destSiteID == 3600 | originSiteID == 3600)) %>% 
     mutate(originSiteID = as.character(originSiteID),
            destSiteID = as.character(destSiteID)) %>% 
@@ -29,9 +29,10 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
                                  destSiteID =="3400" & originSiteID == "3800" ~ "Warm" , 
                                  destSiteID =="3800" & originSiteID == "3200" ~ "Cold" ,
                                  destSiteID =="3800" & originSiteID == "3400" ~ "Cold")) %>% 
-    mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
+    mutate(destPlotID = paste(originSiteID, destSiteID, plotNo, sep='_')) %>% 
+    mutate(UniqueID = paste(Year, destPlotID, sep='_')) %>% 
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment) %>%
-    select(-PlotID) %>% ungroup() %>%
+    select(-PlotID, -plotNo) %>% ungroup() %>%
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
