@@ -15,8 +15,8 @@ ImportCommunity_IN_Kashmir <- function(){
 # Cleaning Kashmir community data
 CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
     dat <- community_IN_Kashmir_raw %>% 
-      mutate(destPlotID = paste (REGION, SITE, BLOCK, PLOT, sep = ".")) %>% 
-    select(c(SITE:`cover class`), destPlotID, -PLOT) %>% 
+    mutate(destPlot = paste (REGION, SITE, BLOCK, PLOT, sep = ".")) %>% 
+    select(c(SITE:`cover class`), destPlot, -PLOT) %>% 
       rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , Treatment = TREATMENT , Year = YEAR)%>%
       mutate(SpeciesName = recode(SpeciesName, "Fragaria spp" = "Fragaria sp." , "Ranunculus spp" = "Ranunculus sp.", "Pinus spp" = "Pinus sp.", "CYANODON dACTYLON" = "Cyanodon dactylon", "Hordeum spp" = "Hordeum sp.", "Rubus spp" = "Rubus sp.", "Cyanodondactylon" = "Cyanodon dactylon")) %>% 
 
@@ -26,7 +26,9 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
                                  Treatment =="high_turf" & destSiteID == "LOW" ~ "Warm" , 
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
       mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 70 , `11` = 90)) %>% 
-      mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
+# Create new destplotID and UniqueID)     
+      mutate(destPlotID = paste(originSiteID, destSiteID, destBlockID, sep='_')) %>% 
+      mutate(UniqueID = paste(destPlotID, Year, sep='_')) %>% 
       mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)  %>% 
       ungroup()
     
@@ -44,7 +46,7 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
     
     comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
     cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
-      select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+      select(destPlotID, SpeciesName, Cover, Rel_Cover) %>% group_by(destPlotID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
       rename(CoverClass=SpeciesName)
     return(list(comm=comm, cover=cover)) 
     return(dat)
