@@ -19,7 +19,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
   dat <- community_CH_Calanda_raw %>% 
     mutate(Treatment = case_when(Treatment == "veg_away" & Site %in% c("Cal", "Nes") ~ "Warm", 
                                  Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
-    rename(destSiteID = Site, originSiteID = turf_type, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id)# %>% 
+    rename(destSiteID = Site, originSiteID = turf_type, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
     mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
     mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
