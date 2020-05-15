@@ -17,6 +17,7 @@ ImportCommunity_DE_Susalps <- function(){
 CleanCommunity_DE_Susalps <- function(community_DE_Susalps_raw){
   dat <- community_DE_Susalps_raw %>% 
     rename(Cover = bm, Year = year, destPlotID = turfID) %>% 
+    filter(Year >2016 ) %>% # filtering out 2016, only available for a few sites
     # only select control, local control, warm/down transplant
     filter(destSiteID %in% c("FE", "GW", "EB"), originSiteID %in% c("FE", "GW", "EB")) %>% 
     mutate(Treatment = case_when(originSiteID == "FE" & destSiteID == 'FE' ~ "LocalControl",
