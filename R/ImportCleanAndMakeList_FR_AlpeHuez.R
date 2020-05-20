@@ -21,7 +21,10 @@ ImportCommunity_FR_AlpeHuez <- function(){
 CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
     dat <- community_FR_AlpeHuez_raw %>% 
     select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , plotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
+    rename(SpeciesName_raw = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , plotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
+    # mutate(SpeciesName = unlist(strsplit(SpeciesName_raw, " "))[1:2])
+    # select(-SpeciesName_raw)
+    # This doesn't work, but something like this to selece only the first two words in SpeciesName_raw...???
       filter(Treatment %in% c("HIGH_TURF", "LOW_TURF")) %>% 
       mutate(originSiteID = str_replace(Treatment, '(.*)_.*', "\\1"), 
              originSiteID = toupper(originSiteID),
@@ -31,7 +34,7 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
            Year = year(as.Date(Date, format='%Y-%m-%d')),
            Cover = recode(Cover, `<1` = "0.5" , `2-5` = "3.5" , `6-10` = "8"),
            Cover= as.numeric(as.character(Cover))) %>% 
-      select(-Date) %>% 
+           select(-Date) %>% 
       mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
       mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
       mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
