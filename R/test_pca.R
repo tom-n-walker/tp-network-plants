@@ -71,7 +71,7 @@ colour_cd <- c("black", "darkgoldenrod1", "cyan4")
 
 
 dd2 %>%  
-  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko")) %>% 
+  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei"))%>% 
 ggplot(aes(x = Year, y = dist, color = what)) + 
   geom_point() +
   scale_colour_manual(values = colour_cd) + 
