@@ -52,7 +52,7 @@ pmap(dd, function(scores, Region, originSiteID, ...){
   
 colour_otd <- c("orange", "blue","green3")
 
-dd %>% filter(Region == "SE_Abisko") %>% #Insert desired region name
+dd %>% filter(Region == "FR_AlpeHuez") %>% #Insert desired region name
   pmap(function(scores, Region, originSiteID, ...){
     scores %>% arrange(Year) %>% 
     ggplot(aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
@@ -71,7 +71,7 @@ colour_cd <- c("black", "darkgoldenrod1", "cyan4")
 
 
 dd2 %>%  
-  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei"))%>% 
+  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 
 ggplot(aes(x = Year, y = dist, color = what)) + 
   geom_point() +
   scale_colour_manual(values = colour_cd) + 
