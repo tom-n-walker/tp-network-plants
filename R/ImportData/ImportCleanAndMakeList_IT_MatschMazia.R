@@ -2,7 +2,7 @@
 ### IT_MatschMazia  ###
 ####################
 
-source("R/community_IT_MatschMazia/loadcomm_IT.r")
+source("R/ImportData/community_IT_MatschMazia/loadcomm_IT.r")
 
 #### Import Community ####
 ImportCommunity_IT_MatschMazia <- function(){

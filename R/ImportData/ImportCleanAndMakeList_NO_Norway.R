@@ -2,7 +2,7 @@
 ### NO_NORWAY  ###
 ##################
 
-source("R/community_NO_Norway/loadCover.r")
+source("R/ImportData/community_NO_Norway/loadCover.r")
 
 #### Import Community ####
 ImportCommunity_NO_Norway <- function(con){
