@@ -21,10 +21,8 @@ ImportCommunity_FR_AlpeHuez <- function(){
 CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
     dat <- community_FR_AlpeHuez_raw %>% 
     select(c(site:cover.class), -plot) %>% 
-    rename(SpeciesName_raw = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , plotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
-    # mutate(SpeciesName = unlist(strsplit(SpeciesName_raw, " "))[1:2])
-    # select(-SpeciesName_raw)
-    # This doesn't work, but something like this to selece only the first two words in SpeciesName_raw...???
+    rename(SpeciesName = `species.name` , Cover = `cover.class` , destSiteID = site , destBlockID = block , plotID = plot.ID , Treatment = treatment , Date = date, Collector = collector)%>% 
+     mutate(SpeciesName = sub("^(\\S*\\s+\\S+).*", "\\1", SpeciesName)) %>%     # This selects only the first two words in SpeciesName.
       filter(Treatment %in% c("HIGH_TURF", "LOW_TURF")) %>% 
       mutate(originSiteID = str_replace(Treatment, '(.*)_.*', "\\1"), 
              originSiteID = toupper(originSiteID),
