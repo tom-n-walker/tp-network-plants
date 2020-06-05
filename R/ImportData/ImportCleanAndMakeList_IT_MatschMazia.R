@@ -23,7 +23,7 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
                                  treat == "receiving" & destSiteID == 'High' & Elevation == 1500 ~ "LocalControl",
                                 treat == "donor" & destSiteID == 'Low' & Elevation == 1500 ~ "Warm"),
             originSiteID = case_when(Elevation == 1000 ~ "Low",
-                                   Elevation == 1500 ~ "Middle")) %>%
+                                   Elevation == 1500 ~ "High")) %>% # changed Middle to High
     select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat) %>% 
     mutate(destPlotID = paste(originSiteID, destSiteID, destPlotID, sep='_')) %>%  
     mutate(UniqueID = paste(Year, destPlotID, sep='_')) %>% 
