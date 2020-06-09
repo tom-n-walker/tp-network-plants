@@ -28,7 +28,7 @@ dd2 <- dd %>%
   group_by(Region, originSiteID, destSiteID, Year) %>% 
   nest() %>% 
   mutate(distances = map(data, ~dist(select(.x, matches("PC"))))) %>% 
-  mutate(distances = map(distances, ~tibble(what = c("dest_orig", "dest_TP", "orig_TP"), dist = as.vector(.x)))) %>% 
+  mutate(distances = map(distances, ~tibble(what = c("Low_High", "Low_TP", "High_TP"), dist = as.vector(.x)))) %>% 
   unnest(distances)
 
 #### PLOT PCA ####
@@ -68,7 +68,6 @@ dd %>% filter(Region == "CH_Lavey") %>% #Insert desired region name
 
 ### Plot centroid distance over time ####
 colour_cd <- c("darkgrey", "darkred", "darkblue")
-
 
 dd2 %>%  
   filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 

@@ -21,7 +21,7 @@ p <- ggplot() + coord_fixed() +
 
 #Add map to base plot
 base_world_messy <- p + geom_polygon(data=world_map, aes(x=long, y=lat, group=group), 
-                                     colour="cyan4", fill="cyan4")
+                                     colour="#cdcdcd", fill="#cdcdcd") 
 
 base_world_messy
 
@@ -30,7 +30,8 @@ cleanup <-
         panel.background = element_rect(fill = 'white', colour = 'white'), 
         axis.line = element_line(colour = "white"), legend.position="none",
         axis.ticks=element_blank(), axis.text.x=element_blank(),
-        axis.text.y=element_blank())
+        axis.text.y=element_blank(),
+        axis.line.y = ggplot2::element_blank())
 
 base_world <- base_world_messy + cleanup
 
@@ -38,11 +39,12 @@ base_world <- base_world_messy + cleanup
 map_data <- base_world +
   geom_point(data=metadat, 
              aes(x=as.numeric(long), y=as.numeric(lat), fill=Yearrange, size=Elevrange), 
-             ,pch=21, alpha=I(0.7)) + 
-  theme(legend.position="bottom") + # omit plot title saying 'color'
+             pch=21, alpha=I(0.7)) + 
+  theme(legend.position="bottom", 
+        legend.text.align = 0) + # omit plot title saying 'color'
   scale_fill_distiller(palette ="OrRd", direction = 1) +
-  labs(size="Elevation (m)", fill="Year Range") +
-  ggtitle('TransPlant Network Sites')
+  labs(size="Elevation (m)", fill="Year Since Established") +
+  ggtitle('TransPlant Network Sites') 
 
 map_data
 
