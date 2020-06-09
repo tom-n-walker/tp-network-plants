@@ -23,7 +23,7 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     mutate(Treatment = recode(siteID, "CRE_CRE"= "LocalControl", "RIO_RIO"= "LocalControl", "MAR_MAR"= "LocalControl", "PRA_PRA"= "LocalControl", 
                               "CRE_RIO" = "Warm", "MAR_RIO" = "Warm", "PRA_RIO" = "Warm"),
            #SpeciesShort= sapply(strsplit(SpeciesName, ' '), function(x) paste(toupper(substr(x, 1,3)), collapse='')),
-           Collector = ifelse(year %in% c(2017, 2018), 'Jean', 'Loic'),
+           Collector = ifelse(year %in% c(2017), 'Jean', 'Loic'),
            cover = as.numeric(cover)) %>%
     separate(siteID, c('destSiteID', 'originSiteID'), sep='_') %>%
     rename(Cover = cover, Year = year, plotID = turfID  ) %>%         
@@ -42,9 +42,9 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
   #dat %>% group_by(UniqueID) %>% filter(Total_Cover <100) #nothing, no need to add an other category
   
   #Create comm and cover class dataframes
-  comm <- dat %>% filter(!SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi'))
-  cover <- dat %>% filter(SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi')) %>%
-    mutate(SpeciesName=recode(SpeciesName, 'Fungi'="Lichen", "bare ground"='Bareground', "Bare ground"='Bareground', 'Bryophyta'= 'Moss', 'Stone'='Rock')) %>%
+  comm <- dat %>% filter(!SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi', 'Vegetation %', 'Bare ground %', 'Litter %', 'Rocks %'))
+  cover <- dat %>% filter(SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi', 'Vegetation %', 'Bare ground %', 'Litter %', 'Rocks %')) %>%
+    mutate(SpeciesName=recode(SpeciesName, 'Fungi'="Lichen", "bare ground"='Bareground', "Bare ground"='Bareground', 'Bryophyta'= 'Moss', 'Stone'='Rock', 'Vegetation %'='Vegetation', 'Bare ground %'='Bareground', 'Litter %'='Litter', 'Rocks %'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover))

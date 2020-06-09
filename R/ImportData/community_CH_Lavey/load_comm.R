@@ -64,7 +64,7 @@ load_cover_CH_Lavey <- function(){
       mutate(cover = recode(cover, `+` = 0.5 , `r` = 0.1 , `1` = 3.5 , `2a` = 10 , `2b` = 20 , `3` = 37.5 , `4` = 62.5 , `5` = 87.5)) %>% 
       filter(!is.na(cover)) %>% #remove non essential rows
       filter(!grepl('FOCAL', SpeciesName)) %>% #remove focals from counts %>%
-      mutate(...1 = gsub('RIO_' , 'RIO_RIO', ...1)) %>%
+      mutate(...1 = gsub('RIO_' , 'RIO_RIOturf_', ...1)) %>%
       mutate(turfID = paste0('T', substr(...1, start = 14, stop=nchar(...1))), siteID = substr(...1, start = 1, stop = 7)) %>%
       select(siteID, turfID, SpeciesName, cover) %>%
       mutate(SpeciesName = str_replace(SpeciesName, "\\...+[\\d]$", "")) 
