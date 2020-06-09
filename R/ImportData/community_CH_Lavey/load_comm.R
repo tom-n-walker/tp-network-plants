@@ -57,13 +57,14 @@ load_cover_CH_Lavey <- function(){
   
   collector19 <- function (y) {
     dat <- excel_sheets(y) %>%
-      .[2:7] %>%
+      .[-1] %>%
       map_dfr(~ read_excel(path = y, sheet = .x, col_types = 'text')) %>%
       pivot_longer(cols = 'Vegetation %':'Biscutella laevigata', names_to = 'SpeciesName', values_to = 'cover')
     dat1 <- dat %>%
       mutate(cover = recode(cover, `+` = 0.5 , `r` = 0.1 , `1` = 3.5 , `2a` = 10 , `2b` = 20 , `3` = 37.5 , `4` = 62.5 , `5` = 87.5)) %>% 
       filter(!is.na(cover)) %>% #remove non essential rows
-      filter(!grepl('FOCAL', SpeciesName)) %>% #remove focals from counts
+      filter(!grepl('FOCAL', SpeciesName)) %>% #remove focals from counts %>%
+      mutate(...1 = gsub('RIO_' , 'RIO_RIO', ...1)) %>%
       mutate(turfID = paste0('T', substr(...1, start = 14, stop=nchar(...1))), siteID = substr(...1, start = 1, stop = 7)) %>%
       select(siteID, turfID, SpeciesName, cover) %>%
       mutate(SpeciesName = str_replace(SpeciesName, "\\...+[\\d]$", "")) 
@@ -91,12 +92,12 @@ load_cover_CH_Lavey <- function(){
     unnest(cols = c(file_contents)) %>%
     filter(!is.na(sp_2017)) %>%
     group_by(year, siteID, turfID) %>%
-    unique
+    unique 
   
   cover17_corr <- cover17 %>% 
     left_join(., corr, by = c("year", "siteID", "turfID", "SpeciesName" = "sp_2017")) %>%
     mutate(SpeciesName = ifelse(is.na(sp_2018), SpeciesName, sp_2018)) %>%
-    select(-sp_2018)
+    select(-sp_2018) 
   
   #Cover18 is species x site
   cover18 <- tibble(siteID=files18) %>% 
@@ -105,13 +106,12 @@ load_cover_CH_Lavey <- function(){
     unnest(cols = c(file_contents)) %>%
     dplyr::select(siteID, year, turfID, SpeciesName, cover) 
 
-  
-  #Cover19 is a single excel sheet
+  #Cover19 is a single excel doc with sheets for each site
   cover19 <- tibble(dat = files19) %>% 
     mutate(file_contents = map(dat, collector19)) %>%
     mutate(year=2019) %>%
     select(-dat) %>%
-    unnest(cols = c(file_contents))
+    unnest(cols = c(file_contents)) 
   
   alldat <- bind_rows(cover17_corr, cover18, cover19) 
 
