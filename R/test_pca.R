@@ -28,11 +28,11 @@ dd2 <- dd %>%
   group_by(Region, originSiteID, destSiteID, Year) %>% 
   nest() %>% 
   mutate(distances = map(data, ~dist(select(.x, matches("PC"))))) %>% 
-  mutate(distances = map(distances, ~tibble(what = c("Controls", "dest_TP", "orig_TP"), dist = as.vector(.x)))) %>% 
+  mutate(distances = map(distances, ~tibble(what = c("dest_orig", "dest_TP", "orig_TP"), dist = as.vector(.x)))) %>% 
   unnest(distances)
 
 #### PLOT PCA ####
-
+source('R/theme_ggplot.R')
 library("patchwork")
 colour_otd <- c("orange", "blue","green3")
  
@@ -52,7 +52,7 @@ pmap(dd, function(scores, Region, originSiteID, ...){
   
 colour_otd <- c("orange", "blue","green3")
 
-dd %>% filter(Region == "FR_AlpeHuez") %>% #Insert desired region name
+dd %>% filter(Region == "CH_Lavey") %>% #Insert desired region name
   pmap(function(scores, Region, originSiteID, ...){
     scores %>% arrange(Year) %>% 
     ggplot(aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
@@ -67,7 +67,7 @@ dd %>% filter(Region == "FR_AlpeHuez") %>% #Insert desired region name
 
 
 ### Plot centroid distance over time ####
-colour_cd <- c("black", "darkgoldenrod1", "cyan4")
+colour_cd <- c("darkgrey", "darkred", "darkblue")
 
 
 dd2 %>%  
@@ -76,7 +76,8 @@ ggplot(aes(x = Year, y = dist, color = what)) +
   geom_point() +
   scale_colour_manual(values = colour_cd) + 
   geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~ Region)
+  facet_wrap(~ Region) +
+  TP_theme()
 
 #TRY TO DO: 
 #Order by duration
