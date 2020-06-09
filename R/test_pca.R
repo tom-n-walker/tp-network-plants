@@ -50,7 +50,7 @@ pmap(dd, function(scores, Region, originSiteID, ...){
   
 ## Individual region PCA
   
-colour_otd <- c("orange", "blue","green3")
+colour_otd <- c("darkred", "darkblue", "goldenrod")
 
 dd %>% filter(Region == "CH_Lavey") %>% #Insert desired region name
   pmap(function(scores, Region, originSiteID, ...){
@@ -60,7 +60,8 @@ dd %>% filter(Region == "CH_Lavey") %>% #Insert desired region name
       scale_colour_manual(values = colour_otd) + 
       geom_path() +
       coord_equal() +
-      labs(title = paste(Region, originSiteID), size = "First Year")
+      labs(title = paste(Region, originSiteID), size = "First Year") +
+      TP_theme()
   })
 
 #Next!: remove rare species by region, max cover e.g. 1% or n occur ==1
