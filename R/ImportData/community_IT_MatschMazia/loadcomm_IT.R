@@ -15,5 +15,3 @@ load_cover_IT_MatschMazia <- function(){
   
   return(cover)
 }
-
-# Check if this is correct.. DestSiteID are named confusingly here, doesn't translate correclty to what they are doing in the treatments. 

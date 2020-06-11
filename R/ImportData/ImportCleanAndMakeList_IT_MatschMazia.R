@@ -25,9 +25,11 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
             originSiteID = case_when(Elevation == 1000 ~ "Low",
                                    Elevation == 1500 ~ "High")) %>% # changed Middle to High
     select(Year, destSiteID, originSiteID, destPlotID, Treatment, SpeciesName, Cover, -treat) %>% 
-    mutate(destPlotID = paste(originSiteID, destSiteID, destPlotID, sep='_')) %>%  
-    mutate(UniqueID = paste(Year, destPlotID, sep='_')) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+    extract(destPlotID, into = c("PlotID", "year"), "(.*)_([^_]+)$") %>% 
+    mutate(destPlotID = paste(originSiteID, destSiteID, PlotID, sep='_')) %>%  
+    select(-PlotID, -year) %>% 
+    mutate(UniqueID = paste(Year, destPlotID, sep='_'))  
+  #  mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
