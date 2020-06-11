@@ -82,3 +82,8 @@ ggplot(aes(x = Year, y = dist, color = what)) +
 #TRY TO DO: 
 #Order by duration
 #change shape to up and down triangle
+
+### Plot centroid distance over time lags...is this necessary? ####
+#Gives an indication of directionality and rate of change
+
+
