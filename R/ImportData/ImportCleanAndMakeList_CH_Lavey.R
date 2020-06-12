@@ -36,6 +36,7 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
     #transmute_at(vars(one_of(destBlockID, destPlotID)), as.character) #%>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
+    filter(Cover>5) %>%
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>% filter(Cover>0) 
   
   #Check relative cover sums to >=100
