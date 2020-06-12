@@ -1,4 +1,7 @@
+library("codyn")
+
 #### COLONISATION PATTERNS ACROSS SITES ####
+#turnover function from codyn
 
 dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
   distinct() %>% 
@@ -9,86 +12,72 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
       originControls = dat %>% filter(Region == R, destSiteID == O, Treatment == "LocalControl"),
       destControls = dat %>% filter(Region == R, destSiteID == D, Treatment == "LocalControl"),
       warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
-      .id = "ODT") %>%
-      arrange(Region, originSiteID, turfID, Year)
+      .id = "ODT") 
   })) %>% 
-  mutate(ID = map(comm, function(x) x %>% group_by(Year, ODT, destPlotID) %>% 
-                    distinct(SpeciesName) %>% nest())) %>%
-  unnest(ID) %>%
-  group_by(Region, Year, ODT, destPlotID) %>%
-  mutate(overlap = map(data, ~turnover_allyears(.x, Year, SpeciesName, RelCover, "total")))) 
-  
-#USE LAPPLY TO COUNT THROUGH ROWS? 
+  filter(Region %in% c("NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "CN_Damxung", "CN_Gongga", "US_Arizona", "DE_Susalps", "SE_Abisko")) %>%
+  mutate(colonisation = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "appearance"))) %>%
+  mutate(extinction = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "disappearance"))) %>%
+  mutate(turnover = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "total"))) 
 
-dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
-  distinct() %>% 
-  filter(Treatment == "Warm") %>% 
-  select(-Treatment) %>% 
-  mutate(comm = pmap(.l = list(R = Region, O = originSiteID, D = destSiteID), .f = function(R, O, D){
-    bind_rows(
-      originControls = dat %>% filter(Region == R, destSiteID == O, Treatment == "LocalControl"),
-      destControls = dat %>% filter(Region == R, destSiteID == D, Treatment == "LocalControl"),
-      warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
-      .id = "ODT") %>%
-      arrange(Region, originSiteID, turfID, Year)
-  })) %>% 
-  mutate(ID = map(comm, function(x) x %>% group_by(Year, ODT, destPlotID) %>% 
-                    distinct(SpeciesName) %>% nest())) %>%
-  unnest(ID) %>%
-  group_by(Region, Year, ODT, destPlotID) %>%
-  mutate(overlap = map(data, ~turnover_allyears(.x, Year, SpeciesName, RelCover, "total")))) 
+#### Plot colonisation patterns ####
+colour_odt <- c("darkred", "darkblue", "darkorange")
+dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
+  mutate(dat = map2(colonisation, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  unnest(dat) %>%
+    ggplot(aes(x = Year, y = appearance, color = ODT)) + 
+    geom_point() +
+    scale_colour_manual(values = colour_odt) + 
+    geom_smooth(method = "lm", se = FALSE) +
+    facet_wrap(~ Region) +
+    TP_theme()
+
+#### Plot extinction patterns ####
+dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
+  mutate(dat = map2(extinction, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  unnest(dat) %>%
+  ggplot(aes(x = Year, y = disappearance, color = ODT)) + 
+  geom_point() +
+  scale_colour_manual(values = colour_odt) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ Region) +
+  TP_theme()
+
+#### Plot turnover patterns ####
+dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
+  mutate(dat = map2(turnover, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  unnest(dat) %>%
+  ggplot(aes(x = Year, y = total, color = ODT)) + 
+  geom_point() +
+  scale_colour_manual(values = colour_odt) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ Region) +
+  TP_theme()
 
 
-turnover_allyears <- function(df, 
-                              time.var, 
-                              species.var, 
-                              abundance.var, 
-                              metric=c("total", "extinction","colonisation"))
+#ISSUES WITH MULTIPLE SPECIES: "DE_Grainau", "US_Montana", "IT_MatschMazia", "CN_Heibei", "FR_AlpeHuez"
+#ISSUES WITH DESTPLOT ID: "CH_Calanda", "US_Colorado", "FR_Lautaret"
+#Keep in mind, Colorado, Lautaret will have only one year of data
 
-# Initialize `filled` vector
-
-
-# Roll and fill
-rollit <- function(x) {
-vec <- rep_along(1:length(x), list(na_value))
-
-for(i in 1:length(x)) {
-  rar   <- lapply(x, function(y) {y[(i-1):y]})
-  vec[[i]] <- do.call(.f, rar)
-}
-
-# create character vectors of unique species from each df
-d1spp <- as.character(unique(d1[[species.var]]))
-d2spp <- as.character(unique(d2[[species.var]]))
-
-# ID shared species
-commspp <- intersect(d1spp, d2spp)
-
-# count number not present in d2
-disappear <- length(d1spp)-length(commspp)
-
-# count number that appear in d2
-appear <- length(d2spp)-length(commspp)
-
-# calculate total richness
-totrich <- sum(disappear, appear, length(commspp))
-rar <- dd$overlap[1:3]
-lag(unlist(rar))
-setdiff(unlist(rar[2]), unlist(rar[3]))
-
-mutate(overlap = map(data, ~intersect(.x - lag(.x))))
-  
-  mutate(PCA = map(comm_spp, ~rda(sqrt(.x)))) %>% 
-  mutate(scores = map(.x = PCA, .f = fortify, display = "wa", axes = 1:2)) %>% 
-  mutate(scores = map2(.x = comm_meta, .y = scores, bind_cols))
-
-  dd2 <- dd %>% 
-    select(-(comm:PCA)) %>% 
-    unnest(scores) %>% 
-    group_by(Region, originSiteID, destSiteID, ODT, Year) %>% 
-    summarise_at(vars(matches("PC")), .funs = mean) %>% 
-    group_by(Region, originSiteID, destSiteID, Year) %>% 
-    nest() %>% 
-    mutate(distances = map(data, ~dist(select(.x, matches("PC"))))) %>% 
-    mutate(distances = map(distances, ~tibble(what = c("Low_High", "Low_TP", "High_TP"), dist = as.vector(.x)))) %>% 
-    unnest(distances)
+#### extra code (not sure where to go with intersect...) ####
+# dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
+#   distinct() %>% 
+#   filter(Treatment == "Warm") %>% 
+#   select(-Treatment) %>% 
+#   mutate(comm = pmap(.l = list(R = Region, O = originSiteID, D = destSiteID), .f = function(R, O, D){
+#     bind_rows(
+#       originControls = dat %>% filter(Region == R, destSiteID == O, Treatment == "LocalControl"),
+#       destControls = dat %>% filter(Region == R, destSiteID == D, Treatment == "LocalControl"),
+#       warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
+#       .id = "ODT") %>%
+#       arrange(Region, originSiteID, turfID, Year)
+#   })) %>% 
+#   mutate(ID = map(comm, function(x) x %>% group_by(ODT, destPlotID) %>% 
+#                     distinct(SpeciesName) %>% nest())) %>%
+#   unnest(ID) #%>%
+# group_by(Region, Year, ODT, destPlotID) %>%
+#   mutate(overlap = map(data, ~for (i in 1:length(.x)) {intersect(.x[i], .x[i+1])})) 
+# 
+# 
