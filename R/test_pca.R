@@ -49,35 +49,45 @@ pmap(dd, function(scores, Region, originSiteID, ...){
   plot_layout(guides = 'collect')
   
 ## Individual region PCA
-  
-colour_otd <- c("darkred", "darkblue", "goldenrod")
+#dest control, origin control, warmed
+colour_odt <- c("#A92420", "#016367", "#FBC00E")
+#shape_odt <- c(16,16,25)
 
-dd %>% filter(Region == "CH_Lavey") %>% #Insert desired region name
+p1 <- dd %>% filter(Region == "SE_Abisko") %>% #Insert desired region name
   pmap(function(scores, Region, originSiteID, ...){
     scores %>% arrange(Year) %>% 
     ggplot(aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
       geom_point(mapping = aes(size = Year == min(Year))) +
-      scale_colour_manual(values = colour_otd) + 
+      scale_colour_manual(values = colour_odt) + 
+      scale_fill_manual(values = colour_odt) +
       geom_path() +
       coord_equal() +
-      labs(title = paste(Region, originSiteID), size = "First Year") +
-      TP_theme()
+      TP_theme() +
+      labs(title = "SE_Abisko", size = "First Year", color = "Treatment") 
   })
 
+# Plotting 3x plots for display
+# p2a <- p2[[2]]
+# p1a <- p1[[3]]
+# p3a <- p3[[2]]
+# p1a + p2a + p3a
+# library(ggpubr)
+# ggarrange(p1a, p2a, p3a, ncol=3, nrow=1, common.legend = TRUE, legend="bottom", align = 'hv')
 #Next!: remove rare species by region, max cover e.g. 1% or n occur ==1
 
 
 ### Plot centroid distance over time ####
-colour_cd <- c("darkgrey", "darkred", "darkblue")
-
+colour_cd <- c("#A92420", "darkgrey", "#016367")
+ 
 dd2 %>%  
   filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 
-ggplot(aes(x = Year, y = dist, color = what)) + 
+  ggplot(aes(x = Year, y = dist, color = what)) + 
+  TP_theme() +
   geom_point() +
   scale_colour_manual(values = colour_cd) + 
   geom_smooth(method = "lm", se = FALSE) +
-  facet_wrap(~ Region) +
-  TP_theme()
+  facet_wrap(~ Region) + 
+  labs(title = 'Transplanted turf convergence/divergence over time', color = "Treatment Comparisons") 
 
 #TRY TO DO: 
 #Order by duration

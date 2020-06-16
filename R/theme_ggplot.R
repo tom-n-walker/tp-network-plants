@@ -22,10 +22,12 @@ TP_theme <- function() {
     legend.position = "bottom",
     legend.text.align = 0,
     legend.background = ggplot2::element_blank(),
-    legend.title = ggplot2::element_blank(),
     legend.key = ggplot2::element_blank(),
+    legend.title = ggplot2::element_text(family=font,
+                                         size=14,
+                                         color="#222222"),
     legend.text = ggplot2::element_text(family=font,
-                                        size=16,
+                                        size=12,
                                         color="#222222"),
     
     #Axis format
