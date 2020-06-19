@@ -79,7 +79,7 @@ p1 <- dd %>% filter(Region == "SE_Abisko") %>% #Insert desired region name
 ### Plot centroid distance over time ####
 colour_cd <- c("#A92420", "darkgrey", "#016367")
  
-dd2 %>%  
+dd2 %>%  filter(!Region %in% c("FR_Lautaret", "US_Colorado", "IN_Kashmir")) %>%
   filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 
   ggplot(aes(x = Year, y = dist, color = what)) + 
   TP_theme() +
@@ -87,7 +87,44 @@ dd2 %>%
   scale_colour_manual(values = colour_cd) + 
   geom_smooth(method = "lm", se = FALSE) +
   facet_wrap(~ Region) + 
-  labs(title = 'Transplanted turf convergence/divergence over time', color = "Treatment Comparisons") 
+  labs(color = "Treatment Comparisons", y="Distance between centroids", x='Year') 
+
+
+## Plot by duration of time on one graph
+
+ddcent <- dd2 %>%  filter(!Region %in% c("FR_Lautaret", "US_Colorado", "IN_Kashmir")) %>%
+  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 
+  group_by(Region) %>%
+  mutate(Year_0 = Year-min(Year)) 
+
+ddcent %>%
+  ggplot(aes(x = Year_0, y = dist, color = what, group=interaction(Region, what))) + 
+  TP_theme() +
+  geom_point() +
+  scale_colour_manual(values = colour_cd) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(color = "Treatment Comparisons", y="Distance between centroids", x='Duration (years)') 
+
+library(nlme)
+library(emmeans)
+#Controls
+dd_C <- ddcent %>% filter(what=='Low_High')
+m1<-lme(dist ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1) #*, -0.006
+
+##To low
+dd_C <- ddcent %>% filter(what=='Low_TP')
+m1<-lme(dist ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1) #***, -0.034
+
+##To alpine
+dd_C <- ddcent %>% filter(what=='High_TP')
+m1<-lme(dist ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1) 
+anova(m1) #***, 0.028
+
 
 #TRY TO DO: 
 #Order by duration

@@ -1,5 +1,5 @@
 library("codyn")
-
+source('R/theme_ggplot.R')
 #### COLONISATION PATTERNS ACROSS SITES ####
 #turnover function from codyn
 
@@ -30,11 +30,12 @@ dd %>%
   unnest(dat) %>%
   ggplot(aes(x = Year, y = SR)) + 
   scale_colour_manual(values = colour_odt) + 
-  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2, method = "lm", se = FALSE) +
+  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2) +
   geom_smooth(aes(group = ODT, color=ODT), method = "lm", se = F) +
-  facet_wrap(~ Region) +
+  facet_wrap(~Region, nrow=2) +
   TP_theme() + 
-  labs(title = 'SR over time', color = "Treatment Comparisons") 
+  scale_x_continuous(breaks=c(2010,2013,2016)) +
+  labs(color = "Treatment", y = 'Species Richness') 
 
 #### Plot colonisation patterns ####
 dd %>%
@@ -43,11 +44,12 @@ dd %>%
   unnest(dat) %>%
     ggplot(aes(x = Year, y = appearance)) + 
     scale_colour_manual(values = colour_odt) + 
-    geom_line(aes(group=destPlotID, color=ODT), alpha=0.2, method = "lm", se = FALSE) +
-    geom_smooth(aes(group = ODT, color=ODT), method = "lm", se = F) +
-    facet_wrap(~ Region) +
-    TP_theme() + 
-  labs(title = 'Colonisation over time', color = "Treatment Comparisons") 
+    geom_line(aes(group=destPlotID, color=ODT), alpha=0.2) +
+  geom_smooth(aes(group = ODT, color=ODT), method = "lm", se = F) +
+  facet_wrap(~Region, nrow=2) +
+  TP_theme() + 
+  scale_x_continuous(breaks=c(2010,2013,2016)) + 
+  labs(title = 'Colonisation over time', color = "Treatment") 
 
 #### Plot extinction patterns ####
 dd %>%
@@ -56,11 +58,12 @@ dd %>%
   unnest(dat) %>%
   ggplot(aes(x = Year, y = disappearance)) + 
   scale_colour_manual(values = colour_odt) + 
-  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2, method = "lm", se = FALSE) +
+  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2) +
   geom_smooth(aes(group = ODT, color=ODT), method = "lm", se = F) +
-  facet_wrap(~ Region) +
+  facet_wrap(~Region, nrow=2) +
   TP_theme() + 
-  labs(title = 'Extinction over time', color = "Treatment Comparisons") 
+  scale_x_continuous(breaks=c(2010,2013,2016)) +
+  labs(title = 'Extinction over time', color = "Treatment") 
 
 #### Plot turnover patterns ####
 dd %>%
@@ -69,14 +72,15 @@ dd %>%
   unnest(dat) %>%
   ggplot(aes(x = Year, y = total)) + 
   scale_colour_manual(values = colour_odt) + 
-  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2, method = "lm", se = FALSE) +
+  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2) +
   geom_smooth(aes(group = ODT, color=ODT), method = "lm", se = F) +
-  facet_wrap(~ Region) +
+  facet_wrap(~Region, nrow=2) +
   TP_theme() + 
-  labs(title = 'Turnover over time', color = "Treatment Comparisons") 
+  scale_x_continuous(breaks=c(2010,2013,2016)) +
+  labs(title = 'Turnover over time', color = "Treatment") 
 
 #### Plot C, E and T for only transplanted turfs ####
-colour_comdyn <- c("darkblue", "darkred", "black")
+colour_comdyn <- c("#CECD7B", "#7496D2", "black")
 dd %>%
   mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
   mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
@@ -90,15 +94,187 @@ dd %>%
   ggplot(aes(x=Year, y=value, color=comdyn, group = interaction(destPlotID, comdyn))) + 
   scale_colour_manual(values = colour_comdyn) + 
   geom_line(alpha=0.2) +
-  geom_smooth(aes(group=comdyn, color=comdyn), method='lm', alpha=0.2, se=F) +
-  facet_wrap(~ Region) +
+  geom_smooth(aes(group=comdyn, color=comdyn), method='lm', se=F) +
+  facet_wrap(~Region, nrow=2) +
   TP_theme() + 
-  labs(title = 'Community dynamics') 
+  scale_x_continuous(breaks=c(2011,2013,2015, 2017)) + 
+  labs(color="Process", y="Proportional change", x='Year') 
+
+#On one gaph, with years scaled to 0 +
+
+dd_T <- dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
+  mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
+    C <- C %>% rename(value = appearance)
+    E <- E %>% rename(value = disappearance)
+    To <- To %>% rename(value = total)
+    bind_rows('C' = C,'E'= E, 'T' = To, .id='comdyn')})) %>% 
+  mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  mutate(dat = map(dat, ~.x %>% mutate(Year_0 = Year-min(Year)))) %>%
+  unnest(dat) %>% 
+  filter(ODT == "warmed") 
+
+dd_T %>% 
+  ggplot(aes(x=Year_0, y=value, color=comdyn, group = interaction(Region, destPlotID, comdyn))) + 
+  scale_colour_manual(values = colour_comdyn) + 
+  geom_line(alpha=0.2) +
+  geom_smooth(aes(group=interaction(Region, comdyn), color=comdyn), method='lm', se=F) +
+  #geom_smooth(aes(group=comdyn, color=comdyn), method='lm', se=F) +
+  TP_theme() + 
+  labs(color="Process", y="Proportional change", x='Duration (years)') 
+
+library(nlme)
+library(emmeans)
+#Colonisation
+dd_C <- dd_T %>% filter(comdyn=='C')
+m1<-lme(value ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1)
+
+##Extinction
+dd_C <- dd_T %>% filter(comdyn=='E')
+m1<-lme(value ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1)
+
+##Turnover
+dd_C <- dd_T %>% filter(comdyn=='T')
+m1<-lme(value ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1) 
+anova(m1)
 
 
 #### Extract elevation and compare ####
+library(broom)
+colour_comdyn <- c("#CECD7B", "#7496D2", "black")
+dd_E <- dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% select(Elevation, ODT, destPlotID) %>% 
+                          distinct() %>%
+                          mutate(Elev_diff=max(Elevation - min(Elevation))))) %>% 
+  mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
+    C <- C %>% rename(value = appearance)
+    E <- E %>% rename(value = disappearance)
+    To <- To %>% rename(value = total)
+    bind_rows('C' = C,'E'= E, 'T' = To, .id='comdyn')})) %>% 
+  mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  mutate(dat = map(dat, ~.x %>% filter(ODT == "warmed"))) %>%
+  unnest(dat) %>% 
+  group_by(Region, Elevation, Elev_diff, comdyn) %>%
+  nest() %>% 
+  mutate(model = map(data, ~lm(value ~ Year, data = .x))) %>% 
+  mutate(tidied = map(model, tidy)) %>% 
+  unnest(tidied) %>%
+  filter(term == 'Year') 
+
+dd_E %>%
+  ggplot(aes(x=Elev_diff, y=abs(estimate), color=comdyn)) + 
+  geom_point() + 
+  scale_colour_manual(values = colour_comdyn) + 
+  geom_smooth(aes(group=comdyn, color=comdyn), method='lm', se=F) +
+  TP_theme() + 
+  labs(color="Process", y="Absolute slope over time", x=expression(Delta*Elevation)) 
+
+#Colonisation
+dd_C <- dd_E %>% filter(comdyn=='C')
+m1<-lme(abs(estimate) ~ Elev_diff, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1)
+
+##Extinction
+dd_C <- dd_E %>% filter(comdyn=='E')
+m1<-lme(abs(estimate) ~ Elev_diff, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1)
+
+##Turnover
+dd_C <- dd_E %>% filter(comdyn=='T')
+m1<-lme(abs(estimate) ~ Elev_diff, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1) 
+anova(m1)
+
+## Elevation but not slope estimates, just to raw values
+dd_E <- dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% select(Elevation, ODT, destPlotID) %>% 
+                          distinct() %>%
+                          mutate(Elev_diff=max(Elevation - min(Elevation))))) %>% 
+  mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
+    C <- C %>% rename(value = appearance)
+    E <- E %>% rename(value = disappearance)
+    To <- To %>% rename(value = total)
+    bind_rows('C' = C,'E'= E, 'T' = To, .id='comdyn')})) %>% 
+  mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  mutate(dat = map(dat, ~.x %>% filter(ODT == "warmed"))) %>%
+  unnest(dat) 
+
+dd_E %>%
+  ggplot(aes(x=Elev_diff, y=value, color=comdyn)) + 
+  geom_point() + 
+  scale_colour_manual(values = colour_comdyn) + 
+  geom_smooth(aes(group=comdyn, color=comdyn), method='lm', se=F) +
+  TP_theme() + 
+  labs(color="Process", y="Proportional change", x=expression(Delta*Elevation)) 
 
 
+#Colonisation
+dd_C <- dd_E %>% filter(comdyn=='C')
+m1<-lme(value ~ Elev_diff, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1)
+
+dd_C <- dd_E %>% filter(comdyn=='C')
+m1<-lm(value ~ Elev_diff, data=dd_C) 
+summary(m1) 
+
+##Extinction
+dd_C <- dd_E %>% filter(comdyn=='E')
+m1<-lme(value ~ Elev_diff, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1)
+anova(m1)
+
+dd_C <- dd_E %>% filter(comdyn=='E')
+m1<-lm(value ~ Elev_diff, data=dd_C) 
+summary(m1) 
+
+##Turnover
+dd_C <- dd_E %>% filter(comdyn=='T')
+m1<-lme(value ~ Elev_diff, random = ~1|Region, method = "ML", data=dd_C) 
+summary(m1) 
+anova(m1)
+
+dd_C <- dd_E %>% filter(comdyn=='T')
+m1<-lm(value ~ Elev_diff, data=dd_C) 
+summary(m1) 
+
+
+
+#### Extract year since establishment and compare ####
+dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% mutate(Year_diff=max(Year - min(Year))) %>%
+                                select(Elevation, Year_diff, ODT, destPlotID) %>% 
+                                distinct())) %>% 
+  mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
+    C <- C %>% rename(value = appearance)
+    E <- E %>% rename(value = disappearance)
+    To <- To %>% rename(value = total)
+    bind_rows('C' = C,'E'= E, 'T' = To, .id='comdyn')})) %>% 
+  mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  mutate(dat = map(dat, ~.x %>% filter(ODT == "warmed"))) %>%
+  unnest(dat) %>% 
+  group_by(Region, Year_diff, comdyn) %>%
+  nest() %>% 
+  mutate(model = map(data, ~lm(value ~ Year, data = .x))) %>% 
+  mutate(tidied = map(model, tidy)) %>% 
+  unnest(tidied) %>%
+  filter(term == 'Year') %>%
+  ggplot(aes(x=Year_diff, y=estimate, color=comdyn)) + 
+  geom_point() + 
+  scale_colour_manual(values = colour_comdyn) + 
+  stat_smooth(method = "nls", formula = "y ~ a*x^b", aes(group=comdyn, color=comdyn), se=F) +
+  TP_theme() + 
+  labs(y="Absolute slope over time", x=expression(Delta*Time)) +
+  labs(color="Process") 
+
+ 
 #ISSUES WITH MULTIPLE SPECIES: "DE_Grainau", "US_Montana", "IT_MatschMazia", "CN_Heibei", "FR_AlpeHuez"
 #ISSUES WITH DESTPLOT ID: "CH_Calanda", "US_Colorado", "FR_Lautaret"
 #Keep in mind, Colorado, Lautaret will have only one year of data
