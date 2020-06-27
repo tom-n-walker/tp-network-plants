@@ -53,7 +53,7 @@ pmap(dd, function(scores, Region, originSiteID, ...){
 colour_odt <- c("#A92420", "#016367", "#FBC00E")
 #shape_odt <- c(16,16,25)
 
-p1 <- dd %>% filter(Region == "SE_Abisko") %>% #Insert desired region name
+p1 <- dd %>% filter(Region == "DE_Susalps") %>% #Insert desired region name
   pmap(function(scores, Region, originSiteID, ...){
     scores %>% arrange(Year) %>% 
     ggplot(aes(x = PC1, y = PC2, colour  = ODT, scale_fill_manual(values = colour_otd), group = destPlotID)) +
@@ -63,7 +63,7 @@ p1 <- dd %>% filter(Region == "SE_Abisko") %>% #Insert desired region name
       geom_path() +
       coord_equal() +
       TP_theme() +
-      labs(title = "SE_Abisko", size = "First Year", color = "Treatment") 
+      labs(title = "IT_MatschMazia", size = "First Year", color = "Treatment") 
   })
 
 # Plotting 3x plots for display

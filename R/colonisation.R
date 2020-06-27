@@ -14,7 +14,7 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
       warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
       .id = "ODT") 
   })) %>% 
-  filter(Region %in% c("NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "CN_Damxung", "CN_Gongga", "US_Arizona", "DE_Susalps", "SE_Abisko")) %>%
+  filter(Region %in% c("NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "CN_Damxung", "CN_Gongga", "US_Arizona", "DE_Susalps", "SE_Abisko", "IT_MatschMazia", "CH_Calanda")) %>%
   mutate(specrich = map(comm, . %>% group_by(Year, destPlotID) %>% summarize(SR=n_distinct(SpeciesName))), 
          colonisation = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "appearance")),
          extinction = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "disappearance")),
@@ -275,9 +275,9 @@ dd %>%
   labs(color="Process") 
 
  
-#ISSUES WITH MULTIPLE SPECIES: "DE_Grainau", "US_Montana", "IT_MatschMazia", "CN_Heibei", "FR_AlpeHuez"
+#ISSUES WITH MULTIPLE SPECIES: "DE_Grainau", "US_Montana", "CN_Heibei", "FR_AlpeHuez"
 #ISSUES WITH DESTPLOT ID: "CH_Calanda", "US_Colorado", "FR_Lautaret"
-#Keep in mind, Colorado, Lautaret will have only one year of data
+#Keep in mind, Colorado, Lautaret will have only one year of data, so Calanda is really the only issue here
 
 #### Extra code ####
 # ##Code with only points for plotting

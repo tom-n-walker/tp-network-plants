@@ -23,7 +23,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     mutate(Cover=if_else(grepl("^\\d", Cover), Cover, NA_character_)) %>% 
     mutate(Cover = as.numeric(gsub("[-|,]", ".", Cover))) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
-    #add block ID because blerg
+    #add block ID 
     rename(destBlockID=Block) %>% 
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>% 
