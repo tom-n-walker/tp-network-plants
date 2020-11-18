@@ -29,14 +29,22 @@ resolve_species <- function(taxa){
   # copy taxa into modified version for database calling
   copy_taxa <- taxa
   # resolve easy fixes
-  copy_taxa[570] <- "Stellaria umbellata"
+  copy_taxa[copy_taxa == "Stellaria_wide_leaf"] <- "Stellaria umbellata"
   copy_taxa[copy_taxa == "Entire Meconopsis"] <- "Meconopsis"
   copy_taxa[copy_taxa == "Leuc. Vulg."] <- "Leucanthemum vulgare"
   copy_taxa[copy_taxa == "unknown aster serrated"] <- "Aster"
   copy_taxa[copy_taxa == "Unknown aster serrated"] <- "Aster"
   copy_taxa[copy_taxa == "Haemarocalus fulva"] <- "Hemerocallis fulva"
   copy_taxa[copy_taxa == "Dracophaleum"] <- "Dracocephalum"
-  copy_taxa[copy_taxa == "Anthoxanthum alpinum"] <- "Anthoxanthum odoratum nipponicum"
+  copy_taxa[copy_taxa %in% c("Antoxanthum alpinum","Anthoxanthum alpinum")] <- "Anthoxanthum odoratum nipponicum"
+  copy_taxa[copy_taxa == "Vaccinium gaultherioides"] <- "Vaccinium uliginosum"
+  copy_taxa[copy_taxa == "Listera ovata"] <- "Neottia ovata"
+  copy_taxa[copy_taxa == "Gentiana tenella"] <- "Gentianella tenella"
+  copy_taxa[copy_taxa == "Nigritella nigra"] <- "Gymnadenia nigra"
+  copy_taxa[copy_taxa == "Hieracium lactucela"] <- "Pilosella lactucella"
+  copy_taxa[copy_taxa == "Agrostis schraderiana"] <- "Agrostis agrostiflora"
+  copy_taxa[copy_taxa == "Festuca pratense"] <- "Festuca pratensis"
+  
   # call GNR
   taxa_gnr <- gnr_resolve(names = copy_taxa, 
                           best_match_only = T, 
@@ -70,7 +78,7 @@ resolve_species <- function(taxa){
 load_wrangle_try <- function(cleaned) {
   ## LOAD TRY ##
   # specify directory, load try, give names
-  try_dir <- paste0(getwd(), "/tom_data/")
+  try_dir <- paste0(getwd(), "/data/Traits/")
   try_data <- lapply(list.files(try_dir, full.names = T), fread)
   names(try_data) <- c("categorical", "numeric", "species")
   

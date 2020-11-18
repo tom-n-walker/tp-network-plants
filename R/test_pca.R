@@ -43,6 +43,7 @@ pmap(dd, function(scores, Region, originSiteID, ...){
     scale_colour_manual(values = colour_otd) + 
     geom_path() +
     coord_equal() +
+    TP_theme()+
     labs(title = paste(Region, originSiteID), shape = "First Year")
   })%>%
     wrap_plots() +
@@ -78,9 +79,11 @@ p1 <- dd %>% filter(Region == "DE_Susalps") %>% #Insert desired region name
 
 ### Plot centroid distance over time ####
 colour_cd <- c("#A92420", "darkgrey", "#016367")
+colour_cd <- c("#49BEB7", "black", "black")
  
 dd2 %>%  filter(!Region %in% c("FR_Lautaret", "US_Colorado", "IN_Kashmir")) %>%
-  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 
+  filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>%
+  filter(what != "Low_High") %>%
   ggplot(aes(x = Year, y = dist, color = what)) + 
   TP_theme() +
   geom_point() +
@@ -91,39 +94,54 @@ dd2 %>%  filter(!Region %in% c("FR_Lautaret", "US_Colorado", "IN_Kashmir")) %>%
 
 
 ## Plot by duration of time on one graph
-
+colour_cd <- c("#49BEB7", "black", "black")
 ddcent <- dd2 %>%  filter(!Region %in% c("FR_Lautaret", "US_Colorado", "IN_Kashmir")) %>%
   filter(Region %in% c("CH_Calanda", "US_Montana", "CN_Damxung", "CN_Gongga", "NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "DE_Grainau", "SE_Abisko", "DE_Susalps", "FR_Lautaret", "IN_Kashmir", "US_Colorado", "IT_MatschMazia", "US_Arizona", "CN_Heibei", "FR_AlpeHuez"))%>% 
   group_by(Region) %>%
   mutate(Year_0 = Year-min(Year)) 
 
-ddcent %>%
+ddcent %>% filter(what != "Low_High") %>%
   ggplot(aes(x = Year_0, y = dist, color = what, group=interaction(Region, what))) + 
   TP_theme() +
   geom_point() +
   scale_colour_manual(values = colour_cd) + 
   geom_smooth(method = "lm", se = FALSE) +
+  facet_grid(~what) + 
   labs(color = "Treatment Comparisons", y="Distance between centroids", x='Duration (years)') 
 
 library(nlme)
 library(emmeans)
 #Controls
 dd_C <- ddcent %>% filter(what=='Low_High')
-m1<-lme(dist ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+m1<-lme(dist ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
 summary(m1)
 anova(m1) #*, -0.006
 
 ##To low
 dd_C <- ddcent %>% filter(what=='Low_TP')
-m1<-lme(dist ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+m1<-lme(dist ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
 summary(m1)
 anova(m1) #***, -0.034
+mnull<-lme(dist ~ Year_0+ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(m1, mnull)
+mnull1<-lme(dist ~ Year_0, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull1)
+mnull2<-lme(dist ~ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull2)
+
 
 ##To alpine
 dd_C <- ddcent %>% filter(what=='High_TP')
-m1<-lme(dist ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
+m1<-lme(dist ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
 summary(m1) 
 anova(m1) #***, 0.028
+mnull<-lme(dist ~ Year_0+ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(m1, mnull)
+mnull1<-lme(dist ~ Year_0, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull1)
+mnull2<-lme(dist ~ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull2)
+
 
 
 #TRY TO DO: 
