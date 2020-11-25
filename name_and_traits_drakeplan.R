@@ -1,4 +1,5 @@
-runsource(clean_taxonomy.R)
+source("R/clean_taxonomy.R")
+source("R/Name_repair.R")
 
 taxa <- get_species()
 
