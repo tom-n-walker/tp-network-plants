@@ -16,7 +16,7 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
       .id = "ODT") 
   })) %>% 
   filter(Region %in% c("NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "CN_Damxung", "CN_Gongga", "US_Arizona", "DE_Susalps", "SE_Abisko", "IT_MatschMazia")) %>%
-  mutate(specrich = map(comm, ~.%>% group_by(Year, destPlotID) %>% summarize(SR=n_distinct(SpeciesName))), 
+  mutate(specrich = map(comm, ~ {.} %>% group_by(Year, destPlotID) %>% summarize(SR=n_distinct(SpeciesName))), 
          colonisation = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "appearance")),
          extinction = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "disappearance")),
          turnover = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "total"))) 
@@ -36,7 +36,8 @@ dd %>%
   facet_wrap(~Region, nrow=2) +
   TP_theme() + 
   scale_x_continuous(breaks=c(2010,2013,2016)) +
-  labs(color = "Treatment", y = 'Species Richness') 
+  labs(color = "Treatment", y = 'Species Richness') +
+  labs(title = 'Species Richness over time', color = "Treatment") 
 
 #### Plot colonisation patterns ####
 dd %>%
@@ -80,11 +81,12 @@ dd %>%
   scale_x_continuous(breaks=c(2010,2013,2016)) +
   labs(title = 'Turnover over time', color = "Treatment") 
 
+
 #### Plot C, E and T for only transplanted turfs ####
 colour_comdyn <- c("#fe875d", "#356288", "black")
 colour_comdyn <- c("#49BEB7", "black", "black")
 #"#7496D2", "#CECD7B"
-c("#fe875d", "#49BEB7", "black")
+#c("#fe875d", "#49BEB7", "black")
 
 dd %>%
   filter(Region != "IT_MatschMazia") %>%
@@ -106,7 +108,7 @@ dd %>%
   scale_x_continuous(breaks=c(2011,2013,2015, 2017)) + 
   labs(color="Process", y="Proportional change", x='Year') 
 
-#On one gaph, with years scaled to 0 +
+#On one graph, with years scaled to 0 +
 
 dd_T <- dd %>%
   mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
@@ -119,7 +121,7 @@ dd_T <- dd %>%
   mutate(dat = map(dat, ~.x %>% mutate(Year_0 = Year-min(Year)))) %>%
   unnest(dat) %>% 
   filter(ODT == "warmed") %>%
-  filter(comdyn%in% c('C', 'E'))  
+  filter(comdyn%in% c('C', 'E', 'T'))  
 
 dd_T %>% 
   ggplot(aes(x=Year_0, y=value, color=comdyn, group = interaction(Region, destPlotID, comdyn))) + 
@@ -135,21 +137,33 @@ library(nlme)
 library(emmeans)
 #Colonisation
 dd_C <- dd_T %>% filter(comdyn=='C')
-m1<-lme(value ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
-summary(m1)
-anova(m1)
+m1<-lme(value ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+mnull<-lme(value ~ Year_0+ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(m1, mnull)  #***, 99.582
+mnull1<-lme(value ~ Year_0, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull1) #***, 42.692
+mnull2<-lme(value ~ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull2) #**, 8.674
 
 ##Extinction
 dd_C <- dd_T %>% filter(comdyn=='E')
-m1<-lme(value ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
-summary(m1)
-anova(m1)
+m1<-lme(value ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+mnull<-lme(value ~ Year_0+ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(m1, mnull)  #***, 100.610
+mnull1<-lme(value ~ Year_0, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull1) #***, 59.958
+mnull2<-lme(value ~ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull2) 
 
 ##Turnover
 dd_C <- dd_T %>% filter(comdyn=='T')
-m1<-lme(value ~ Year_0, random = ~1|Region, method = "ML", data=dd_C) 
-summary(m1) 
-anova(m1)
+m1<-lme(value ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+mnull<-lme(value ~ Year_0+ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(m1, mnull)  #***, 50.267
+mnull1<-lme(value ~ Year_0, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull1) #***, 68.218
+mnull2<-lme(value ~ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
+anova(mnull, mnull2) 
 
 #With region as fixed effect
 #Colonisation
@@ -303,7 +317,34 @@ dd %>%
   labs(y="Absolute slope over time", x=expression(Delta*Time)) +
   labs(color="Process") 
 
-y ~ a*x^b
+## Compare distributions of change in these three
+
+dd %>%
+  mutate(comm_sim = map(comm, ~.x %>% mutate(Year_diff=max(Year - min(Year))) %>%
+                          select(Elevation, Year_diff, ODT, destPlotID) %>% 
+                          distinct())) %>% 
+  mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
+    C <- C %>% rename(value = appearance)
+    E <- E %>% rename(value = disappearance)
+    To <- To %>% rename(value = total)
+    bind_rows('C' = C,'E'= E, 'T' = To, .id='comdyn')})) %>% 
+  mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
+  mutate(dat = map(dat, ~.x %>% filter(ODT == "warmed"))) %>%
+  unnest(dat) %>% 
+  group_by(Region, Year_diff, comdyn) %>%
+  nest() %>% 
+  mutate(model = map(data, ~lm(value ~ Year, data = .x))) %>% 
+  mutate(tidied = map(model, tidy)) %>% 
+  unnest(tidied) %>%
+  filter(term == 'Year') %>%
+  ggplot(aes(x=estimate, color=comdyn)) + 
+  geom_density() + 
+  scale_colour_manual(values = colour_comdyn) +
+  TP_theme() + 
+  labs(y="Number of sites", x=expression(Delta*Slope)) +
+  labs(color="Process") 
+
+
 #ISSUES WITH MULTIPLE SPECIES: "DE_Grainau", "US_Montana", "CN_Heibei", "FR_AlpeHuez"
 #ISSUES WITH DESTPLOT ID: "CH_Calanda", "US_Colorado", "FR_Lautaret"
 #Keep in mind, Colorado, Lautaret will have only one year of data, so Calanda is really the only issue here
