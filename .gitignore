@@ -48,6 +48,7 @@ vignettes/*.pdf
 *.rds
 *.rtf
 *.tiff
+*.tif
 *.xlsm
 
 
@@ -58,6 +59,14 @@ vignettes/*.pdf
 *.prj
 *.hproj
 
+#climate data
+*.pre.dat.nc
+*.pre.dat.nc.gz
+*.tmp.dat.nc
+*.tmp.dat.nc.gz
+*.elv
+*.elvZ
+
 #figures & output
 *.png
 *.html
@@ -67,6 +76,10 @@ vignettes/*.pdf
 *.md
 *.doc
 
+# Data/image directories
+/climate/*
+/data/*
+/figures/*
 
 *.DS_Store
 *_DS_Store
