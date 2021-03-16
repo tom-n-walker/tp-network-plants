@@ -47,10 +47,3 @@ dat %>% filter(Treatment == 'Warm') %>% #filter for warmed plots at low elevatio
               #lowinhigh = map2(.x=overlap, .y=Low, union),
               prop=map2(.x=lowinhigh, .y=splist_warmed, ~as.numeric(.x)/length(.y))) %>%
        unnest(prop)
-#
-#
-#      #species present in alpine at low elevation not present in alpine at high
-#
-#               #old code, still use intersect but need to figure out how to use map2 with lists...
-#        #        mutate(overlap = map(splist, ~summarise(overlap = length(intersect(.[[1]]$SpeciesName, .[[2]]$SpeciesName))))) %>%
-#        # unnest(overlap)

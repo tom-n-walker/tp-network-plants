@@ -1,9 +1,22 @@
 #### COMMUNITY TRAITS ####
-species <- dd %>% select(Region, originSiteID, destSiteID, comm) %>%
-  mutate(species = map(comm, ~{.} %>% 
-                         select(Year, ODT, SpeciesName) %>% 
-                         group_by(Year, ODT) %>%
-                     distinct(.$SpeciesName) %>% flatten_chr(.)))
+dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
+  distinct() %>% 
+  filter(Treatment == "Warm") %>% 
+  select(-Treatment) %>% 
+  mutate(comm = pmap(.l = list(R = Region, O = originSiteID, D = destSiteID), .f = function(R, O, D){
+    bind_rows(
+      originControls = dat %>% filter(Region == R, destSiteID == O, Treatment == "LocalControl"),
+      destControls = dat %>% filter(Region == R, destSiteID == D, Treatment == "LocalControl"),
+      warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
+      .id = "ODT") 
+  })) 
+
+# species <- dd %>% 
+#   mutate(species = map(comm, ~{.} %>% 
+#                          select(Year, ODT, SpeciesName) %>% 
+#                          group_by(Year, ODT) %>%
+#                           distinct(.$SpeciesName) %>% 
+#                           flatten_chr(.)))
 
 # Unnest and lengthen dataframe
 speclist <- dd %>% select(comm) %>% unnest(comm) %>% left_join(., sp_codes, by=c('SpeciesName'='code')) %>%
@@ -17,8 +30,8 @@ trait_g <-traits$species_only
 traitdat <- left_join(speclist, trait_g, by = c("species" = "original_name"))
 
 # Scaling traits
-traitdat <- traitdat %>% select(Region, Year, destSiteID, ODT, destPlotID, species, Rel_Cover, leaf_area:SLA) %>% tibble()
-traitdat_f <- traitdat %>% filter(!rowSums(is.na(.[,8:14]))==7)
+traitdat <- traitdat %>% select(Region, Year, originSiteID, destSiteID, ODT, destPlotID, species, Rel_Cover, leaf_area:SLA) %>% tibble()
+traitdat_f <- traitdat %>% filter(!rowSums(is.na(.[,9:15]))==7)
 
 # Calculate CWMs
 CWM <- traitdat_f %>% group_by(Region, Year, destSiteID, ODT, destPlotID) %>%

@@ -17,7 +17,8 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
          comm_spp = map(comm_wide, select, -ODT, -destPlotID, -Year)) %>% 
   select(-comm_wide) %>% 
   mutate(PCA = map(comm_spp, ~rda(sqrt(.x)))) %>% 
-  mutate(scores = map(.x = PCA, .f = fortify, display = "wa", axes = 1:2)) %>% 
+  mutate(scores = map(.x = PCA, ~scores(.x, choices=c(1,2), display='sites'))) %>%
+  mutate(scores = map(.x = scores, ~data.frame(PCA1=.x[,1], PCA2=.x[,2]))) %>%
   mutate(scores = map2(.x = comm_meta, .y = scores, bind_cols))
   
 dd2 <- dd %>% 

@@ -74,10 +74,11 @@ invord_sp <- invord %>%
   select(-MDS1, -MDS2)
 
 invord_dist %>% filter(invaded == 'yes') %>%
-  ggplot(aes(x = Region, y = distances)) + 
+  ggplot(aes(x = destSiteID, y = distances)) + 
   TP_theme() +
+  facet_grid(~Region) +
   geom_boxplot() +
-  labs(color = "Treatment Comparisons", y="Distance between centroids", x='Year') 
+  labs(y="Distance between centroids", x='Region') 
 
 #### ODT ORDINATIONS ####
 
@@ -122,24 +123,34 @@ traitord_dist <- traitord %>%
   left_join(., invord_sp, by=c("originSiteID", "destSiteID", "Region", "ODT", "destPlotID", "species")) %>%
   mutate(invader = ifelse(is.na(invader), 'resident', invader)) %>%
   group_by(Region, originSiteID, destSiteID, ODT, destPlotID, invader) %>% 
-  summarise_at(vars(matches("MDS")), .funs = mean) #%>% 
-  # group_by(Region, originSiteID, destSiteID, ODT, destPlotID, invader) %>% 
-  # nest() %>%
-  # mutate(distances = map(data, ~c(dist(select(.x, matches("MDS"))))[1])) %>%  
-  # unnest(distances) %>%
-  # mutate(invaded = ifelse(is.na(distances), 'no', 'yes'))
+  summarise_at(vars(matches("MDS")), .funs = mean) 
 
-
-traitord_dist %>% #filter(invaded == 'yes') %>%
+# Ordination of trait distances between invaders and residents
+traitord_dist %>% 
   ggplot(aes(x = MDS1, y = MDS2, col=invader)) + 
   TP_theme() +
   geom_point() +
-  #facet_wrap(~Region) +
+  facet_wrap(~Region) +
+  labs(color = "Invader", y="PC2", x='PC1')
+
+traitord_dist2 <- traitord_dist %>%
+  group_by(Region, originSiteID, destSiteID, ODT, destPlotID) %>%
+  nest() %>%
+  mutate(distances = map(data, ~c(dist(.)))) %>%
+  #mutate(distances = map(data, ~c(dist(select(.x, matches("MDS"))))[1])) %>%
+  unnest(distances) %>%
+  mutate(invaded = ifelse(is.na(distances), 'no', 'yes'))
+
+#Calculated distances between invaders and residents <- should I do this by year?
+traitord_dist2 %>% filter(invaded == 'yes') %>%
+  ggplot(aes(x = Region, y = distances)) + 
+  TP_theme() +
+  geom_boxplot() +
   labs(color = "Treatment Comparisons", y="Distance between centroids", x='Year')
 
 #Individual plots
 colour_odt <- c("#A92420", "#016367", "#FBC00E")
-colour_odt <- c("#FBC00E")
+#colour_odt <- c("#FBC00E")
 #shape_odt <- c(16,16,25)
 
 traitord_dist %>% filter(Region == "CH_Lavey") %>% #Insert desired region name

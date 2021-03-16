@@ -171,7 +171,7 @@ dd_C <- dd_T %>% filter(comdyn=='C')
 m1<-lme(value ~ Year_0*Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
 summary(m1)
 anova(m1)
-mnull<-lme(value ~ 1, random = ~1|originSiteID, method = "ML", data=dd_C) 
+mnull<-lme(value ~ Region, random = ~1|originSiteID, method = "ML", data=dd_C) 
 anova(m1, mnull)
 
 ##Extinction
@@ -202,7 +202,7 @@ dd_E <- dd %>%
   mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) %>%
   mutate(dat = map(dat, ~.x %>% filter(ODT == "warmed"))) %>%
   unnest(dat) %>% 
-  group_by(Region, Elevation, Elev_diff, comdyn) %>%
+  group_by(Region, destSiteID, Elevation, Elev_diff, comdyn) %>%
   nest() %>% 
   mutate(model = map(data, ~lm(value ~ Year, data = .x))) %>% 
   mutate(tidied = map(model, tidy)) %>% 

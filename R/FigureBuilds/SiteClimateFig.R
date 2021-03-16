@@ -22,7 +22,7 @@ chelsa_bioclim <- get_chelsa(output_dir = "./climate", period = "current")
 library(raster)
 library(sp)
 
-r <- getData("worldclim",var="bio",res=10)
+r <- getData("worldclim",var="bio")
 
 r <- r[[c(1,12)]]
 names(r) <- c("Temp","Prec")
