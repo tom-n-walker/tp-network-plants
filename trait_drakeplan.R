@@ -4,8 +4,8 @@ source("R/clean_taxonomy.R")
 # Import Data
 TraitDrakePlan <- drake_plan(
   
-taxa <- get_species()
+taxa = get_species(),
 
-resolve_species <- resolve_species(taxa)
+resolve_species = resolve_species(taxa)
 
 )
