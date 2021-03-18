@@ -35,12 +35,12 @@ CleanCommunity_IT_MatschMazia <- function(community_IT_MatschMazia_raw){
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% 
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))  %>% 
+    filter(Cover > 0)
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
@@ -58,7 +58,7 @@ CleanTaxa_IT_MatschMazia <- function(community_IT_MatschMazia){
 # Clean metadata
 CleanMeta_IT_MatschMazia <- function(community_IT_MatschMazia){
   dat <- community_IT_MatschMazia %>%
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()  %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1000', 'High'= '1500')),
            Gradient = 'IT_MatschMazia', #Already fixed this, just add dat above

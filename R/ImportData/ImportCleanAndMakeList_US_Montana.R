@@ -24,22 +24,20 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
            Collector ='Tim', Cover = as.numeric(Cover),
            destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     select(-plotID) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)%>% 
-    ungroup()
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% #omg so inelegant
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>% 
-    ungroup()
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) 
   
   #Check relative cover sums to >=100
   #dat2 %>% group_by(UniqueID) %>% filter(Total_Cover <100)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock'))
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock'))%>% 
+    filter(Cover > 0) 
   cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare', 'Litter', 'bareground', 'rock', 'litter', 'moss', 'Moss', 'Litter', 'Rock')) %>% 
     mutate(SpeciesName=recode(SpeciesName, litter="Litter", "bareground"='Bareground', "bare"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
@@ -58,7 +56,7 @@ CleanTaxa_US_Montana <- function(community_US_Montana){
 # Clean metadata
 CleanMeta_US_Montana <- function(community_US_Montana){
   dat <- community_US_Montana %>% 
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1985', 'Middle'= '2185', 'High'='2620')), #need to figure this out
            Country = 'USA',

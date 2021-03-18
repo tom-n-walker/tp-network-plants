@@ -40,12 +40,12 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) #there are Litter, Lichen and Moss in the species list below, but nothing here? Hmmm...
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))  %>% 
+    filter(Cover > 0) #there are Litter, Lichen and Moss in the species list below, but nothing here? Hmmm...
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
@@ -56,7 +56,7 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
 #Paul wasn't particular about these elevations, check this!
 CleanMeta_SE_Abisko <- function(community_SE_Abisko){
   dat <- community_SE_Abisko %>% 
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '1000', 'Mid' = '690', 'Low' = '500')),
            Gradient = 'SE_Abisko',

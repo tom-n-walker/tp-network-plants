@@ -37,12 +37,12 @@ CleanCommunity_DE_Susalps <- function(community_DE_Susalps_raw){
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% 
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>% 
+    filter(Cover > 0)
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
     select(UniqueID, destSiteID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, destSiteID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
@@ -59,7 +59,7 @@ CleanTaxa_DE_Susalps <- function(community_DE_Susalps){
 # Clean metadata
 CleanMeta_DE_Susalps <- function(community_DE_Susalps){
   dat <- community_DE_Susalps %>%
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()  %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'FE' = '550', 'GW'= '900', 'EB'= '1300')),
            Gradient = 'DE_Susalps', #Already fixed this, just add dat above

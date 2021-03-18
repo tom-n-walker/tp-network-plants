@@ -32,7 +32,7 @@ CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>% #no Nas, just a precaution
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% #No sum cover <100, pmax rebases this to zero
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% #All total cover >100, pmax rebases this to zero
     bind_rows(dat) %>% 
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   

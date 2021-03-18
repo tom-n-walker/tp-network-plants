@@ -98,19 +98,17 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
     filter(!is.na(Cover), !Cover == 0) %>% 
     select(-flag, -species, -Gradient, -Country) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, Treatment, destPlotID, turfID, sep='_')) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>% 
-    ungroup()
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) 
   
   dat2<- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other", Cover = pmax((100 - sum(Cover)), 0)) %>% #All total cover >100, pmax rebases this to zero
     bind_rows(dat) %>% 
-    filter(Cover > 0) %>% #omg so inelegant
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>%
-    ungroup()
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) 
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>% 
+    filter(Cover > 0) 
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
     select(UniqueID, destSiteID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, destSiteID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)

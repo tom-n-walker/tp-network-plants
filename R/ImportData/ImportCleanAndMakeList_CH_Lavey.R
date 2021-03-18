@@ -36,14 +36,15 @@ CleanCommunity_CH_Lavey <- function(community_CH_Lavey_raw) {
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
     #transmute_at(vars(one_of(destBlockID, destPlotID)), as.character) #%>%
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
-    filter(Cover>5) %>%
-    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) %>% filter(Cover>0) 
+    #filter(Cover>5) %>%
+    mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover) 
   
   #Check relative cover sums to >=100
   #dat %>% group_by(UniqueID) %>% filter(Total_Cover <100) #nothing, no need to add an other category
   
   #Create comm and cover class dataframes
-  comm <- dat %>% filter(!SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi', 'Vegetation %', 'Bare ground %', 'Litter %', 'Rocks %'))
+  comm <- dat %>% filter(!SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi', 'Vegetation %', 'Bare ground %', 'Litter %', 'Rocks %')) %>% 
+    filter(Cover>0) 
   cover <- dat %>% filter(SpeciesName %in% c('Other', 'Dead', 'Bare ground', 'bare ground', 'Bryophyta', 'Stone', 'Fungi', 'Vegetation %', 'Bare ground %', 'Litter %', 'Rocks %')) %>%
     mutate(SpeciesName=recode(SpeciesName, 'Fungi'="Lichen", "bare ground"='Bareground', "Bare ground"='Bareground', 'Bryophyta'= 'Moss', 'Stone'='Rock', 'Vegetation %'='Vegetation', 'Bare ground %'='Bareground', 'Litter %'='Litter', 'Rocks %'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
@@ -64,7 +65,7 @@ CleanMeta_CH_Lavey <- function(community_CH_Lavey){
   dat <- 
     community_CH_Lavey %>%
     #mutate(destBlockID=NA) %>%
-    select(-SpeciesName, -Cover) %>%
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct() %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'PRA'=1400, 'MAR'= 1750, 'CRE'=1950, 'RIO'=2200)),
            Gradient = "CH_Lavey",

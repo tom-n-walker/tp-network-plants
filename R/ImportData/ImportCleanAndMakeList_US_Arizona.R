@@ -48,7 +48,7 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment, Collector) %>%
     mutate(Rel_Cover = (VascCover / sum(Individuals, na.rm=T) * Individuals)/100) %>%
     bind_rows(dat) %>% 
-    filter(Rel_Cover > 0)   #omg so inelegant
+    filter(Rel_Cover > 0)  
    
 
    dat3 <- dat2 %>% select(-'OtherCover', -'VascCover', -'Rel_OtherCover', -'<NA>') #what's with this NA? Fix it...

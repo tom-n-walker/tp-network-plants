@@ -29,22 +29,20 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
 # Create new destplotID and UniqueID)     
       mutate(destPlotID = paste(originSiteID, destSiteID, destBlockID, sep='_')) %>% 
       mutate(UniqueID = paste(destPlotID, Year, sep='_')) %>% 
-      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)  %>% 
-      ungroup()
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)  
     
 
     
  dat2<- dat %>%  
       filter(!is.na(Cover)) %>%
       group_by_at(vars(-SpeciesName, -Cover)) %>%
-      summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+      summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
       bind_rows(dat) %>% 
-      filter(Cover > 0)  %>% #omg so inelegant
-      mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)  %>% 
-      ungroup()
+      mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)  
  
     
-    comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
+    comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>% 
+      filter(Cover > 0) 
     cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
       select(destPlotID, SpeciesName, Cover, Rel_Cover) %>% group_by(destPlotID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
       rename(CoverClass=SpeciesName)
@@ -56,7 +54,7 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
 
 CleanMeta_IN_Kashmir <- function(community_IN_Kashmir){
   dat2 <- community_IN_Kashmir %>% 
-       select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()%>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '2684', 'LOW' = '1951')),
            Gradient = 'IN_Kashmir',

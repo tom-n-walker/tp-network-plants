@@ -49,12 +49,12 @@ CleanCommunity_NO_Norway <- function(community_NO_Norway_raw){
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other'))
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>% 
+    filter(Cover > 0) 
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
     select(UniqueID, destSiteID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, destSiteID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)

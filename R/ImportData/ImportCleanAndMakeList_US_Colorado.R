@@ -30,13 +30,13 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   #dat2 %>% filter(Total_Cover<100) #There are plots with <100, so we need to create an Other cover class
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss'))
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss')) %>% 
+    filter(Cover > 0)
   cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss')) %>%
     mutate(SpeciesName=recode(SpeciesName, "Bare Soil"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
@@ -55,7 +55,7 @@ return(taxa)
 # Clean metadata
 CleanMeta_US_Colorado <- function(community_US_Colorado){
   dat <- community_US_Colorado %>% 
-  select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()%>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'um' = '2900', 'pf'= '3200', 'mo' = '3300')),
            Gradient = 'US_Colorado',

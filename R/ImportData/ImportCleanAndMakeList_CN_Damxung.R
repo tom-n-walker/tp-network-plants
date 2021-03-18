@@ -31,12 +31,12 @@ CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
     dat2 <- dat %>%  
       filter(!is.na(Cover)) %>%
       group_by_at(vars(-SpeciesName, -Cover)) %>%
-      summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+      summarise(SpeciesName = "Other", Cover = pmax((100 - sum(Cover)), 0)) %>% #All total cover >100, pmax rebases this to zero
       bind_rows(dat) %>% 
-      filter(Cover > 0)  %>% #omg so inelegant
       mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
     
-    comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Litter', 'litter', 'moss', 'rock', 'bareground', 'Bare', 'Moss', 'Rock'))
+    comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Litter', 'litter', 'moss', 'rock', 'bareground', 'Bare', 'Moss', 'Rock')) %>% 
+      filter(Cover>0) 
     cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Litter', 'litter', 'moss', 'rock', 'bareground', 'Bare', 'Moss', 'Rock')) %>% 
       mutate(SpeciesName=recode(SpeciesName, 'litter'="Litter", "bareground"='Bareground', "Bare"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
       select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
@@ -48,7 +48,7 @@ CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
 
 CleanMeta_CN_Damxung <- function(community_CN_Damxung){
   dat2 <- community_CN_Damxung %>%
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()%>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '4800', 'LOW' = '4313')),
            Gradient = 'CN_Damxung',
