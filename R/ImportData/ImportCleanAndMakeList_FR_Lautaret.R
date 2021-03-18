@@ -4,7 +4,8 @@
 
 #### Import Community ####
 ImportCommunity_FR_Lautaret <- function(){
-  community_FR_Lautaret_raw<-read.table(file = "data/FR_Lautaret/FR_Lautaret_commdata/TransPlant_Lautaret.txt")
+  load("data/FR_Lautaret/FR_Lautaret_commdata/data_pinpoints.RData")
+  community_FR_Lautaret_raw<-data_pinpoints
   return(community_FR_Lautaret_raw)
 } 
 
@@ -13,33 +14,30 @@ ImportCommunity_FR_Lautaret <- function(){
 # Cleaning Lautaret community data
 CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
   dat <- community_FR_Lautaret_raw %>% 
-    mutate(plot=rownames(.)) %>%
-    gather(SpeciesName, Cover, -plot) %>%
-    filter(!is.na(Cover)) %>%
-    mutate(SpeciesName = gsub('\\.', ' ', SpeciesName)) %>%
-    mutate(Year = 2017, 
-           destSiteID = substr(plot, 1, 1),
-           plotID = substr(plot, 3, 4),
-           Treatment = substr(plot, 6, 7),
-           originSiteID = case_when(destSiteID == "L" & Treatment == 'TP' ~ "G", 
+    mutate(plotID = paste(Site_Treatment, Replicate, "_"), #ignoring subplot, will make it relative below anyway
+    Cover = number_of_obs,
+    SpeciesName = ifelse(grepl("Genus:", Species), paste0(Species, ' sp.'), Species),
+    SpeciesName = gsub('Genus:', '', SpeciesName)) %>% #changed Genus: to __ sp. 
+    separate(Site_Treatment, c("destSiteID", "Treatment"), "_") %>% #called CP or TP (control or transplant)
+    mutate(originSiteID = case_when(destSiteID == "L" & Treatment == 'TP' ~ "G", 
                                   destSiteID == "L" & Treatment == 'CP' ~ "L",
                                   destSiteID == "G" & Treatment == 'CP' ~ "G")) %>% 
     mutate(Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
-    select(Year, destSiteID, originSiteID, plotID, Treatment, SpeciesName, Cover, -plot) %>%
+    select(Year, destSiteID, originSiteID, plotID, Treatment, SpeciesName, Cover) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
     mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     select(-plotID) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
   dat2 <- dat %>%  
-    filter(!is.na(Cover)) %>%
+    filter(!is.na(Cover)) %>% #no Nas, just a precaution
     group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = 100 - sum(Cover)) %>%
+    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% #No sum cover <100, pmax rebases this to zero
     bind_rows(dat) %>% 
-    filter(Cover > 0)  %>% #omg so inelegant
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) 
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>%
+    filter(Cover > 0)  
   cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
@@ -56,7 +54,7 @@ taxa <- unique(community_FR_Lautaret$SpeciesName)
 # Clean metadata
 CleanMeta_FR_Lautaret <- function(community_FR_Lautaret){
   dat <- community_FR_Lautaret %>%
-    select(-c('SpeciesName', 'Cover')) %>% 
+    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct()  %>% 
     mutate(Elevation = as.numeric(recode(destSiteID, 'G' = '2450', 'L'= '1950')),
            Gradient = 'FR_Lautaret',
