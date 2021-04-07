@@ -53,7 +53,8 @@ ImportDrakePlan <- drake_plan(
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(), 
   SE_Abisko = ImportClean_SE_Abisko(),
   FR_Lautaret = ImportClean_FR_Lautaret(), 
-  IT_MatschMazia = ImportClean_IT_MatschMazia() 
+  IT_MatschMazia1 = ImportClean_IT_MatschMazia1(),
+  IT_MatschMazia2 = ImportClean_IT_MatschMazia2()  
 )
 
 #Make taxa vectors all a dataframe with column name 'SpeciesName', keep consistent across all dataframes
@@ -65,7 +66,7 @@ MergeDrakePlan <- drake_plan(
     CH_Lavey, CH_Calanda, #CH_Calanda2,
     US_Colorado, US_Montana, US_Arizona,
     CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
-    DE_Grainau, DE_Susalps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia))
+    DE_Grainau, DE_Susalps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
 )
 
 MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
