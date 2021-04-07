@@ -17,7 +17,7 @@ ImportCommunity_US_Montana <- function(){
 # Cleaning Montana community data *** NOTE MOST CODE FOR CLEANING IS IN THE COMM DATAFRAME, IT REQUIRED BINDING DATAFRAMES WHICH DIDN'T MATCH
 CleanCommunity_US_Montana <- function(community_US_Montana_raw){
   dat <- community_US_Montana_raw %>% 
-    rename(plotID = turfID, Gradient=Region) %>% 
+    rename(plotID = turfID, Gradient = Region) %>% 
     # DDE: renamed turfID to plotID and created unique destPlotID below.
     select(Gradient, Year, originSiteID, destSiteID, plotID, Treatment, SpeciesName, Cover) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_'), 
