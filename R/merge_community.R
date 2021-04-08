@@ -8,8 +8,8 @@ merge_comm_data <- function(alldat) {
     map_df("community", .id='Region') %>%
     ungroup() %>%
     filter(!Treatment %in% c('NettedControl', 'Cold', 'Control')) %>%
-    select(Region, Year, originSiteID, originBlockID, destSiteID, destBlockID, 
-           Treatment, turfID, UniqueID, SpeciesName, Cover, Rel_Cover) #TSome unnecessary columsn in NO and CH
+    select(Region, Year, originSiteID, originBlockID, destSiteID, destBlockID, destPlotID, 
+           Treatment, turfID, UniqueID, SpeciesName, Cover, Rel_Cover) #Some unnecessary columsn in NO and CH
   
   #add metadata to organize by elevations
   meta <- alldat %>% 

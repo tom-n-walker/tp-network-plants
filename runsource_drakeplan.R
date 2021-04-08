@@ -18,7 +18,7 @@ r_make(source = "TransPlant_DrakePlan.R")
 # Load data 
 # site data available as CO_Site (Country_Site, ex. CH_Lavey is Switzerland, Lavey)
 # target dat is combined plant community abundance data for all sites (you can also write loadd(dat) to get just this target)
-loadd()
+loadd(dat)
 
 # Check all is good
 drake_failed()
