@@ -1,4 +1,5 @@
 library(FD)
+
 #use traitdat_f from communitytraits.R
 traitdat_all <- traitdat %>% mutate(SpeciesName=species) %>% 
   filter(!rowSums(is.na(.[,9:15]))==7) %>%

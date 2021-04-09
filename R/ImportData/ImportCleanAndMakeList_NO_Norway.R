@@ -121,15 +121,15 @@ ImportClean_NO_Norway <- function(g){
   con <- src_sqlite(path = file_in("data/NO_Norway/seedclim.sqlite"), create = FALSE)
   community_NO_Norway_raw = ImportCommunity_NO_Norway(con)
   taxa_NO_Norway = ImportTaxa_NO_Norway(con)
-  #trait_NO_Norway_raw = read_csv(file = file_in("data/NO_Norway/traitdata_NO.csv"))
+  trait_NO_Norway_raw = read_csv(file = file_in("data/NO_Norway/traitdata_NO.csv"))
   
   ### CLEAN DATA SETS
   meta_NO_Norway = CleanMeta_NO_Norway(meta_NO_Norway_raw) %>% 
     filter(destSiteID %in% sites)
   #metaCommunity_NO_Norway = CleanMetaCommunity_NO_Norway(metaCommunity_NO_Norway_raw, g) %>% 
   #filter(destSiteID %in% sites)
-  #trait_NO_Norway = CleanTrait_NO_Norway(trait_NO_Norway_raw) %>% 
-  #  filter(destSiteID %in% sites)
+  trait_NO_Norway = CleanTrait_NO_Norway(trait_NO_Norway_raw) %>% 
+    filter(destSiteID %in% sites)
   
   cleaned_NO_Norway = CleanCommunity_NO_Norway(community_NO_Norway_raw) 
   community_NO_Norway = cleaned_NO_Norway$comm %>% filter(destSiteID %in% sites)
@@ -139,7 +139,8 @@ ImportClean_NO_Norway <- function(g){
   NO_Norway = list(meta = meta_NO_Norway,
                    cover = cover_NO_Norway, # this is e.g. total cover of PFGs.
                    community = community_NO_Norway,
-                   taxa = taxa_NO_Norway)
+                   taxa = taxa_NO_Norway,
+                   trait = trait_NO_Norway)
   
   return(NO_Norway)
 }
