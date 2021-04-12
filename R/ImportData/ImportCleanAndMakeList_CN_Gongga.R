@@ -67,21 +67,6 @@ return(taxa_CN_Gongga)
 
 
 ### Cleaning Code ####
-#Clean trait data
-CleanTrait_CN_Gongga <- function(dat){
-  dat2 <- dat %>%
-    filter(Project %in% c("LOCAL", "0", "C")) %>%
-    mutate(Treatment = plyr::mapvalues(Project, c("C", "0", "LOCAL"), c("C", "O", "Gradient"))) %>%
-    mutate(Taxon = trimws(Taxon)) %>%
-    mutate(Year = year(Date),
-           Country = "China",
-           Gradient = as.character(1)) %>%
-    rename(BlockID = Location, SpeciesName = Taxon, destSiteID = Site) %>%
-    dplyr::select(Country, Year, destSiteID, Gradient, SpeciesName, Wet_Mass_g, Dry_Mass_g, Leaf_Thickness_Ave_mm, Leaf_Area_cm2, SLA_cm2_g, LDMC, C_percent, N_percent , CN_ratio, dN15_percent, dC13_percent, P_AVG, P_Std_Dev, P_Co_Var) %>%
-    gather(key = Trait, value = Value, -Country, -Year, -destSiteID, -Gradient, -SpeciesName) %>%
-    filter(!is.na(Value))
-  return(dat2)
-}
 
 # Cleaning community data
 CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
@@ -113,7 +98,22 @@ CleanCommunity_CN_Gongga <- function(community_CN_Gongga_raw){
 
 }
 
-  
+#Clean trait data
+CleanTrait_CN_Gongga <- function(dat){
+  dat2 <- dat %>%
+    filter(Project %in% c("LOCAL", "0", "C")) %>%
+    mutate(Treatment = plyr::mapvalues(Project, c("C", "0", "LOCAL"), c("C", "O", "Gradient"))) %>%
+    mutate(Taxon = trimws(Taxon)) %>%
+    mutate(Year = year(Date),
+           Country = "China",
+           Gradient = as.character(1)) %>%
+    rename(BlockID = Location, SpeciesName = Taxon, destSiteID = Site) %>%
+    dplyr::select(Country, Year, destSiteID, Gradient, SpeciesName, Wet_Mass_g, Dry_Mass_g, Leaf_Thickness_Ave_mm, Leaf_Area_cm2, SLA_cm2_g, LDMC, C_percent, N_percent , CN_ratio, dN15_percent, dC13_percent, P_AVG, P_Std_Dev, P_Co_Var) %>%
+    gather(key = Trait, value = Value, -Country, -Year, -destSiteID, -Gradient, -SpeciesName) %>%
+    filter(!is.na(Value))
+  return(dat2)
+}
+
 # Cleaning China Meta community (class cover) data
 # CleanMetaCommunity_CN_Gongga <- function(metaCommunity_CN_Gongga_raw){
 #   dat2 <- metaCommunity_CN_Gongga_raw %>% 

@@ -65,12 +65,24 @@ CleanMeta_FR_Lautaret <- function(community_FR_Lautaret){
   return(dat)
 }
 
+#Clean trait data
+CleanTrait_CH_Calanda <- function(dat){
+  dat2 <- dat %>%
+    rename(SpeciesName = species, Individual_number = rep, destPlotID = plot, Trait = trait, destSiteID = climate, Treatment = treatment, Value=value) %>% 
+    mutate(Country = "France",
+           Trait = recode(Trait, 'F_Mass' = 'W_Mass_g',  'D_Mass' = 'Dry_Mass_g', 'L_Area' = 'Leaf_Area_cm2', 'H_Repr' = 'Plant_Rep_Height_cm',  'H_Veg' = 'Plant_Veg_Height_cm'),
+           Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
+    dplyr::select(Country, destSiteID, Treatment, SpeciesName, Individual_number, Trait, Value) %>%
+    filter(!is.na(Value), !is.na(SpeciesName))
+  return(dat2)
+}
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
 ImportClean_FR_Lautaret <- function(){
   
   ### IMPORT DATA
   community_FR_Lautaret_raw = ImportCommunity_FR_Lautaret()
+  trait_FR_Lautaret_raw = read.table("./data/FR_Lautaret/FR_lautaret_traitdata/TransPlant_Lautaret_traits_2018_30062020.txt")
   
   ### CLEAN DATA SETS
   cleaned_FR_Lautaret = CleanCommunity_FR_Lautaret(community_FR_Lautaret_raw)
@@ -78,13 +90,15 @@ ImportClean_FR_Lautaret <- function(){
   cover_FR_Lautaret = cleaned_FR_Lautaret$cover
   meta_FR_Lautaret = CleanMeta_FR_Lautaret(community_FR_Lautaret) 
   taxa_FR_Lautaret = CleanTaxa_FR_Lautaret(community_FR_Lautaret)
+  trait_FR_Lautaret = CleanTrait_FR_Lautaret(trait_FR_Lautaret_raw)
   
   
   # Make list
   FR_Lautaret = list(meta = meta_FR_Lautaret,
                    community = community_FR_Lautaret,
                    cover = cover_FR_Lautaret,
-                   taxa = taxa_FR_Lautaret)
+                   taxa = taxa_FR_Lautaret,
+                   trait = trait_FR_Lautaret)
   
   return(FR_Lautaret)
 }

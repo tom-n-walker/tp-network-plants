@@ -21,6 +21,7 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
                                  Treatment == "veg_home" & Site %in% c("Nes","Pea","Cal") ~ "LocalControl")) %>%
     rename(destSiteID = Site, originSiteID = turf_type, Cover = Cov_Rel1, Year = year, SpeciesName = Species_Name, Collector = Botanist_Rel1, destPlotID = plot_id) %>% 
     filter(!Cover=='\xa7', !Cover == "NF") %>% 
+    mutate(Cover = gsub(',|-', '.', Cover)) %>%
     mutate(Cover=as.numeric(Cover)) %>%
     filter(!is.na(Cover)) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>%
@@ -70,16 +71,17 @@ CleanMeta_CH_Calanda <- function(community_CH_Calanda) {
 }
 
 #Clean trait data
-CleanTrait_CH_Calanda <- function(dat){
-  dat2 <- dat %>%
+CleanTrait_CH_Calanda <- function(trait_CH_Calanda_raw){
+  dat2 <- trait_CH_Calanda_raw %>%
     rename(SpeciesName = species, Individual_number = individual, destSiteID = site, Collector = collector, PlantID = unique.code) %>% #not including Year/date because clear issues in file
     rename(Wet_Mass_g = leaf.fresh.weight, Dry_Mass_g = leaf.dry.weight, Leaf_Area_cm2 = leaf.area) %>%
     mutate(Country = "Switzerland",
-           Elevation = recode(destSiteID, 'Pea'='PEAK', 'Cal'='CAL', 'Nes'='NES'),
-           Plant_Height_cm = as.numeric(height.veg.stretch), #taking only vegetative height
+           Elevation = recode(destSiteID, 'PEAK' = 'Pea', 'CAL' = 'Cal', 'NES' = 'Nes'),
+           Plant_Veg_Height_cm = as.numeric(height.veg.stretch), 
+           Plant_Rep_Height_cm = as.numeric(height.rep.stretch),
            LDMC = as.numeric(Dry_Mass_g)/as.numeric(Wet_Mass_g),
            SLA_cm2_g = as.numeric(Leaf_Area_cm2)/as.numeric(Dry_Mass_g)) %>% 
-    dplyr::select(Country, destSiteID, SpeciesName, Individual_number, PlantID, Plant_Height_cm, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2, SLA_cm2_g, LDMC) %>%
+    dplyr::select(Country, destSiteID, SpeciesName, Individual_number, PlantID, Plant_Veg_Height_cm, Plant_Rep_Height_cm, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2, SLA_cm2_g, LDMC) %>%
     gather(key = Trait, value = Value, -Country, -destSiteID, -SpeciesName, -Individual_number, -PlantID) %>%
     filter(!is.na(Value))
   return(dat2)
@@ -106,7 +108,8 @@ ImportClean_CH_Calanda <- function(){
   CH_Calanda = list(meta = meta_CH_Calanda,
                   community = community_CH_Calanda,
                   cover = cover_CH_Calanda,
-                  taxa = taxa_CH_Calanda)
+                  taxa = taxa_CH_Calanda,
+                  trait = trait_CH_Calanda)
   
   return(CH_Calanda)
 }
