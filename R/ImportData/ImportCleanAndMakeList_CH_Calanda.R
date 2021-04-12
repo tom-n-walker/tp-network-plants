@@ -74,13 +74,27 @@ CleanMeta_CH_Calanda <- function(community_CH_Calanda) {
 CleanTrait_CH_Calanda <- function(trait_CH_Calanda_raw){
   dat2 <- trait_CH_Calanda_raw %>%
     rename(SpeciesName = species, Individual_number = individual, destSiteID = site, Collector = collector, PlantID = unique.code) %>% #not including Year/date because clear issues in file
-    rename(Wet_Mass_g = leaf.fresh.weight, Dry_Mass_g = leaf.dry.weight, Leaf_Area_cm2 = leaf.area) %>%
+    rename(Wet_Mass_g = leaf.fresh.weight, Dry_Mass_g = leaf.dry.weight, Leaf_Area_cm2 = leaf.area, Plant_Veg_Height_cm = height.veg.stretch, Plant_Rep_Height_cm = height.rep.stretch) %>%
+    select(destSiteID, SpeciesName,Individual_number, PlantID, Plant_Veg_Height_cm, Plant_Rep_Height_cm, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2) %>%
+    mutate_all(~gsub(',','', .)) %>%
     mutate(Country = "Switzerland",
            Elevation = recode(destSiteID, 'PEAK' = 'Pea', 'CAL' = 'Cal', 'NES' = 'Nes'),
-           Plant_Veg_Height_cm = as.numeric(height.veg.stretch), 
-           Plant_Rep_Height_cm = as.numeric(height.rep.stretch),
-           LDMC = as.numeric(Dry_Mass_g)/as.numeric(Wet_Mass_g),
-           SLA_cm2_g = as.numeric(Leaf_Area_cm2)/as.numeric(Dry_Mass_g)) %>% 
+           Plant_Veg_Height_cm =   gsub("[^0-9.-]", "", Plant_Veg_Height_cm),
+           Plant_Veg_Height_cm = as.numeric(as.character(Plant_Veg_Height_cm)), 
+           Plant_Rep_Height_cm =   gsub("[^0-9.-]", "", Plant_Rep_Height_cm),
+           Plant_Rep_Height_cm = as.numeric(as.character(Plant_Rep_Height_cm)),
+           Dry_Mass_g =   gsub("[^0-9.-]", "", Dry_Mass_g),
+           Dry_Mass_g = as.numeric(as.character(Dry_Mass_g)),
+           Wet_Mass_g =   gsub("[^0-9.-]", "", Wet_Mass_g),
+           Wet_Mass_g =   gsub("\\..", ".", Wet_Mass_g), #a .. present in data
+           Wet_Mass_g =   gsub("NA", NA, Wet_Mass_g),
+           Wet_Mass_g = as.numeric(as.character(Wet_Mass_g)),
+           Leaf_Area_cm2 =   gsub("[^0-9.-]", "", Leaf_Area_cm2),
+           Leaf_Area_cm2 =   gsub("0", "NA", Leaf_Area_cm2),
+           Leaf_Area_cm2 =   gsub("NA", NA, Leaf_Area_cm2),
+           Leaf_Area_cm2 = as.numeric(as.character(Leaf_Area_cm2)),
+           LDMC = ifelse(!is.na(Dry_Mass_g)&!is.na(Wet_Mass_g), Dry_Mass_g/Wet_Mass_g, NA),
+           SLA_cm2_g = ifelse(!is.na(Leaf_Area_cm2)&!is.na(Dry_Mass_g), Leaf_Area_cm2/Dry_Mass_g, NA)) %>% 
     dplyr::select(Country, destSiteID, SpeciesName, Individual_number, PlantID, Plant_Veg_Height_cm, Plant_Rep_Height_cm, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2, SLA_cm2_g, LDMC) %>%
     gather(key = Trait, value = Value, -Country, -destSiteID, -SpeciesName, -Individual_number, -PlantID) %>%
     filter(!is.na(Value))
@@ -93,7 +107,7 @@ ImportClean_CH_Calanda <- function(){
   
   ### IMPORT DATA
   community_CH_Calanda_raw = ImportCommunity_CH_Calanda()
-  trait_CH_Calanda_raw = read_excel("./data/CH_Calanda/CH_Calanda_traitdata/funct_traits(101114)Excel.xlsx", sheet=1)
+  trait_CH_Calanda_raw = read_excel("./data/CH_Calanda/CH_Calanda_traitdata/funct_traits(101114)Excel.xlsx", sheet=1, na = "NA")
   
   ### CLEAN DATA SETS
   cleaned_CH_Calanda = CleanCommunity_CH_Calanda(community_CH_Calanda_raw)
