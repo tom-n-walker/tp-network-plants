@@ -70,12 +70,31 @@ CleanMeta_IT_MatschMazia2 <- function(community_IT_MatschMazia2){
   return(dat)
 }
 
+#Clean trait data
+CleanTrait_IT_MatschMazia2 <- function(trait_IT_MatschMazia2_raw){
+  trait <- trait_IT_MatschMazia2_raw %>%
+    rename(Elevation = elevation, SpeciesName = Species, Individual_number = `Rep-ID`) %>%
+    filter(Elevation != 989.80) %>%
+    rename(Wet_Mass_g = "Fresh weight, 1 leaf [g]", Dry_Mass_g = "Dry weight, 1 leaf [mg]", Leaf_Area_cm2 = "Leaf area [cm2], 1 leaf", Plant_Veg_Height_cm = "VegHt [cm]", Plant_Rep_Height_cm = "RepHt [cm]",
+           LDMC = "LDMC [mg g-1]", SLA_mm2_mg = "SLA [mm2 mg-1]",  C_percent = "Carbon [%]", N_percent = "Nitrogen [%]", N_conc_mg_g = "LNC [mg g-1]", C_conc_mg_g = "LCC [mg g-1]"  ) %>%
+    mutate_all(~gsub(',','', .)) %>%
+    mutate(Country = "Italy",
+           destSiteID = recode(Elevation,  "1476.46" = "Low", "2026.09" = "High"),
+           SLA_cm2_g = 10*as.numeric(SLA_mm2_mg),
+           CN_ratio = as.numeric(C_percent)/as.numeric(N_percent)) %>%
+    dplyr::select(Country, Elevation, destSiteID, SpeciesName, Individual_number,  Plant_Veg_Height_cm, Plant_Rep_Height_cm, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2, SLA_cm2_g, LDMC, C_percent, N_percent , CN_ratio, N_conc_mg_g, C_conc_mg_g) %>%
+    gather(key = Trait, value = Value, -Country,-Elevation, -destSiteID, -SpeciesName, -Individual_number) %>%
+    mutate(Individual_number = as.character(Individual_number), Value = as.numeric(Value)) %>%
+    filter(!is.na(Value))
+  return(trait)
+}
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
 ImportClean_IT_MatschMazia2 <- function(){
   
   ### IMPORT DATA
   community_IT_MatschMazia2_raw = ImportCommunity_IT_MatschMazia2()
+  trait_IT_MatschMazia2_raw = read_excel("./data/IT_MatschMazia/IT_MatschMazia_traitdata/Plant_Traits_Matsch_TRY_Contribution_names.xlsx", na="na")
   
   ### CLEAN DATA SETS
   cleaned_IT_MatschMazia2 = CleanCommunity_IT_MatschMazia2(community_IT_MatschMazia2_raw)
@@ -83,13 +102,15 @@ ImportClean_IT_MatschMazia2 <- function(){
   cover_IT_MatschMazia2 = cleaned_IT_MatschMazia2$cover
   meta_IT_MatschMazia2 = CleanMeta_IT_MatschMazia2(community_IT_MatschMazia2) 
   taxa_IT_MatschMazia2 = CleanTaxa_IT_MatschMazia2(community_IT_MatschMazia2)
+  trait_IT_MatschMazia2 = CleanTrait_IT_MatschMazia1(trait_IT_MatschMazia2_raw)
   
   
   # Make list
   IT_MatschMazia2 = list(meta = meta_IT_MatschMazia2,
                      community = community_IT_MatschMazia2,
                      cover = cover_IT_MatschMazia2,
-                     taxa = taxa_IT_MatschMazia2)
+                     taxa = taxa_IT_MatschMazia2,
+                     trait = trait_IT_MatschMazia2)
   
   return(IT_MatschMazia2)
 }

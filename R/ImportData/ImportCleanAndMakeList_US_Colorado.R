@@ -66,12 +66,26 @@ CleanMeta_US_Colorado <- function(community_US_Colorado){
   return(dat)
 }
 
+#Clean trait data
+CleanTrait_US_Colorado <- function(trait_US_Colorado_raw){
+  trait <- trait_US_Colorado_raw %>%
+    rename(destPlotID = turfID, SpeciesName = species, Individual_number = individual) %>%
+    rename(Wet_Mass_g = "wetMassg", Dry_Mass_g = "dryMassg", Leaf_Area_cm2 = "leafAreacm2", Plant_Veg_Height_cm = "leafHeight_cm",
+           SLA_cm2_g = "SLA",  Leaf_Thickness_Ave_mm = "thicknessAvgorSingle") %>%
+    mutate(Country = "USA") %>%
+    dplyr::select(Country, destPlotID, SpeciesName, Individual_number, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2, SLA_cm2_g, LDMC, Leaf_Thickness_Ave_mm, Plant_Veg_Height_cm) %>%
+    gather(key = Trait, value = Value, -Country, -destPlotID, -SpeciesName, -Individual_number) %>%
+    mutate(Individual_number = as.character(Individual_number), Value = as.numeric(Value)) %>%
+    filter(!is.na(Value))
+  return(trait)
+}
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
 ImportClean_US_Colorado <- function(){
   
   ### IMPORT DATA
   community_US_Colorado_raw = ImportCommunity_US_Colorado()
+  trait_US_Colorado_raw = read.csv("./data/US_Colorado/US_Colorado_traitdata/RMBLtransplant_leafTraits2018.csv")
   
   ### CLEAN DATA SETS
   cleaned_US_Colorado = CleanCommunity_US_Colorado(community_US_Colorado_raw)
@@ -79,13 +93,15 @@ ImportClean_US_Colorado <- function(){
   cover_US_Colorado = cleaned_US_Colorado$cover
   meta_US_Colorado = CleanMeta_US_Colorado(community_US_Colorado) 
   taxa_US_Colorado = CleanTaxa_US_Colorado(community_US_Colorado)
+  trait_US_Colorado = CleanTrait_US_Colorado(trait_US_Colorado_raw)
   
   
   # Make list
   US_Colorado = list(meta = meta_US_Colorado,
                    community = community_US_Colorado,
                    cover = cover_US_Colorado,
-                   taxa = taxa_US_Colorado)
+                   taxa = taxa_US_Colorado,
+                   trait = trait_US_Colorado)
   
   return(US_Colorado)
 }

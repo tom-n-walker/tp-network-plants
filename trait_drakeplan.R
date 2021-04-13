@@ -1,6 +1,7 @@
 #############################
 ### TRAIT DRAKE PLAN ########
 #############################
+#C. Chisholm, 13 April 2021
 
 # Load libraries
 library("drake")
@@ -19,64 +20,50 @@ pkgconfig::set_config("drake::strings_in_dots" = "literals")
 # trick
 pn <- . %>% print(n = Inf)
 
-# Source trait cleaning scripts
-path <- c('./R/ImportTraitData/')    
-source_files <- list.files(path, "\\.R$")  
-map(paste0(path, source_files), source)
-
 # Source downstream scripts
 source("R/clean_taxonomy.R")
 source("R/Name_repair.R")
-
-# Import field collected trait data
-ImportTraitDrakePlan <- drake_plan(
-  
-  # Get TRY data (cleaned) 
-  taxa = get_species(),
-  
-  cleaned = resolve_species(taxa),
-  
-  traits <- load_wrangle_try(cleaned)
-  
-)
+source("R/merge_traits.R")
 
 
 # Import TRY Data
-TRYDrakePlan <- drake_plan(
+ImportTRYDrakePlan <- drake_plan(
 
 taxa = get_species(),
 
 cleaned = resolve_species(taxa),
 
-traits <- load_wrangle_try(cleaned)
+trytraits = load_wrangle_try(cleaned)
 
 )
 
-# Merge Trait Data
-TRYDrakePlan <- drake_plan(
-  
-  taxa = get_species(),
-  
-  cleaned = resolve_species(taxa),
-  
-  traits <- load_wrangle_try(cleaned)
-  
+# Merge Field-collected trait data
+
+MergeTraitDrakePlan <- drake_plan(
+  sitetraits = merge_trait_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+                                             CH_Calanda, US_Colorado, CN_Gongga, FR_AlpeHuez, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
 )
 
-# Check and Clean Trait Data
-TRYDrakePlan <- drake_plan(
-  
-  taxa = get_species(),
-  
-  cleaned = resolve_species(taxa),
-  
-  traits <- load_wrangle_try(cleaned)
-  
-)
+# CleanTraitDrakePlan <- drake_plan(
+#   
+#   #add cleaning script here, see error risk from tundra trait team as an example
+# )
 
+MyPlan <- bind_rows(ImportTRYDrakePlan, MergeTraitDrakePlan)
 
+conf <- drake_config(MyPlan)
+conf
 
+make(MyPlan)
 
+# Load data (sitetraits and trytraits)
+loadd()
+
+# Check all is good
+drake_failed()
+
+# View dependency graph
+vis_drake_graph(MyPlan)
 
 #Checked names! Everything w/o replacement ok
 # Pulsatilla vernalis

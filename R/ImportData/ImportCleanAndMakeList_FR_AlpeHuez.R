@@ -76,12 +76,38 @@ CleanTaxa_FR_AlpeHuez <- function(community_FR_AlpeHuez){
   return(taxa)
 }
 
+#Clean trait data
+CleanTrait_FR_Lautaret <- function(dat){
+  dat2 <- dat %>%
+    rename(SpeciesName = species, Individual_number = rep, destPlotID = plot, Trait = trait, destSiteID = climate, Treatment = treatment, Value=value) %>% 
+    mutate(Country = "France",
+           Trait = recode(Trait, 'F_Mass' = 'W_Mass_g',  'D_Mass' = 'Dry_Mass_g', 'L_Area' = 'Leaf_Area_cm2', 'H_Repr' = 'Plant_Rep_Height_cm',  'H_Veg' = 'Plant_Veg_Height_cm'),
+           Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
+    dplyr::select(Country, destSiteID, Treatment, SpeciesName, Individual_number, Trait, Value) %>%
+    filter(!is.na(Value), !is.na(SpeciesName))
+  return(dat2)
+}
+
+#Clean trait data
+CleanTrait_FR_AlpeHuez <- function(trait_FR_AlpeHuez_raw){
+  trait <- bind_rows(trait_FR_AlpeHuez_raw[1:15,], trait_FR_AlpeHuez_raw[20:36,], .id = 'destSiteID') %>%
+    mutate(Country = 'France',
+           destSiteID = recode(destSiteID, '1'='LOW', '2' = 'HIGH'), 
+           SpeciesName = paste(LOW, ...2, sep = ' '),
+           Trait = 'Plant_Veg_Height_cm') %>%
+    dplyr::select(-LOW, -`...2`) %>%
+    gather(key = Individual_number, value = Value, -Country, -SpeciesName, -destSiteID, -Trait) %>%
+    mutate(Individual_number = as.character(Individual_number), Value = as.numeric(Value)) %>%
+    filter(!is.na(Value))
+  return(trait)
+}
 
 #### IMPORT, CLEAN AND MAKE LIST #### 
 ImportClean_FR_AlpeHuez <- function(){
   
   ### IMPORT DATA
   community_FR_AlpeHuez_raw = ImportCommunity_FR_AlpeHuez()
+  trait_FR_AlpeHuez_raw = read_excel("./data/FR_AlpeHuez/FR_AlpeHuez_traitdata/2019-HUEZ-TRAITS-SP-SELECTION.xlsx", sheet=6)
   
   ### CLEAN DATA SETS
   cleaned_FR_AlpeHuez = CleanCommunity_FR_AlpeHuez(community_FR_AlpeHuez_raw)
@@ -89,13 +115,15 @@ ImportClean_FR_AlpeHuez <- function(){
   cover_FR_AlpeHuez = cleaned_FR_AlpeHuez$cover
   meta_FR_AlpeHuez = CleanMeta_FR_AlpeHuez(community_FR_AlpeHuez) 
   taxa_FR_AlpeHuez = CleanTaxa_FR_AlpeHuez(community_FR_AlpeHuez)
+  trait_FR_AlpeHuez = CleanTrait_FR_AlpeHuez(trait_FR_AlpeHuez_raw)
   
   
   # Make list
   FR_AlpeHuez = list(meta = meta_FR_AlpeHuez,
                         community = community_FR_AlpeHuez,
                         cover = cover_FR_AlpeHuez,
-                        taxa = taxa_FR_AlpeHuez)
+                        taxa = taxa_FR_AlpeHuez,
+                        trait = trait_FR_AlpeHuez)
   
   
   return(FR_AlpeHuez)

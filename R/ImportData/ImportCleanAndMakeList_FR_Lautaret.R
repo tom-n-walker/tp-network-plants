@@ -66,13 +66,14 @@ CleanMeta_FR_Lautaret <- function(community_FR_Lautaret){
 }
 
 #Clean trait data
-CleanTrait_CH_Calanda <- function(dat){
+CleanTrait_FR_Lautaret <- function(dat){
   dat2 <- dat %>%
     rename(SpeciesName = species, Individual_number = rep, destPlotID = plot, Trait = trait, destSiteID = climate, Treatment = treatment, Value=value) %>% 
     mutate(Country = "France",
            Trait = recode(Trait, 'F_Mass' = 'W_Mass_g',  'D_Mass' = 'Dry_Mass_g', 'L_Area' = 'Leaf_Area_cm2', 'H_Repr' = 'Plant_Rep_Height_cm',  'H_Veg' = 'Plant_Veg_Height_cm'),
            Treatment = recode(Treatment, "CP" = "LocalControl", "TP" = "Warm")) %>%
     dplyr::select(Country, destSiteID, Treatment, SpeciesName, Individual_number, Trait, Value) %>%
+    mutate(Individual_number = as.character(Individual_number), Value = as.numeric(Value)) %>%
     filter(!is.na(Value), !is.na(SpeciesName))
   return(dat2)
 }
