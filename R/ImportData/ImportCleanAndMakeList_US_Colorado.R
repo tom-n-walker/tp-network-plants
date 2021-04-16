@@ -2,9 +2,11 @@
 ### US_Colorado  ###
 ####################
 
+source("R/ImportData/community_US_Colorado/load_us_col.r")
+
 #### Import Community ####
 ImportCommunity_US_Colorado <- function(){
-  community_US_Colorado_raw<-read_csv(file = "./data/US_Colorado/US_Colorado_commdata/RMBLtransplant_speciesCover2018.csv")
+  community_US_Colorado_raw<-load_cover_US_Colorado()
   return(community_US_Colorado_raw)
 } 
 
@@ -13,17 +15,14 @@ ImportCommunity_US_Colorado <- function(){
 # Cleaning Colorado community data
 CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
   dat <- community_US_Colorado_raw %>% 
-    select(-c(pos1.1:pos5.5)) %>% 
     rename(SpeciesName = species, Cover = percentCover) %>% 
-    mutate(Year = year(ymd(date_yyyymmdd)), 
-           destSiteID = substr(turfID, 1, 2),
+    mutate(destSiteID = substr(turfID, 1, 2),
            destBlockID = substr(turfID, 3, 3),
            Treatment = substr(turfID, 7, 8),
            originSiteID = substr(turfID, nchar(turfID)-4, nchar(turfID)-3),
            originBlockID = substr(turfID, nchar(turfID)-2, nchar(turfID)-2)) %>% 
       mutate(Treatment = recode(Treatment, "c1" = "Cold", "c2" = "Cold", "w1" = "Warm", "w2" = "Warm", "nu" = "NettedControl", "u_" = "Control", "ws" = "LocalControl")) %>% 
     rename(destPlotID = turfID) %>% 
-    select(-date_yyyymmdd, -comments) %>%
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, destPlotID, sep='_'), Collector='Laura', SpeciesName = recode(SpeciesName, 'Rock' = "rock", 'Moss' = "moss")) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
   
