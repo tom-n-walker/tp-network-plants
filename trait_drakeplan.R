@@ -13,6 +13,7 @@ library("e1071")
 library("DBI")
 library("RSQLite")
 library("visNetwork")
+library("TR8")
 
 # drake configurations
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
@@ -22,7 +23,7 @@ pn <- . %>% print(n = Inf)
 
 # Source downstream scripts
 source("R/clean_taxonomy.R")
-source("R/Name_repair.R")
+source("R/Name_repair.R") #for sp_codes for No, US and Sweden where they use species codes in dat
 source("R/merge_traits.R")
 
 
@@ -37,11 +38,17 @@ trytraits = load_wrangle_try(cleaned)
 
 )
 
-# Merge Field-collected trait data
+# Merge field-collected trait data
 
-MergeTraitDrakePlan <- drake_plan(
-  sitetraits = merge_trait_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+ImportSiteTraitDrakePlan <- drake_plan(
+  sitetraits = merge_site_trait_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
                                              CH_Calanda, US_Colorado, CN_Gongga, FR_AlpeHuez, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
+)
+
+# Merge all trait data
+
+ MergeTraitDrakePlan <- drake_plan(
+   alltraits = merge_trait_data(traits = tibble::lst(trytraits, sitetraits, dat))
 )
 
 # CleanTraitDrakePlan <- drake_plan(
@@ -49,14 +56,13 @@ MergeTraitDrakePlan <- drake_plan(
 #   #add cleaning script here, see error risk from tundra trait team as an example
 # )
 
-MyPlan <- bind_rows(ImportTRYDrakePlan, MergeTraitDrakePlan)
+MyPlan <- bind_rows(ImportTRYDrakePlan, ImportSiteTraitDrakePlan, MergeTraitDrakePlan)
 
 conf <- drake_config(MyPlan)
 conf
 
 make(MyPlan)
 
-# Load data (sitetraits and trytraits)
 loadd()
 
 # Check all is good

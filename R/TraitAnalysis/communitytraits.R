@@ -2,10 +2,13 @@
 #Analysing CWM trends in functional traits
 
 # Source traits drakeplan
-source('./name_and_traits_drakeplan.R')
+source('./trait_drakeplan.R') #gives us dataset alltraits (dat + cleaned trait data)
 
 # Source ggplot theme
 source('./R/theme_ggplot.R')
+
+dat <- alltraits %>% select(Country, Region, Year, originSiteID, destSiteID, Treatment, destPlotID, SpeciesName, species, Rel_Cover, Plant_Veg_Height_cm, Leaf_Area_cm2, SLA_cm2_g, C_percent, N_percent, P_percent, Seed_Mass, Stem_density) %>%
+  rename(plant_height = Plant_Veg_Height_cm, leaf_area = Leaf_Area_cm2, SLA = SLA_cm2_g , leaf_C = C_percent , leaf_N = N_percent, leaf_P = P_percent, seed_mass = Seed_Mass, SD = Stem_density)
 
 # Create ODT treatment and nest data
 dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
@@ -21,32 +24,26 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
   })) 
 
 # Unnest species and lengthen dataframe
-speclist <- dd %>% select(comm) %>% unnest(comm) %>% left_join(., sp_codes, by=c('SpeciesName'='code')) %>%
-  mutate(species = ifelse(!is.na(taxa), taxa, SpeciesName)) %>%
-  filter(!is.na(species), !is.na(SpeciesName)) %>%
-  select(Region, Year, originSiteID, destSiteID, ODT, destPlotID, SpeciesName, Rel_Cover, taxa, species)
-
-# Match with try trait data
-trait_g <-traits$species_only
-traitdat <- left_join(speclist, trait_g, by = c("species" = "original_name"))
+traitdat <- dd %>% select(comm) %>% unnest(comm) 
 
 # Calculate coverage of traits per plot
-coverage <- traitdat %>% group_by(Region, Year, destSiteID, destPlotID) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA'), ~mean(is.na(.))) #using all data
-coverage %>% group_by(Region) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA'), ~sum(.==1))
-coverage %>% group_by(Region) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA'), ~sum(.>0.5))
-coverage_f <- traitdat %>% filter(Rel_Cover > 0.05) %>% group_by(Region, Year, destSiteID, destPlotID) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA'), ~mean(is.na(.))) #first subsetting plants <10% cover
-coverage %>% group_by(Region) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA'), ~sum(.==1))
-# this removed ~300 plots (500 if >0.1) 
+coverage <- traitdat %>% group_by(Region, Year, destSiteID, destPlotID) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA', 'leaf_area', 'seed_mass', 'SD'), ~mean(is.na(.))) #using all data
+coverage %>% group_by(Region) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA', 'leaf_area', 'seed_mass', 'SD'), ~sum(.==1))
+coverage %>% group_by(Region) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA', 'leaf_area', 'seed_mass', 'SD'), ~sum(.>0.5))
+coverage_f <- traitdat %>% filter(Rel_Cover > 0.05) %>% group_by(Region, Year, destSiteID, destPlotID) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA','leaf_area', 'seed_mass', 'SD'), ~mean(is.na(.))) #first subsetting plants <10% cover
+coverage %>% group_by(Region) %>% summarise_at(.vars=c('leaf_C', 'leaf_P', 'leaf_N', 'plant_height', 'SLA', 'leaf_area', 'seed_mass', 'SD'), ~sum(.==1))
+# this removed ~50 plots (500 if >0.1) 
 
 # Scaling traits and removing species with zero trait values
-traitdat <- traitdat %>% select(Region, Year, originSiteID, destSiteID, ODT, destPlotID, species, Rel_Cover, leaf_area:SLA) %>% tibble() %>%
+traitdat <- traitdat %>% select(Region, Year, originSiteID, destSiteID, ODT, destPlotID, species, Rel_Cover, plant_height:SD) %>% tibble() %>%
                  filter(Rel_Cover > 0.1) 
-traitdat_f <- traitdat %>% filter(!rowSums(is.na(.[,9:15]))==7)
+traitdat_f <- traitdat %>% filter(!rowSums(is.na(.[,9:16]))==8)
 
 # Calculate CWMs
 CWM <- traitdat_f %>% group_by(Region, Year, destSiteID, ODT, destPlotID) %>%
-  summarise(across(.cols= leaf_area:SLA, .fns = list(CWM = ~weighted.mean({.}, Rel_Cover, na.rm=T)))) %>%
-  pivot_longer(leaf_area_CWM:SLA_CWM, names_to="CWM") 
+  summarise(across(.cols= plant_height:SD, .fns = list(CWM = ~weighted.mean({.}, Rel_Cover, na.rm=T)))) %>%
+  pivot_longer(plant_height_CWM:SD_CWM, names_to="CWM") %>%
+  filter(!is.na(value), value>0, value != 'Inf')
 
 # Plot change in CWMs over time
 colour_odt <- c("#A92420", "#016367", "#FBC00E")
@@ -55,20 +52,23 @@ CWM %>%
   group_by(Region) %>% mutate(Year_diff=max(Year - min(Year))) %>%
   ungroup() %>%
   filter(Year_diff > 0, !is.na(value)) %>%
-  group_by(Region, destSiteID, ODT, CWM) %>%
+  group_by(Region, destSiteID, ODT, destPlotID, CWM) %>%
   nest() %>% 
+  mutate(npoints = map_int(data, nrow)) %>%
+  filter(npoints > 2) %>%
   mutate(model = map(data, ~lm(log(value) ~ Year, data = .x))) %>% 
-  mutate(tidied = map(model, tidy)) #%>% 
+  mutate(tidied = map(model, broom::tidy)) %>% 
   unnest(tidied) %>%
-  filter(term == 'Year', CWM != "leaf_C_CWM") %>% #ODT == "warmed"
-  ggplot(aes(x=abs(estimate), fill=ODT)) + 
-  geom_density(adjust = 3, alpha=0.2) + 
-  scale_fill_manual(values = colour_odt) + 
+  filter(term == 'Year') %>% #, CWM != "leaf_C_CWM") %>% #ODT == "warmed"
+  ggplot(aes(x=estimate, y=ODT, col = ODT)) + 
+  geom_pointrange(aes(xmin=min(estimate), xmax=max(estimate)), adjust = 3, alpha=0.2) + #used to be geom_density
+  geom_errorbar(aes(xmin = min(estimate), xmax = max(estimate)), width = 0.2) +
+  scale_color_manual(values = colour_odt) + 
   xlim(-0.5, 0.5) +
   TP_theme() + 
   labs(x=expression(Delta*Slope)) +
   labs(color="Treatment", y="Number of communities") +
-  facet_wrap(~CWM) +
+  facet_wrap(~CWM, scales = 'free') +
   geom_vline(xintercept=0, linetype="dashed", 
              color = "grey", size=1) 
 
@@ -86,7 +86,7 @@ CWM %>%
   TP_theme() + 
   labs(x="Treatment") +
   labs(color="Treatment", y="log(SLA)") +
-  facet_wrap(~Region) 
+  facet_wrap(~Region, scales='free') 
 
 CWM %>%
   group_by(Region) %>% mutate(Year=max(Year)) %>%
@@ -99,6 +99,6 @@ CWM %>%
   TP_theme() + 
   labs(x="Treatment") +
   labs(color="Treatment", y="log(Plant Height)") +
-  facet_wrap(~Region) 
+  facet_wrap(~Region, scales='free') 
 
 
