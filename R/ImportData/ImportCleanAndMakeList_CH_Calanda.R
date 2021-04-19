@@ -30,7 +30,8 @@ CleanCommunity_CH_Calanda <- function(community_CH_Calanda_raw) {
     # only select control, local control, warm/down transplant
     filter(Treatment %in% c("LocalControl", "Warm")) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))  %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) 
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
+    filter(destPlotID != "CalNA.NA")
   
   dat2 <- dat %>%  
     group_by_at(vars(-SpeciesName, -Cover)) %>%

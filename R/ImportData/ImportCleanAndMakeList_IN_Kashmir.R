@@ -16,8 +16,8 @@ ImportCommunity_IN_Kashmir <- function(){
 CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
     dat <- community_IN_Kashmir_raw %>% 
     mutate(destPlot = paste (REGION, SITE, BLOCK, PLOT, sep = ".")) %>% 
-    select(c(SITE:`cover class`), destPlot, -PLOT) %>% 
-      rename(SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , Treatment = TREATMENT , Year = YEAR)%>%
+    select(c(SITE:`cover class`), destPlot, -PLOT, PLOT.ID) %>% 
+      rename(Collector = collector, SpeciesName = `Species name` , Cover = `cover class` , destSiteID = SITE , destBlockID = BLOCK , Treatment = TREATMENT , Year = YEAR)%>%
       mutate(SpeciesName = recode(SpeciesName, "Fragaria spp" = "Fragaria sp." , "Ranunculus spp" = "Ranunculus sp.", "Pinus spp" = "Pinus sp.", "CYANODON dACTYLON" = "Cyanodon dactylon", "Hordeum spp" = "Hordeum sp.", "Rubus spp" = "Rubus sp.", "Cyanodondactylon" = "Cyanodon dactylon")) %>% 
 
       mutate(originSiteID = str_replace(Treatment, '(.*)_.*', "\\1"), 
@@ -29,8 +29,11 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
 # Create new destplotID and UniqueID)     
       mutate(destPlotID = paste(originSiteID, destSiteID, destBlockID, sep='_')) %>% 
       mutate(UniqueID = paste(destPlotID, Year, sep='_')) %>% 
-      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)  
-    
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)  %>%
+      distinct() %>% #one duplicated row in original dataframe
+      group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, Collector, SpeciesName) %>%
+      summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
+      ungroup()
 
     
  dat2<- dat %>%  

@@ -33,7 +33,12 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
     mutate(UniqueID = paste(Year, destPlotID, sep='_')) %>% 
     group_by(UniqueID, Year, originSiteID, destSiteID, destPlotID, Treatment) %>%
     select(-PlotID, -plotNo) %>% ungroup() %>%
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
+    distinct() %>% #removed 9 instances of duplication
+    group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, SpeciesName) %>%
+    summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
+    ungroup()
+  
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%

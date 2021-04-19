@@ -7,8 +7,8 @@ load_cover_US_Montana <- function(){
 
   cover <- dat %>% 
     rename(destSiteID=Elevation, turfID=Plot, SpeciesName=Species)  %>%
-    filter(!grepl("soil",Disturb_treat)) %>% #what to do about inside vs outside in column Location? ignored for now
-    select(-Location) %>%
+    filter(!grepl("soil",Disturb_treat)) %>% 
+    select(-Location) %>% #Tim said we could remove this, was just for the tech to find the right plot
     mutate(Treatment = case_when(Disturb_treat == "lowland_community" & destSiteID=="low" ~ "LocalControl",
                                  Disturb_treat == "Alpine_community" & destSiteID == "low" ~ "Warm",
                                  Disturb_treat == "Alpine_community" & destSiteID == "mid" ~ "LocalControl")) %>% #I remember Tim saying they transplanted alpine turfs downward to both middle and low. so here we are...

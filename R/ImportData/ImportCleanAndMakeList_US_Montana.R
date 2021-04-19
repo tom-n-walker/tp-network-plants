@@ -24,7 +24,11 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
            Collector ='Tim', Cover = as.numeric(Cover),
            destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     select(-plotID) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
+    distinct() %>% #one duplicated row in original dataframe
+    group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, SpeciesName) %>%
+    summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
+    ungroup()
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
@@ -58,11 +62,13 @@ CleanMeta_US_Montana <- function(community_US_Montana){
   dat <- community_US_Montana %>% 
     select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
     distinct() %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1985', 'Middle'= '2185', 'High'='2620')), #need to figure this out
+    mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1985', 'High'='2185')), #'Low' = '1985', 'Middle'= '2185', 'High'='2620', but we only use low and mid
+           Gradient = 'US_Montana',
            Country = 'USA',
            YearEstablished = 2013,
            destBlockID = NA,
-           PlotSize_m2 = NA) #need to find this
+           PlotSize_m2 = NA, #need to find this
+           Gradient = "US_Montana") 
   
   return(dat)
 }

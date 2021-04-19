@@ -35,7 +35,11 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
            select(-Date) %>% 
       mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
       mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
-      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
+      distinct() %>% #duplicated row in original dataframe
+      group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, Collector, SpeciesName) %>%
+      summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
+      ungroup()
     
     dat2 <- dat %>%  
       filter(!is.na(Cover)) %>%

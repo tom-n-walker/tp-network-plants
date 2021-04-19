@@ -14,7 +14,8 @@ ImportCommunity_FR_Lautaret <- function(){
 # Cleaning Lautaret community data
 CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
   dat <- community_FR_Lautaret_raw %>% 
-    mutate(plotID = paste(Site_Treatment, Replicate, "_"), #ignoring subplot, will make it relative below anyway
+    filter(Subplot %in% c('0','B')) %>% #Choosing 0 subplot (controls) and B subplot (treatment) as it had no added individuals into it
+    mutate(plotID = paste(Site_Treatment, Replicate, "_"), 
     Cover = number_of_obs,
     SpeciesName = ifelse(grepl("Genus:", Species), paste0(Species, ' sp.'), Species),
     SpeciesName = gsub('Genus:', '', SpeciesName)) %>% #changed Genus: to __ sp. 
@@ -27,7 +28,11 @@ CleanCommunity_FR_Lautaret <- function(community_FR_Lautaret_raw){
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, plotID, sep='_')) %>% 
     mutate(destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     select(-plotID) %>% 
-    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+    mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
+    distinct() %>% #one duplicated row in original dataframe
+    group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, SpeciesName) %>%
+    summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
+    ungroup()
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>% #no Nas, just a precaution

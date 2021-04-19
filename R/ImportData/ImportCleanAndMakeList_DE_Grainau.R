@@ -22,7 +22,11 @@ CleanCommunity_DE_Grainau <- function(community_DE_Grainau_raw){
                                  Treatment =="high_turf" & destSiteID == "HIGH" ~ "LocalControl")) %>% 
       mutate(Cover = recode(Cover, `1` = 0.5 , `2` = 1 , `3` = 3.5 , `4` = 8 , `5` = 15.5 , `6` = 25.5 , `7` = 35.5 , `8` = 45.5 , `9` = 55.5 , `10` = 65.5 , `11` = 75.5 , `12` = 85.5 , `13` = 95.5 )) %>% 
       mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_'))  %>% 
-      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA)
+      mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
+      distinct() %>% #one duplicated row in original dataframe
+      group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, Collector, SpeciesName) %>%
+      summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
+      ungroup()
     
     dat2 <- dat %>%  
       filter(!is.na(Cover)) %>%
