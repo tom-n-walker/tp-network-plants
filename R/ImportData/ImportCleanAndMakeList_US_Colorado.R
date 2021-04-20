@@ -25,7 +25,8 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
     rename(destPlotID = turfID) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destBlockID, destPlotID, sep='_'), Collector='Laura', SpeciesName = recode(SpeciesName, 'Rock' = "rock", 'Moss' = "moss")) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
-    distinct() #removes Viola nuttallii which was doubled in 2019
+    distinct() %>% #removes Viola nuttallii which was doubled in 2019
+    filter(!destBlockID %in% c("6")) #filter out new turfs added end of 2018 (though this could be useful for single year of data for non-temporal analyses)
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%

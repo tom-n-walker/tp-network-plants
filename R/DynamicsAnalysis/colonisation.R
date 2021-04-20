@@ -15,13 +15,10 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
       warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
       .id = "ODT") 
   })) %>% 
-  filter(!Region %in% c("US_Colorado")) %>%
   mutate(specrich = map(comm, ~ {.} %>% group_by(Year, destPlotID) %>% summarize(SR=n_distinct(SpeciesName))), 
          colonisation = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "appearance")),
          extinction = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "disappearance")),
          turnover = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "total"))) 
-
-# US_Colorado = ImportClean_US_Colorado(), :x zero-length inputs cannot be mixed with those of non-zero length
 
 #### Plot SR patterns ####
 #dest control, origin control, warmed
@@ -349,9 +346,6 @@ dd %>%
   labs(color="Process") 
 
 
-#ISSUES WITH MULTIPLE SPECIES: "DE_Grainau", "US_Montana", "CN_Heibei", "FR_AlpeHuez"
-#ISSUES WITH DESTPLOT ID: "CH_Calanda", "US_Colorado", "FR_Lautaret"
-#Keep in mind, Colorado, Lautaret will have only one year of data, so Calanda is really the only issue here
 
 #### Extra code ####
 # ##Code with only points for plotting
