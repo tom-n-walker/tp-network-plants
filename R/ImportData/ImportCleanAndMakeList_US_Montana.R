@@ -25,10 +25,7 @@ CleanCommunity_US_Montana <- function(community_US_Montana_raw){
            destPlotID = paste(originSiteID, destSiteID, plotID, sep='_')) %>% 
     select(-plotID) %>% 
     mutate(destPlotID = as.character(destPlotID), destBlockID = if (exists('destBlockID', where = .)) as.character(destBlockID) else NA) %>%
-    distinct() %>% #one duplicated row in original dataframe
-    group_by(Year, originSiteID, destSiteID, destBlockID, destPlotID, UniqueID, Treatment, SpeciesName) %>%
-    summarize(Cover = sum(Cover, na.rm=T)) %>% #had one species which occured twice in a plot, summing across
-    ungroup()
+    distinct() 
   
   dat2 <- dat %>%  
     filter(!is.na(Cover)) %>%
