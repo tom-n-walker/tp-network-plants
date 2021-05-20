@@ -1,4 +1,17 @@
-traitdat_all <- traitdat_f %>% mutate(SpeciesName=species)
+
+#use trait_f from invadertraits_odt.R for trait data
+#traitdat_all <- traitdat_f %>% mutate(SpeciesName=species)
+
+# Use alltraits from trait_drakeplan.R
+traitdat_all <- alltraits %>% mutate(SpeciesName=species) %>% select(-species)
+
+# match with traitdat_f from invadertraits_odt.R to get invaders listed
+trait_invader <- traitdat_f %>% mutate(SpeciesName=species) %>% select(originSiteID:SpeciesName, -species)
+
+#create community matrix for all sites
+tr_dat <- traitdat_all %>% left_join(., trait_invader) #%>% #need year so right join instead of left
+  #filter(!rowSums(is.na(.[,8:14]))==7) %>%
+  #filter(!is.na(Rel_Cover))
 
 # create comm matrix for each region
 dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
@@ -24,13 +37,6 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
              select(invader, leaf_area:SLA)}))
 
   
-
-#use trait_f from invadertraits_odt.R for trait data
-#create community matrix for all sites
-tr_dat <- traitdat_all %>% right_join(., dat) %>% #need year so right join instead of left
-  filter(!rowSums(is.na(.[,8:14]))==7) %>%
-  filter(!is.na(Rel_Cover))
-  
 # create wide format trait dataframes (without year)
 tr_wide <-tr_dat %>% group_by(Region, originSiteID, destSiteID) %>%
   nest() %>%
@@ -52,8 +58,8 @@ tr_wide <-tr_dat %>% group_by(Region, originSiteID, destSiteID) %>%
 
 # Calculate invasive total cover per plot
 tr_results <- tr_dat %>% 
-      select(Region, Year, destSiteID, ODT, destPlotID, invader, SpeciesName, Rel_Cover) %>%
-      group_by(Region, destSiteID, ODT, Year, destPlotID, invader) %>%
+      select(Region, Year, originSiteID, destSiteID, ODT, destPlotID, invader, SpeciesName, Rel_Cover) %>%
+      group_by(Region, Year, originSiteID, destSiteID, ODT, destPlotID, invader) %>%
       summarise(Total_cover = sum(Rel_Cover, na.rm=T)) 
       
 

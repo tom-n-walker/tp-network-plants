@@ -22,13 +22,13 @@ dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>%
       warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
       .id = "ODT") 
   })) %>% 
-  filter(Region %in% c("NO_Skjellingahaugen", "NO_Gudmedalen", "NO_Lavisdalen", "NO_Ulvhaugen", "CH_Lavey", "CN_Damxung", "CN_Gongga", "US_Arizona", "DE_Susalps", "SE_Abisko", "IT_MatschMazia1", "IT_MatschMazia2", "DE_Grainau")) %>%
   mutate(specrich = map(comm, ~ {.} %>% group_by(Year, destPlotID) %>% summarize(SR=n_distinct(SpeciesName))), 
          colonisation = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "appearance")),
          extinction = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "disappearance")),
          turnover = map(comm, ~turnover(.x, time.var= "Year", species.var= "SpeciesName", abundance.var= "Rel_Cover", replicate.var="destPlotID", metric = "total"))) 
 
 ddd <- dd %>%
+  filter(!Region %in% c("FR_Lautaret", "IN_Kashmir", "US_Colorado")) %>%
   mutate(comm_sim = map(comm, ~.x %>% select(ODT, destPlotID) %>% distinct())) %>%
   mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
     C <- C %>% rename(value = appearance)

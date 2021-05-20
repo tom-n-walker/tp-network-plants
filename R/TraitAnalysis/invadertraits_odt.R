@@ -37,7 +37,7 @@ inv_spfixed <- inv %>%
 inv_fixed <- inv_spfixed %>% unnest(comm_6) 
 
 # Match with try trait data
-trait_g <-traits$species_only
+trait_g <-traits$trytraits$genus_species
 traitdat <- left_join(inv_fixed, trait_g, by = c("species" = "original_name"))
 
 # Scaling traits

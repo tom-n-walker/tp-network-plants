@@ -1,8 +1,7 @@
 #### COMMUNITY TRAITS ANALYSIS (CWM) ####
 #Analysing CWM trends in functional traits
 
-# Source traits drakeplan
-source('./trait_drakeplan.R') #gives us dataset alltraits (dat + cleaned trait data)
+# Source traits drakeplan from runsource_traitplan.R first before running this script. Have removed originSiteID from trait drake plant 'merge_traits', should I add that back in?
 
 # Source ggplot theme
 source('./R/theme_ggplot.R')

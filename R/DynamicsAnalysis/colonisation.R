@@ -83,7 +83,6 @@ dd %>% filter(!Region %in% c("FR_Lautaret", "IN_Kashmir", "US_Colorado")) %>%
 
 
 #### Plot C, E and T for only transplanted turfs ####
-colour_comdyn <- c("#fe875d", "#356288", "black")
 colour_comdyn <- c("#49BEB7", "black", "black")
 #"#7496D2", "#CECD7B"
 #c("#fe875d", "#49BEB7", "black")
@@ -105,7 +104,7 @@ dd %>%
   geom_smooth(aes(group=comdyn, color=comdyn), method='lm', se=F) +
   facet_wrap(~Region, nrow=2) +
   TP_theme() + 
-  scale_x_continuous(breaks=c(2011,2013,2015, 2017)) + 
+  scale_x_continuous(breaks=c(2011,2013,2015,2017)) + 
   labs(color="Process", y="Proportional change", x='Year') 
 
 #On one graph, with years scaled to 0 +
@@ -344,6 +343,33 @@ dd %>%
   TP_theme() + 
   labs(y="Number of sites", x=expression(Delta*Slope)) +
   labs(color="Process") 
+
+
+
+#### Plot colonisation of invaders vs. local species ####
+dd %>% filter(!Region %in% c("FR_Lautaret", "IN_Kashmir", "US_Colorado")) %>%
+  mutate(comm_sim = map(comm, ~.x %>% mutate(Year_diff=max(Year - min(Year))) %>%
+                          select(Elevation, Year_diff, ODT, destPlotID) %>% 
+                          distinct())) %>% 
+  mutate(dat = pmap(.l = list(C=colonisation, E=extinction, To=turnover), .f = function(C, E, To){
+    C <- C %>% rename(value = appearance)
+    E <- E %>% rename(value = disappearance)
+    To <- To %>% rename(value = total)
+    bind_rows('C' = C,'E'= E, 'T' = To, .id='comdyn')})) %>% 
+  mutate(dat = map2(dat, comm_sim, ~left_join(.x, .y, by = "destPlotID"))) #%>%
+  mutate(dat = map(dat, ~.x %>% filter(ODT == "warmed"))) %>%
+  unnest(dat) %>% 
+  group_by(Region, Year_diff, comdyn) %>%
+  nest() %>% 
+  unnest(dat) %>%
+  ggplot(aes(x = Year, y = appearance)) + 
+  scale_colour_manual(values = colour_odt) + 
+  geom_line(aes(group=destPlotID, color=ODT), alpha=0.2) +
+  geom_smooth(aes(group = ODT, color=ODT), method = "lm", se = F) +
+  facet_wrap(~Region, nrow=2) +
+  TP_theme() + 
+  scale_x_continuous(breaks=c(2010,2013,2016)) + 
+  labs(title = 'Colonisation over time', color = "Treatment") 
 
 
 
