@@ -1,5 +1,6 @@
 dat <- dat %>% filter(!is.na(Rel_Cover))#4 NAs in DE_Susalps, correct that in cleaning file
 source('R/theme_ggplot.R')
+library("patchwork")
 
 #### RUN PCA AND EXTRACT DISTANCES ####
 dd <- dat %>% 
@@ -38,8 +39,6 @@ dd2 <- dd %>%
   unnest(distances)
 
 #### PLOT PCA ####
-source('R/theme_ggplot.R')
-library("patchwork")
 colour_otd <- c("orange", "blue","green3")
  
 pmap(dd, function(scores, Region, originSiteID, ...){
@@ -234,14 +233,6 @@ dd_ind_ave <- dd_ind %>% group_by(Region, originSiteID, destSiteID) %>% summariz
 
 dd_group <- dd2 %>% unnest(avepoints) # group obs
 
-
-dd3 %>%
-  ggplot(aes(x = PCA1s, y = PCA2s, group=Region)) + 
-  TP_theme() +
-  geom_point(pch = 23, size=3) +
-  #geom_errorbar(xmin=min())+
-  xlim(0,1) 
-
 ggplot(dd_ind, aes(x = PCA1, y = PCA2, color = Region)) +
   geom_point(alpha = .4) +
   geom_point(data = dd_group, size = 4) +
@@ -273,35 +264,55 @@ ggplot(dd_ind_ave, aes(x = pca1, y = pca2, color = Region)) +
 
 temp <- read.csv('./climate/worlclim2_processedclimate.csv')
 
-#replace incorrect site names in temp
-############NEED TO ADD IN NEW CLIMATE DATA HERE
-
 #Calculate annual cumulative warming
-Temp <- temp %>% select(gradient, site, T_ann, year_range) 
+Temp <- temp %>% select(Gradient, destSiteID, T_ann_cor, T_sum_cor, V_ann, P_ann, YearRange) 
 
-dd_temp <- left_join(dd_ind_ave, Temp, by=c("Region"="gradient", "originSiteID"="site")) %>% 
-  mutate(T_ann_origin = T_ann) %>% select(-T_ann, -year_range)
-dd_Temp <- left_join(dd_temp, Temp, by=c("Region"="gradient", "destSiteID"="site")) %>% 
-  mutate(T_ann_dest = T_ann, T_warm = T_ann_dest-T_ann_origin, T_warm_cum = T_warm*year_range) %>% 
-  select(-T_ann)
+dd_temp <- left_join(dd_ind_ave, Temp, by=c("Region"="Gradient", "originSiteID"="destSiteID")) %>% 
+  mutate(T_ann_origin = T_ann_cor, T_sum_origin = T_sum_cor, V_ann_origin = V_ann, P_ann_origin = P_ann) %>% select(-T_ann_cor, -T_sum_cor, -V_ann, -P_ann, -YearRange)
+dd_Temp <- left_join(dd_temp, Temp, by=c("Region"="Gradient", "destSiteID"="destSiteID")) %>% 
+  mutate(T_ann_dest = T_ann_cor, T_sum_dest = T_sum_cor, V_ann_dest = V_ann, P_ann_dest = P_ann, T_warm = T_ann_dest-T_ann_origin, T_warm_cum = T_warm*YearRange, T_swarm = T_sum_dest-T_sum_origin, T_swarm_cum = T_swarm*YearRange, V_warm = V_ann_dest-V_ann_origin, V_warm_cum = V_warm*YearRange, P_warm = P_ann_dest-P_ann_origin, P_warm_cum = P_warm*YearRange) %>% 
+  select(-T_ann_cor, -V_ann, -P_ann)
 
-dd_Temp_ave <- dd_Temp %>% group_by(Region) %>% summarize_each(pca1:T_warm_cum, funs=mean)
+dd_clim_ave <- dd_Temp %>% group_by(Region) %>% summarize_each(pca1:P_warm_cum, funs=mean)
 
-#order by T_warm_cum
-dd_Temp_ave <- dd_Temp_ave %>% arrange(T_warm_cum)
-dd_Temp_ave$SiteID <- c('COL', 'SWE', 'MON', 'ARI', 'FRA1', 'SWI1', 'NOR1', 'FRA2', 'GER1', 'CHI1', 'CHI2', 'IND', 'CHI3', 'NOR2', 'SWI2', 'NOR3', 'NOR4', 'GER2', 'ITA')
-colfunc <- colorRampPalette(c("blue4", "#6A38B3", "#FE433C"))
-cols <- colfunc(19)
-cols <- data.frame(SiteID=dd_Temp_ave$SiteID, cols=cols)
+# Create colors by values
+#order by Temp (black to red) and P_warm (black to blue) <- VPD doesn't vary much
+dd_clim_ave$SiteID <- substr(dd_clim_ave$Region, 1,4)
+TS <- log(dd_clim_ave$T_swarm_cum)
+TS_ave <- log(dd_clim_ave$T_sum_cor)
+PR <- log(dd_clim_ave$P_warm_cum+1)
+PR_ave <- log(dd_clim_ave$P_ann_dest)
+VPD <- log(dd_clim_ave$V_warm_cum+1)
+VPD_ave <- log(dd_clim_ave$V_ann_dest)
 
+TS <- (TS-min(TS)) / (max(TS)-min(TS))
+TSA <- (TS_ave-min(TS_ave)) / (max(TS_ave)-min(TS_ave))
+PR <- (PR-min(PR)) / (max(PR)-min(PR))
+PRA <- (PR_ave-min(PR_ave)) / (max(PR_ave)-min(PR_ave))
+VPD <- (VPD-min(VPD)) / (max(VPD)-min(VPD))
+VPDave <- (VPD_ave-min(VPD_ave)) / (max(VPD_ave)-min(VPD_ave))
+TScol <- rgb(TS, 0, 0) #R, G, B colors, between 0 to 1
+TSAcol <- rgb(TSA, 0, 0)
+PRcol <- rgb(0, 0, PR) 
+PRAcol <- rgb(0, 0, PRA) 
+Vcol <- rgb(0, 0, VPD) 
+VAcol <- rgb(0, 0, VPDave) 
+names(TScol) <- as.character(dd_clim_ave$SiteID)
+names(TSAcol) <- as.character(dd_clim_ave$SiteID)
+names(PRcol) <- as.character(dd_clim_ave$SiteID)
+names(PRAcol) <- as.character(dd_clim_ave$SiteID)
+names(Vcol) <- as.character(dd_clim_ave$SiteID)
+names(VAcol) <- as.character(dd_clim_ave$SiteID)
 
-
-p1 <- ggplot(dd_Temp_ave, aes(x = pca1, y = pca2, color = SiteID)) +
+#### For change in summer temp (dest-origin) 
+p1 <-  dd_clim_ave %>% arrange(T_swarm_cum) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y = pca2, color = SiteID)) +
   geom_point(alpha = 3, size=3) +    
   geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
   geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
   geom_line() +
-  scale_colour_manual(values=cols$cols) +
+  scale_colour_manual(values=col1) +
   TP_theme() +
   xlim(0,1) +
   ylim(0,1) +
@@ -311,11 +322,13 @@ p1 <- ggplot(dd_Temp_ave, aes(x = pca1, y = pca2, color = SiteID)) +
     y = "Distance to point"
   )
 
-p2 <- ggplot(dd_Temp_ave, aes(x = SiteID, y=pca2, color = SiteID)) +
+p2 <-  dd_clim_ave %>% arrange(T_swarm_cum) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = SiteID, y=pca2, color = SiteID)) +
   geom_point(alpha = 3, size=3) +   
   geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
   geom_line() +
-  scale_colour_manual(values=cols$cols) +
+  scale_colour_manual(values=col1) +
   TP_theme() +
   ylim(0,1) +
   labs(
@@ -323,11 +336,13 @@ p2 <- ggplot(dd_Temp_ave, aes(x = SiteID, y=pca2, color = SiteID)) +
     y = ""
   )
 
-p3 <- ggplot(dd_Temp_ave, aes(x = pca1, y=SiteID, color = SiteID)) +
+p3 <- dd_clim_ave %>% arrange(T_swarm_cum) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y=SiteID, color = SiteID)) +
   geom_point(alpha = 3, size=3) +   
   geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
   geom_line() +
-  scale_colour_manual(values=cols$cols) +
+  scale_colour_manual(values=col1) +
   TP_theme() +
   xlim(0,1) +
   labs(
@@ -335,15 +350,14 @@ p3 <- ggplot(dd_Temp_ave, aes(x = pca1, y=SiteID, color = SiteID)) +
     y = "Region"
   )
 
-
-
+library(cowplot)
 
 legend <- get_legend(
   # create some space to the left of the legend
   p1 + theme(legend.position = "right")
 )
 
-library(cowplot)
+
 plot_grid(p1 + theme(legend.position="none"), 
                     p2 + theme(legend.position="none", axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
                     p3 +  theme(legend.position="none"), 
@@ -352,3 +366,192 @@ plot_grid(p1 + theme(legend.position="none"),
                     rel_widths = c(1/2, 1/2, 1/2),
                     labels = c('A', 'B', 'C'))
 
+#### For annual precip (VPD and p_warm didn't show much)
+
+p1 <-  dd_clim_ave %>% arrange(P_warm) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y = pca2, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +    
+  geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
+  geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=PRAcol) +
+  TP_theme() +
+  xlim(0,1) +
+  ylim(0,1) +
+  guides(color = guide_legend("Region")) +
+  labs(
+    x = "",
+    y = "Distance to point"
+  )
+
+p2 <-  dd_clim_ave %>% arrange(P_ann_dest) %>%   
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = SiteID, y=pca2, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +   
+  geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=PRAcol) +
+  TP_theme() +
+  ylim(0,1) +
+  labs(
+    x = "Region",
+    y = ""
+  )
+
+p3 <-  dd_clim_ave %>% arrange(P_ann_dest) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y=SiteID, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +   
+  geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=PRAcol) +
+  TP_theme() +
+  xlim(0,1) +
+  labs(
+    x = "Distance from origin to destination",
+    y = "Region"
+  )
+
+library(cowplot)
+
+legend <- get_legend(
+  # create some space to the left of the legend
+  p1 + theme(legend.position = "right")
+)
+
+
+plot_grid(p1 + theme(legend.position="none"), 
+          p2 + theme(legend.position="none", axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
+          p3 +  theme(legend.position="none"), 
+          align = "vh", nrow = 2, 
+          rel_heights = c(1/2, 1/2, 1/2),
+          rel_widths = c(1/2, 1/2, 1/2),
+          labels = c('A', 'B', 'C'))
+
+
+#### For VPD (dest-origin)
+
+p1 <-  dd_clim_ave %>% arrange(V_warm_cum) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y = pca2, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +    
+  geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
+  geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=Vcol) +
+  TP_theme() +
+  xlim(0,1) +
+  ylim(0,1) +
+  guides(color = guide_legend("Region")) +
+  labs(
+    x = "",
+    y = "Distance to point"
+  )
+
+p2 <-  dd_clim_ave %>% arrange(V_warm_cum) %>%   
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = SiteID, y=pca2, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +   
+  geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=Vcol) +
+  TP_theme() +
+  ylim(0,1) +
+  labs(
+    x = "Region",
+    y = ""
+  )
+
+p3 <-  dd_clim_ave %>% arrange(V_warm_cum) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y=SiteID, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +   
+  geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=Vcol) +
+  TP_theme() +
+  xlim(0,1) +
+  labs(
+    x = "Distance from origin to destination",
+    y = "Region"
+  )
+
+library(cowplot)
+
+legend <- get_legend(
+  # create some space to the left of the legend
+  p1 + theme(legend.position = "right")
+)
+
+
+plot_grid(p1 + theme(legend.position="none"), 
+          p2 + theme(legend.position="none", axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
+          p3 +  theme(legend.position="none"), 
+          align = "vh", nrow = 2, 
+          rel_heights = c(1/2, 1/2, 1/2),
+          rel_widths = c(1/2, 1/2, 1/2),
+          labels = c('A', 'B', 'C'))
+
+#### For VPD average
+
+p1 <-  dd_clim_ave %>% arrange(V_ann_dest) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y = pca2, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +    
+  geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
+  geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=Vcol) +
+  TP_theme() +
+  xlim(0,1) +
+  ylim(0,1) +
+  guides(color = guide_legend("Region")) +
+  labs(
+    x = "",
+    y = "Distance to point"
+  )
+
+p2 <-  dd_clim_ave %>% arrange(V_ann_dest) %>%   
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = SiteID, y=pca2, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +   
+  geom_errorbar(aes(ymin=pca2-se2, ymax=pca2+se2), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=Vcol) +
+  TP_theme() +
+  ylim(0,1) +
+  labs(
+    x = "Region",
+    y = ""
+  )
+
+p3 <-  dd_clim_ave %>% arrange(V_ann_dest) %>%    
+  mutate(SiteID=factor(SiteID, levels=SiteID)) %>%
+  ggplot(aes(x = pca1, y=SiteID, color = SiteID)) +
+  geom_point(alpha = 3, size=3) +   
+  geom_errorbar(aes(xmin=pca1-se1, xmax=pca1+se1), width=.01) +
+  geom_line() +
+  scale_colour_manual(values=Vcol) +
+  TP_theme() +
+  xlim(0,1) +
+  labs(
+    x = "Distance from origin to destination",
+    y = "Region"
+  )
+
+library(cowplot)
+
+legend <- get_legend(
+  # create some space to the left of the legend
+  p1 + theme(legend.position = "right")
+)
+
+
+plot_grid(p1 + theme(legend.position="none"), 
+          p2 + theme(legend.position="none", axis.title.x = element_blank(), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)), 
+          p3 +  theme(legend.position="none"), 
+          align = "vh", nrow = 2, 
+          rel_heights = c(1/2, 1/2, 1/2),
+          rel_widths = c(1/2, 1/2, 1/2),
+          labels = c('A', 'B', 'C'))

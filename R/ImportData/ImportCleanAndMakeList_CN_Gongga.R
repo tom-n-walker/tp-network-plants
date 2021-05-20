@@ -125,7 +125,7 @@ CleanTrait_CN_Gongga <- function(dat){
 #   return(dat2)
 # }
 
-CleanMeta_CN_Gongga <- function(){
+CleanMeta_CN_Gongga <- function(community_CN_Gongga){
   dat <- community_CN_Gongga %>% 
     select(destSiteID, Year) %>%
     group_by(destSiteID) %>%
@@ -157,13 +157,13 @@ ImportClean_CN_Gongga <- function(){
 
   ### CLEAN DATA SETS
   ## CN_Gongga
-  meta_CN_Gongga = CleanMeta_CN_Gongga()
   taxa_CN_Gongga = ImportTaxa_CN_Gongga() %>% .$speciesName
   trait_CN_Gongga = CleanTrait_CN_Gongga(trait_CN_Gongga_raw)
   
   cleaned_CN_Gongga = CleanCommunity_CN_Gongga(community_CN_Gongga_raw) 
   community_CN_Gongga = cleaned_CN_Gongga$comm
   cover_CN_Gongga = cleaned_CN_Gongga$cover
+  meta_CN_Gongga = CleanMeta_CN_Gongga(community_CN_Gongga)
   
   
   # Make list

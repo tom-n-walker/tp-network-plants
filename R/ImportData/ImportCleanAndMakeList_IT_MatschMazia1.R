@@ -62,11 +62,11 @@ CleanMeta_IT_MatschMazia1 <- function(community_IT_MatschMazia1){
     select(destSiteID, Year) %>%
     group_by(destSiteID) %>%
     summarize(YearMin = min(Year), YearMax = max(Year)) %>%
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = 1500, 'LOW' = 1000)),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = 1500, 'Low' = 1000)),
            Gradient = 'IT_MatschMazia1',
            Country = 'Italy',
-           Longitude = as.numeric(recode(destSiteID, 'LOW' = NA, 'HIGH' = 10.5797899)), #ADD IN COORDS FOR LOW
-           Latitude = as.numeric(recode(destSiteID, 'LOW' = NA, 'HIGH' = 46.6862599)), #ADD IN COORDS FOR LOW
+           Longitude = as.numeric(recode(destSiteID, 'Low' = 10.5797899, 'High' = 10.5797899)), #ADD IN COORDS FOR LOW
+           Latitude = as.numeric(recode(destSiteID, 'Low' = 46.6862599, 'High' = 46.6862599)), #ADD IN COORDS FOR LOW
            YearEstablished = 2010,
            PlotSize_m2 = 0.25) %>% 
     mutate(YearRange = (YearMax-YearEstablished)) %>% 

@@ -65,8 +65,8 @@ CleanMeta_FR_Lautaret <- function(community_FR_Lautaret){
     mutate(Elevation = as.numeric(recode(destSiteID, 'G' = 2450, 'L' = 1950)),
            Gradient = 'FR_Lautaret',
            Country = 'France',
-           Longitude = as.numeric(recode(destSiteID, 'HIGH' = 6.40048, 'LOW' = 6.4190699)),
-           Latitude = as.numeric(recode(destSiteID, 'HIGH' = 45.0543600, 'LOW' = 45.04006)),
+           Longitude = as.numeric(recode(destSiteID, 'G' = 6.40048, 'L' = 6.4190699)),
+           Latitude = as.numeric(recode(destSiteID, 'G' = 45.0543600, 'L' = 45.04006)),
            YearEstablished = 2017,
            PlotSize_m2 = 1) %>% 
     mutate(YearRange = (YearMax-YearEstablished)) %>% 
