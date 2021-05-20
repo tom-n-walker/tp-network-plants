@@ -10,7 +10,11 @@ library(taxize)
 get_species <- function(){
   # load drake environment
   loadd()
-  alldat <- mget(ls(pattern = "_"))
+  alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+                                 CH_Lavey, CH_Calanda, 
+                                 US_Colorado, US_Montana, US_Arizona,
+                                 CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
+                                 DE_Grainau, DE_Susalps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2)
   # map all taxa to one unique vector
   taxa <- alldat %>% 
     map(~.$taxa) %>%

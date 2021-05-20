@@ -21,11 +21,17 @@ pkgconfig::set_config("drake::strings_in_dots" = "literals")
 # trick
 pn <- . %>% print(n = Inf)
 
-# Source downstream scripts
+# drake configurations
+pkgconfig::set_config("drake::strings_in_dots" = "literals")
+
+# trick
+pn <- . %>% print(n = Inf)
+
+
+# Source downstream trait scripts
 source("R/clean_taxonomy.R")
 source("R/Name_repair.R") #for sp_codes for No, US and Sweden where they use species codes in dat
 source("R/merge_traits.R")
-
 
 # Import TRY Data
 ImportTRYDrakePlan <- drake_plan(
@@ -41,7 +47,7 @@ trytraits = load_wrangle_try(cleaned)
 # Merge field-collected trait data
 
 ImportSiteTraitDrakePlan <- drake_plan(
-  sitetraits = merge_site_trait_data(alldat = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+  sitetraits = merge_site_trait_data(sitedata = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
                                              CH_Calanda, US_Colorado, CN_Gongga, FR_AlpeHuez, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
 )
 
@@ -63,13 +69,13 @@ conf
 
 make(MyPlan)
 
-loadd()
+loadd(alltraits)
 
 # Check all is good
-drake_failed()
+#drake_failed()
 
 # View dependency graph
-vis_drake_graph(MyPlan)
+#vis_drake_graph(MyPlan)
 
 #Checked names! Everything w/o replacement ok
 # Pulsatilla vernalis

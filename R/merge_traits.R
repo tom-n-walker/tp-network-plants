@@ -1,10 +1,10 @@
 #### Code to merge all community data (with metadata) together ####
 
-merge_site_trait_data <- function(alldat) {
+merge_site_trait_data <- function(sitedata) {
   
   
   #merge trait data from 7 sites
-  dat <- alldat %>% 
+  sitedata_traits <- sitedata %>% 
     map_df("trait", .id='Region') %>%
     ungroup() 
   
@@ -15,7 +15,7 @@ merge_site_trait_data <- function(alldat) {
   # dat[is.na(dat$Treatment),] #no NA treatments
   #fulldat %>% group_by(Region, destSiteID, Treatment) %>% summarize(n=n()) %>% View
   
-  return(dat) 
+  return(sitedata_traits) 
   
 }
 
@@ -42,7 +42,7 @@ merge_trait_data <- function(traits) {
       rename(TLeaf_Area_cm2 = leaf_area, TC_percent = leaf_C, TN_percent = leaf_N, TP_percent = leaf_P, TPlant_Veg_Height_cm = plant_height, TSeed_Mass = seed_mass, TSLA_cm2_g = SLA, TStem_density = stem_density)
   # trait names: Plant_Veg_Height_cm, Plant_Rep_Height_cm, Wet_Mass_g, Dry_Mass_g, Leaf_Area_cm2, SLA_cm2_g, LDMC, C_percent, N_percent , CN_ratio
   
-  dat_sp <- dat %>% left_join(.,sp_codes, by=c('SpeciesName'='code')) %>%
+  dat_sp <- comm %>% left_join(.,sp_codes, by=c('SpeciesName'='code')) %>%
     mutate(species = ifelse(!is.na(taxa), taxa, SpeciesName)) %>%
     filter(!is.na(species), !is.na(SpeciesName)) %>%
     select(Region, Year, originSiteID, destSiteID, Treatment, destPlotID, SpeciesName, Rel_Cover, taxa, species)
