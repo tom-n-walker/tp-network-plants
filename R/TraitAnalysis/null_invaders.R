@@ -13,30 +13,6 @@ tr_dat <- traitdat_all %>% left_join(., trait_invader) #%>% #need year so right 
   #filter(!rowSums(is.na(.[,8:14]))==7) %>%
   #filter(!is.na(Rel_Cover))
 
-# create comm matrix for each region
-dd <- dat %>% select(Region, originSiteID, destSiteID, Treatment) %>% 
-  distinct() %>% 
-  filter(Treatment == "Warm") %>% 
-  select(-Treatment) %>% 
-  mutate(comm = pmap(.l = list(R = Region, O = originSiteID, D = destSiteID), .f = function(R, O, D){
-    bind_rows(
-      originControls = dat %>% filter(Region == R, destSiteID == O, Treatment == "LocalControl"),
-      destControls = dat %>% filter(Region == R, destSiteID == D, Treatment == "LocalControl"),
-      warmed =  dat %>% filter(Region == R, destSiteID == D, Treatment == "Warm"),
-      .id = "ODT")
-  })) %>% 
-  mutate(comm_wide = map(comm, ~{
-    .x %>% select(ODT, Year, SpeciesName, Rel_Cover, destPlotID) %>% 
-      pivot_wider(names_from = SpeciesName, values_from = Rel_Cover, values_fill = list(Rel_Cover = 0), values_fn = list(Rel_Cover = sum))
-  })) %>% 
-  mutate(comm_meta  = map(comm_wide, select, ODT, destPlotID, Year), 
-         comm_spp = map(comm_wide, select, -ODT, -destPlotID, -Year),
-         comm_traits = map(comm, ~{.x %>% 
-             select(ODT, Year, destPlotID, SpeciesName, Rel_Cover) %>% 
-             left_join(., traitdat_all) %>%
-             select(invader, leaf_area:SLA)}))
-
-  
 # create wide format trait dataframes (without year)
 tr_wide <-tr_dat %>% group_by(Region, originSiteID, destSiteID) %>%
   nest() %>%

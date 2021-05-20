@@ -271,17 +271,10 @@ ggplot(dd_ind_ave, aes(x = pca1, y = pca2, color = Region)) +
 
 # Read in temperature and compute cumulative temp for ordering graph
 
-temp <- read.csv('./climate/worlclim2_processedtemp.csv')
+temp <- read.csv('./climate/worlclim2_processedclimate.csv')
 
 #replace incorrect site names in temp
-temp$site <- as.character(temp$site)
-temp$site[1:3] <- c('Cal', 'Nes', 'Pea')
-temp$site[14:17] <- c('3200', '3400', '3600', '3800')
-temp$site[22:23] <- c('G', 'L')
-temp$site[26:44] <- c("High", "Low", "Gudmedalen", "Arhelleren", "Rambera", 
-                      "Lavisdalen", "Vikesland", "Hogsete", 
-                      "Skjellingahaugen", "Ovstedal", "Veskre", 
-                      "Ulvhaugen", "Fauske", "Alrust", "High", "Low", "Mid", "MC", "PP")
+############NEED TO ADD IN NEW CLIMATE DATA HERE
 
 #Calculate annual cumulative warming
 Temp <- temp %>% select(gradient, site, T_ann, year_range) 

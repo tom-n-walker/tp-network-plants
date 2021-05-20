@@ -1,8 +1,10 @@
 #### MAKE A MAP ####
 #10.04.2019
 library(tidyverse)
+library(readxl)
 library(RColorBrewer)
 library(maps)
+library(mapproj)
 
 metadata <- read_excel(path = '~/Dropbox/projects/SNF Experiment/Transplant_Incline/data/overview/MetadataOverview_Gradient_Site.xlsx', 
            sheet='Site level', skip = c(2))
@@ -21,7 +23,10 @@ p <- ggplot() + coord_fixed() +
 
 #Add map to base plot
 base_world_messy <- p + geom_polygon(data=world_map, aes(x=long, y=lat, group=group), 
-                                     colour="#cdcdcd", fill="#cdcdcd") 
+                                    colour="#cdcdcd", fill="#cdcdcd") +
+                          scale_y_continuous(breaks = (-2:2) * 30) +
+                          scale_x_continuous(breaks = (-4:4) * 45) +
+                          coord_map("ortho",ylim=c(25,180), orientation=c(61, 0, 0))
 
 base_world_messy
 
@@ -43,7 +48,7 @@ map_data <- base_world +
   theme(legend.position="bottom", 
         legend.text.align = 0) + # omit plot title saying 'color'
   scale_fill_distiller(palette ="OrRd", direction = 1) +
-  labs(size="Elevation (m)", fill="Year Since Established") +
+  labs(size="Max Transplant Downslope (m)", fill="Year Since Established") +
   ggtitle('TransPlant Network Sites') 
 
 map_data
