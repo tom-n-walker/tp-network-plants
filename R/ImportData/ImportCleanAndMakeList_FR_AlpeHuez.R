@@ -60,18 +60,21 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
 # Clean metadata
 
 CleanMeta_FR_AlpeHuez <- function(community_FR_AlpeHuez){
-  dat2 <- community_FR_AlpeHuez %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '1714', 'LOW' = '773')),
+  dat <- community_FR_AlpeHuez %>%
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = 2072, 'LOW' = 1481)),
            Gradient = 'FR_AlpeHuez',
            Country = 'France',
+           Longitude = as.numeric(recode(destSiteID, 'HIGH' = 6.0554500, 'LOW' = 6.035933)),
+           Latitude = as.numeric(recode(destSiteID, 'HIGH' = 45.0999830, 'LOW' = 6.0554500)),
            YearEstablished = 2014,
-           PlotSize_m2 = 0.25
-    )
+           PlotSize_m2 = 0.25) %>% 
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
-  
-  return(dat2)
+  return(dat)
 }
 
 # Cleaning species list

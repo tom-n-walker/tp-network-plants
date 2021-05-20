@@ -56,18 +56,21 @@ CleanCommunity_IN_Kashmir <- function(community_IN_Kashmir_raw){
 # Clean metadata
 
 CleanMeta_IN_Kashmir <- function(community_IN_Kashmir){
-  dat2 <- community_IN_Kashmir %>% 
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '2684', 'LOW' = '1951')),
+  dat <- community_IN_Kashmir %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = 2684, 'LOW' = 1951)),
            Gradient = 'IN_Kashmir',
            Country = 'India',
+           Longitude = as.numeric(recode(destSiteID, 'HIGH' = 74.39961099, 'LOW' = 74.832931)),
+           Latitude = as.numeric(recode(destSiteID, 'HIGH' = 34.050736, 'LOW' = 34.13218899)),
            YearEstablished = 2013,
-           PlotSize_m2 = 0.25
-    )
+           PlotSize_m2 = 0.25) %>% 
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
-  
-  return(dat2)
+  return(dat)
 }
 
 # Cleaning Kashmir species list

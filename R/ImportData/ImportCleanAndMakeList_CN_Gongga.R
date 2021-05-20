@@ -126,18 +126,21 @@ CleanTrait_CN_Gongga <- function(dat){
 # }
 
 CleanMeta_CN_Gongga <- function(){
-   
-  meta_CN_Gongga <- tibble(Gradient = rep(x = "CN_Gongga", 4),
-                           Country = rep(x = "China", 4), 
-                              destSiteID = c("L", "M", "A", "H"),
-                              Elevation = c(3000, 3500, 3850, 4100),
-                              Latitude = c(29.84347, 29.86192, 29.88911, 29.90742),
-                              Longitude = c(102.0343, 102.0360, 102.0173, 102.0118),
-                              YearEstablished = rep(2012, 4),
-                              PlotSize_m2 = rep(0.0625, 4),
-                              destBlockID= rep(NA, 4))
+  dat <- community_CN_Gongga %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'L'=3000, 'M'=3500, 'A'=3850, 'H'=4100)),
+           Gradient = "CN_Gongga",
+           Country = "China",
+           Longitude = as.numeric(recode(destSiteID, 'L'=102.0343, 'M'=102.0360, 'A'=102.0173, 'H'=102.0118)),
+           Latitude = as.numeric(recode(destSiteID, 'L'=29.84347, 'M'=29.86192, 'A'=29.88911, 'H'=29.90742)),
+           YearEstablished = 2012,
+           PlotSize_m2 = 0.0625) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
-  return(meta_CN_Gongga)
+  return(dat)
 }
 
 

@@ -56,15 +56,18 @@ CleanCommunity_SE_Abisko <- function(community_SE_Abisko_raw){
 #Paul wasn't particular about these elevations, check this!
 CleanMeta_SE_Abisko <- function(community_SE_Abisko){
   dat <- community_SE_Abisko %>% 
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct() %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = '1000', 'Mid' = '690', 'Low' = '500')),
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'High' = 1000, 'Mid' = 690, 'Low' = 500)),
            Gradient = 'SE_Abisko',
            Country = 'Sweden',
+           Longitude = as.numeric(recode(destSiteID, 'High' = 19.0921899, 'Mid' = 19.17353299, 'Low' = 19.190148)),
+           Latitude = as.numeric(recode(destSiteID, 'High' = 68.29267099, 'Mid' = 68.294066999, 'Low' = 68.300843)),
            YearEstablished = 2012,
-           PlotSize_m2 = 0.0177
-    )
-  
+           PlotSize_m2 = 0.0177) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
   return(dat)
 }

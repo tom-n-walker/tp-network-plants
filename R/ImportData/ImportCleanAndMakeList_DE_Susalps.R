@@ -58,14 +58,19 @@ CleanTaxa_DE_Susalps <- function(community_DE_Susalps){
 
 # Clean metadata
 CleanMeta_DE_Susalps <- function(community_DE_Susalps){
-  dat <- community_DE_Susalps %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()  %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'FE' = '550', 'GW'= '900', 'EB'= '1300')),
-           Gradient = 'DE_Susalps', #Already fixed this, just add dat above
-           Country = 'DE',
+  dat <- community_DE_Susalps %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'FE' = 600, 'GW'= 860, 'EB'= 1260)),
+           Gradient = 'DE_Susalps',
+           Country = 'Germany',
+           Longitude = as.numeric(recode(destSiteID, 'FE' = 11.035853599, 'GW'= 11.015163599, 'EB'= 11.0927828)),
+           Latitude = as.numeric(recode(destSiteID, 'FE' = 47.4945552, 'GW'= 47.34111, 'EB'= 47.3058824)),
            YearEstablished = 2016,
-           PlotSize_m2 = 0.09) #circle
+           PlotSize_m2 = 0.09) %>% #circle
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
   return(dat)
 }

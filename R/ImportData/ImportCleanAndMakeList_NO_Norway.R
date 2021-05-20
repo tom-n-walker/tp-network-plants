@@ -81,15 +81,21 @@ CleanTrait_NO_Norway <- function(trait_NO_Norway_raw){
 CleanMeta_NO_Norway <- function(meta_NO_Norway_raw){
   meta_NO_Norway <- meta_NO_Norway_raw %>% 
     mutate(Elevation = as.numeric(as.character(Elevation)),
-           Country = as.character("Norway"),
+           Country = "Norway",
            YearEstablished = 2009,
+           YearMin = 2009,
+           YearMax = 2017,
+           YearRange = YearMax-YearEstablished,
            PlotSize_m2 = 0.0625,
-           destSiteID = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske")) %>% 
-    mutate(Gradient = case_when(destSiteID %in% c("Ulvhaugen", "Alrust", "Fauske")~ 1 ,
-                                destSiteID %in% c("Lavisdalen", "Hogsete", "Vikesland")~ 2 ,
-                                destSiteID %in% c("Gudmedalen", "Rambera", "Arhelleren")~ 3 ,  
-                                destSiteID %in% c("Skjellingahaugen", "Veskre", "Ovstedal")~ 4 ))
-  
+           destSiteID = recode(Site, "Lav" = "Lavisdalen", "Hog" = "Hogsete", "Ulv" =  "Ulvhaugen", "Vik" = "Vikesland", "Gud" = "Gudmedalen", "Ram" = "Rambera", "Arh" = "Arhelleren", "Skj" = "Skjellingahaugen", "Ves" = "Veskre", "Alr" = "Alrust", "Ovs" = "Ovstedal", "Fau" = "Fauske"), 
+          Gradient = case_when(destSiteID %in% c("Ulvhaugen", "Alrust", "Fauske")~ "NO_Ulvhaugen" ,
+                                destSiteID %in% c("Lavisdalen", "Hogsete", "Vikesland")~ "NO_Lavisdalen" ,
+                                destSiteID %in% c("Gudmedalen", "Rambera", "Arhelleren")~ "NO_Gudmedalen" ,  
+                                destSiteID %in% c("Skjellingahaugen", "Veskre", "Ovstedal")~ "Skjellingahaugen")) %>%
+          #Longitude = as.numeric(recode(destSiteID, 'Lavisdalen'=7.2759600, 'Hogsete'=7.17666, 'Ulvhaugen'=8.1234300,'Vikesland'=7.16981999, 'Gudmedalen'=7.17560999, 'Rambera'=6.63028,'Arhelleren'=6.337379999, 'Skjellingahaugen'=6.4150400, 'Veskre'=6.5146800,'Alrust'=8.7046600, 'Ovstedal'=5.9648700, 'Fauske'=9.0787600)),
+          #Latitude = as.numeric(recode(destSiteID, 'Lavisdalen'=60.8230999, 'Hogsete'=60.8759999, 'Ulvhaugen'=61.0242999,'Vikesland'=60.880299, 'Gudmedalen'=60.8327999, 'Rambera'=61.086599,'Arhelleren'=60.6651999, 'Skjellingahaugen'=60.9335000, 'Veskre'=60.5444999,'Alrust'=60.8203000, 'Ovstedal'=60.690100, 'Fauske'=61.0354999))) %>%
+  select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
+
   return(meta_NO_Norway)
 }
 

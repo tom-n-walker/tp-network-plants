@@ -62,16 +62,19 @@ CleanTaxa_CH_Lavey <- function(community_CH_Lavey) {
 
 # Clean metadata
 CleanMeta_CH_Lavey <- function(community_CH_Lavey){
-  dat <- 
-    community_CH_Lavey %>%
-    #mutate(destBlockID=NA) %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct() %>% 
+  dat <- community_CH_Lavey %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
     mutate(Elevation = as.numeric(recode(destSiteID, 'PRA'=1400, 'MAR'= 1750, 'CRE'=1950, 'RIO'=2200)),
            Gradient = "CH_Lavey",
-           Country = as.character("Switzerland"),
+           Country = "Switzerland",
+           Longitude = as.numeric(recode(destSiteID, 'PRA'=7.0396599, 'MAR'= 7.051020, 'CRE'=7.0546499, 'RIO'=7.06053)),
+           Latitude = as.numeric(recode(destSiteID, 'PRA'=46.216459, 'MAR'= 46.21567, 'CRE'=46.2181, 'RIO'=46.20429)),
            YearEstablished = 2016,
-           PlotSize_m2 = 1)
+           PlotSize_m2 = 1) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
   return(dat)
 }

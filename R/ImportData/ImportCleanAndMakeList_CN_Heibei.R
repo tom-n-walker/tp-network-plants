@@ -60,18 +60,21 @@ CleanCommunity_CN_Heibei <- function(community_CN_Heibei_raw){
 # Clean metadata
 
 CleanMeta_CN_Heibei <- function(community_CN_Heibei){
-  dat2 <- community_CN_Heibei %>% 
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(destSiteID), 
-           Gradient = 'CN_Heibei',
-           Country = 'China',
+  dat <- community_CN_Heibei %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, '3200'=3200, '3400'=3400, '3800'=3800)),
+           Gradient = "CN_Heibei",
+           Country = "China",
+           Longitude = as.numeric(recode(destSiteID, '3800'=101.36922199, '3400'=101.331306, '3200'=101.313306)),
+           Latitude = as.numeric(recode(destSiteID, '3800'=37.704917, '3400'=37.665306, '3200'=37.611750)),
            YearEstablished = 2007,
-           PlotSize_m2 = 1
-    )
+           PlotSize_m2 = 1) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
-  
-  return(dat2)
+  return(dat)
 }
 
 # Cleaning Heibei species list

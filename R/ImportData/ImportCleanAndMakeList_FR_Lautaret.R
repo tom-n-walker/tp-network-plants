@@ -59,13 +59,18 @@ taxa <- unique(community_FR_Lautaret$SpeciesName)
 # Clean metadata
 CleanMeta_FR_Lautaret <- function(community_FR_Lautaret){
   dat <- community_FR_Lautaret %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()  %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'G' = '2450', 'L'= '1950')),
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'G' = 2450, 'L' = 1950)),
            Gradient = 'FR_Lautaret',
-           Country = 'FR',
+           Country = 'France',
+           Longitude = as.numeric(recode(destSiteID, 'HIGH' = 6.40048, 'LOW' = 6.4190699)),
+           Latitude = as.numeric(recode(destSiteID, 'HIGH' = 45.0543600, 'LOW' = 45.04006)),
            YearEstablished = 2017,
-           PlotSize_m2 = 1)
+           PlotSize_m2 = 1) %>% 
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
   return(dat)
 }

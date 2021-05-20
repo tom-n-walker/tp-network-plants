@@ -57,16 +57,18 @@ CleanTaxa_US_Montana <- function(community_US_Montana){
 # Clean metadata
 CleanMeta_US_Montana <- function(community_US_Montana){
   dat <- community_US_Montana %>% 
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct() %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1985', 'High'='2185')), #'Low' = '1985', 'Middle'= '2185', 'High'='2620', but we only use low and mid
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = 1985, 'High'=2185)), #'Low' = '1985', 'Middle'= '2185', 'High'='2620', but we only use low and mid
            Gradient = 'US_Montana',
            Country = 'USA',
+           Longitude =  as.numeric(recode(destSiteID, 'Low' = 45.30523699, 'High'=-111.49859499)), # Need to check these!
+           Latitude =  as.numeric(recode(destSiteID, 'Low' = 45.3089900, 'High'=45.30523699)),
            YearEstablished = 2013,
-           destBlockID = NA,
-           PlotSize_m2 = NA, #need to find this
-           Gradient = "US_Montana") 
-  
+           PlotSize_m2 = NA) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   return(dat)
 }
 

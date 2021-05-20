@@ -56,13 +56,18 @@ return(taxa)
 # Clean metadata
 CleanMeta_US_Colorado <- function(community_US_Colorado){
   dat <- community_US_Colorado %>% 
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'um' = '2900', 'pf'= '3200', 'mo' = '3300')),
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'um' = 2900, 'pf'= 3200, 'mo' = 3300)),
            Gradient = 'US_Colorado',
            Country = 'USA',
+           Longitude =  as.numeric(recode(destSiteID, 'um' = -107.010180, 'pf'= -107.0326199, 'mo' = -107.04908)),
+           Latitude =  as.numeric(recode(destSiteID, 'um' = 38.9324799, 'pf'= 38.9324799, 'mo' = 38.9727400)),
            YearEstablished = 2017,
-           PlotSize_m2 = 0.25)
+           PlotSize_m2 = 0.25) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
   return(dat)
 }

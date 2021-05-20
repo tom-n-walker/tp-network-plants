@@ -59,13 +59,18 @@ CleanTaxa_IT_MatschMazia1 <- function(community_IT_MatschMazia1){
 # Clean metadata
 CleanMeta_IT_MatschMazia1 <- function(community_IT_MatschMazia1){
   dat <- community_IT_MatschMazia1 %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()  %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'Low' = '1000', 'High'= '1500')),
-           Gradient = 'IT_MatschMazia1', #Already fixed this, just add dat above
-           Country = 'IT',
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = 1500, 'LOW' = 1000)),
+           Gradient = 'IT_MatschMazia1',
+           Country = 'Italy',
+           Longitude = as.numeric(recode(destSiteID, 'LOW' = NA, 'HIGH' = 10.5797899)), #ADD IN COORDS FOR LOW
+           Latitude = as.numeric(recode(destSiteID, 'LOW' = NA, 'HIGH' = 46.6862599)), #ADD IN COORDS FOR LOW
            YearEstablished = 2010,
-           PlotSize_m2 = NA) #need to figure this out!
+           PlotSize_m2 = 0.25) %>% 
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
   return(dat)
 }

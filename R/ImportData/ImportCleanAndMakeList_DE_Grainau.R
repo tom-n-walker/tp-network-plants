@@ -47,18 +47,22 @@ CleanCommunity_DE_Grainau <- function(community_DE_Grainau_raw){
 # Clean metadata
 
 CleanMeta_DE_Grainau <- function(community_DE_Grainau){
-  dat2 <- community_DE_Grainau %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '1714', 'LOW' = '773')),
+  dat <- community_DE_Grainau %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH'=1714, 'LOW'=773)),
            Gradient = 'DE_Grainau',
            Country = 'Germany',
+           Longitude = as.numeric(recode(destSiteID, 'HIGH'=11.0617667, 'LOW'=11.011217)),
+           Latitude = as.numeric(recode(destSiteID, 'HIGH'=47.4414333, 'LOW'=47.4761499)),
            YearEstablished = 2013,
-           PlotSize_m2 = 0.25
-    )
+           PlotSize_m2 = 0.25) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
   
-  return(dat2)
+  return(dat)
 }
 
 # Cleaning Grainau species list

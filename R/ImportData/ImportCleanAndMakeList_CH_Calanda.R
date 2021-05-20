@@ -58,13 +58,18 @@ CleanTaxa_CH_Calanda <- function(community_CH_Calanda) {
 # Clean metadata
 CleanMeta_CH_Calanda <- function(community_CH_Calanda) {
   dat <- community_CH_Calanda %>% 
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()  %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'Pea'='2800', 'Cal'='2000', 'Nes'='1400')),
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'Pea'=2800, 'Cal'=2000, 'Nes'=1400)),
            Gradient = "CH_Calanda",
-           Country = as.character("Switzerland"),
+           Country = "Switzerland",
+           Longitude = as.numeric(recode(destSiteID, 'Pea'=9.47031, 'Cal'=9.48939, 'Nes'=9.49013)),
+           Latitude = as.numeric(recode(destSiteID, 'Pea'=46.89326, 'Cal'=46.88778, 'Nes'=46.86923)),
            YearEstablished = 2012,
-           PlotSize_m2 = 0.75) 
+           PlotSize_m2 = 0.75) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
   return(dat)
 }

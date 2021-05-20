@@ -62,15 +62,18 @@ CleanCommunity_US_Arizona <- function(community_US_Arizona_raw, cover_US_Arizona
 # Cleaning Arizona meta data
 CleanMeta_US_Arizona <- function(community_US_Arizona){
   dat <- community_US_Arizona %>% 
-    select(-c('SpeciesName', 'Date', 'Individuals', 'Rel_Cover')) %>% 
-    distinct() %>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'MC' = '2620', 'PP' = '2344')),
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'MC' = 2620, 'PP' = 2344)),
            Gradient = 'US_Arizona',
            Country = 'USA',
+           Longitude = as.numeric(recode(destSiteID, 'MC' = -111.73, 'PP' = -111.67)),
+           Latitude = as.numeric(recode(destSiteID, 'MC' = 35.35, 'PP' = 35.42)),
            YearEstablished = 2014,
-           PlotSize_m2 = 0.09
-    )
-  
+           PlotSize_m2 = 0.09) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   
   return(dat)
 }

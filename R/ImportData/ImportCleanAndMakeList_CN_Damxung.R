@@ -45,20 +45,22 @@ CleanCommunity_CN_Damxung <- function(community_CN_Damxung_raw){
 }
 
 # Clean metadata
-
 CleanMeta_CN_Damxung <- function(community_CN_Damxung){
-  dat2 <- community_CN_Damxung %>%
-    select(-c('SpeciesName', 'Cover', 'Total_Cover', 'Rel_Cover')) %>% 
-    distinct()%>% 
-    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = '4800', 'LOW' = '4313')),
-           Gradient = 'CN_Damxung',
-           Country = 'China',
+ dat <- community_CN_Damxung %>% 
+    select(destSiteID, Year) %>%
+    group_by(destSiteID) %>%
+    summarize(YearMin = min(Year), YearMax = max(Year)) %>%
+    mutate(Elevation = as.numeric(recode(destSiteID, 'HIGH' = 4800, 'LOW' = 4313)),
+           Gradient = "CN_Damxung",
+           Country = "China",
+           Longitude = as.numeric(recode(destSiteID, 'HIGH' = 91.05491, 'LOW' = 91.0646299)),
+           Latitude = as.numeric(recode(destSiteID, 'HIGH' = 30.531410, 'LOW' = 30.4971)),
            YearEstablished = 2013,
-           PlotSize_m2 = 0.25
-    )
+           PlotSize_m2 = 0.25) %>%
+    mutate(YearRange = (YearMax-YearEstablished)) %>% 
+    select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country)
   
-  
-  return(dat2)
+  return(dat)
 }
 
 # Cleaning Damxung species list
