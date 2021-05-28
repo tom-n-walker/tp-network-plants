@@ -1,9 +1,9 @@
-###### DE_Susalps community data functions ####
-#Chelsea Chisholm & Joshua Lynn, 18.03.2021; updated C. Chisholm 28.05.2021
+###### DE_TransAlps community data functions ####
+#newly received data, C. Chisholm 28.05.2021
 
-load_cover_DE_Susalps <- function(){
+load_cover_DE_TransAlps <- function(){
   #import data
-  comm <- read_delim(file = "./data/DE_Susalps/DE_Susalps_commdata/TransPlantNet_DE_SusAlps_2016-2020.csv", delim=";")
+  comm <- read_delim(file = "./data/DE_TransAlps/DE_TransAlps_commdata/TransPlantNet_DACH_TransAlps_2016-2020.csv", delim=";")
   cover <- comm %>% 
     rename(year = Harvest_title, turfID = Plot_label, originSiteID = Origin_site, destSiteID = Transplant_site, SpeciesName = Species_name) %>%
     separate(year, c("year", "harvest"), ' ') %>% #all controls harvested at peak season, don't need to keep this column
@@ -17,3 +17,4 @@ load_cover_DE_Susalps <- function(){
   
   return(cover)
 }
+

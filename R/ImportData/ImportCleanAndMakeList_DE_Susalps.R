@@ -16,36 +16,37 @@ ImportCommunity_DE_Susalps <- function(){
 # Cleaning NO community data
 CleanCommunity_DE_Susalps <- function(community_DE_Susalps_raw){
   dat <- community_DE_Susalps_raw %>% 
-    rename(Cover = bm, Year = year, destPlotID = turfID) %>% 
-    filter(Year >2016 ) %>% # filtering out 2016, only available for a few sites
-    # only select control, local control, warm/down transplant
-    filter(destSiteID %in% c("FE", "GW", "EB"), originSiteID %in% c("FE", "GW", "EB")) %>% 
-    mutate(Treatment = case_when(originSiteID == "FE" & destSiteID == 'FE' ~ "LocalControl",
-                                 originSiteID == "GW" & destSiteID == 'GW' ~ "LocalControl",
+    rename(Cover = biomass, Year = year, destPlotID = turfID) %>% 
+    #filter(Year >2016 ) %>% # filtering out 2016, only available for a few sites
+    # only select control, local control, warm/down transplant, sites low elev to high : BT, FE, GW, EB
+    mutate(Treatment = case_when(originSiteID == "BT" & destSiteID == 'BT' ~ "LocalControl",
+                                 originSiteID == "EB" & destSiteID == 'BT' ~ "Warm",
                                  originSiteID == "EB" & destSiteID == 'EB' ~ "LocalControl",
-                                 originSiteID == "GW" & destSiteID == 'FE' ~ "Warm",
                                  originSiteID == "EB" & destSiteID == 'FE' ~ "Warm",
                                  originSiteID == "EB" & destSiteID == 'GW' ~ "Warm",
-                                 originSiteID == "FE" & destSiteID == 'EB' ~ "Cold",
-                                 originSiteID == "FE" & destSiteID == 'GW' ~ "Cold",
-                                 originSiteID == "GW" & destSiteID == 'EB' ~ "Cold")) %>% 
+                                 originSiteID == "FE" & destSiteID == 'BT' ~ "Warm",
+                                 originSiteID == "FE" & destSiteID == 'FE' ~ "LocalControl",
+                                 originSiteID == "GW" & destSiteID == 'BT' ~ "Warm",
+                                 originSiteID == "GW" & destSiteID == 'FE' ~ "Warm",
+                                 originSiteID == "GW" & destSiteID == 'GW' ~ "LocalControl")) %>% 
     mutate(UniqueID = paste(Year, originSiteID, destSiteID, destPlotID, sep='_')) %>% 
     mutate(destPlotID = as.character(destPlotID),
            destBlockID = if (exists('destBlockID', where = .)){ as.character(destBlockID)} else {NA})
   
   
   dat2 <- dat %>%  
-    filter(!is.na(Cover)) %>%
-    group_by_at(vars(-SpeciesName, -Cover)) %>%
-    summarise(SpeciesName = "Other",Cover = pmax((100 - sum(Cover)), 0)) %>% 
-    bind_rows(dat) %>% 
+    filter(!is.na(Cover)) %>% #not creating other cover as biomass
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>% 
-    filter(Cover > 0)
-  cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
-    select(UniqueID, destSiteID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, destSiteID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Moss', 'Dead biomass')) %>% 
+                            filter(Cover > 0)
+  cover <- dat2 %>% filter(SpeciesName %in% c('Moss', 'Dead biomass')) %>%
+    mutate(SpeciesName=recode(SpeciesName, 'Bryophyta'= 'Moss', 'Litter %'='Dead biomass')) %>%
+    select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% 
+    group_by(UniqueID, SpeciesName) %>% 
+    summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
+
   return(list(comm=comm, cover=cover))
 }
 
@@ -62,11 +63,11 @@ CleanMeta_DE_Susalps <- function(community_DE_Susalps){
     select(destSiteID, Year) %>%
     group_by(destSiteID) %>%
     summarize(YearMin = min(Year), YearMax = max(Year)) %>%
-    mutate(Elevation = as.numeric(recode(destSiteID, 'FE' = 600, 'GW'= 860, 'EB'= 1260)),
+    mutate(Elevation = as.numeric(recode(destSiteID, 'BT'=350, 'FE' = 600, 'GW'= 860, 'EB'= 1260)),
            Gradient = 'DE_Susalps',
            Country = 'Germany',
-           Longitude = as.numeric(recode(destSiteID, 'FE' = 11.035853599, 'GW'= 11.015163599, 'EB'= 11.0927828)),
-           Latitude = as.numeric(recode(destSiteID, 'FE' = 47.4945552, 'GW'= 47.34111, 'EB'= 47.3058824)),
+           Longitude = as.numeric(recode(destSiteID, 'BT' = 11.3455,'FE' = 11.035853599, 'GW'= 11.015163599, 'EB'= 11.0927828)),
+           Latitude = as.numeric(recode(destSiteID, 'BT' = 49.5516, 'FE' = 47.4945552, 'GW'= 47.34111, 'EB'= 47.3058824)),
            YearEstablished = 2016,
            PlotSize_m2 = 0.09) %>% #circle
     mutate(YearRange = (YearMax-YearEstablished)) %>% 

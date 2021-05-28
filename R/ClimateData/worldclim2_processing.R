@@ -8,7 +8,7 @@ alldat <- tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingah
                      CH_Lavey, CH_Calanda, 
                      US_Colorado, US_Montana, US_Arizona,
                      CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
-                     DE_Grainau, DE_Susalps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2)
+                     DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2)
 meta <- alldat %>% 
   map_df("meta", .id='Region') %>%
   ungroup() 

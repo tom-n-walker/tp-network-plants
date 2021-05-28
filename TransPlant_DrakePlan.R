@@ -50,6 +50,7 @@ ImportDrakePlan <- drake_plan(
 
   DE_Grainau = ImportClean_DE_Grainau(), 
   DE_Susalps = ImportClean_DE_Susalps(),
+  DE_TransAlps = ImportClean_DE_TransAlps(),
   FR_AlpeHuez = ImportClean_FR_AlpeHuez(), 
   SE_Abisko = ImportClean_SE_Abisko(),
   FR_Lautaret = ImportClean_FR_Lautaret(), 
@@ -66,7 +67,7 @@ MergeDrakePlan <- drake_plan(
     CH_Lavey, CH_Calanda, #CH_Calanda2,
     US_Colorado, US_Montana, US_Arizona,
     CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
-    DE_Grainau, DE_Susalps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
+    DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
 )
 
 MyPlan <- bind_rows(ImportDrakePlan, MergeDrakePlan)
