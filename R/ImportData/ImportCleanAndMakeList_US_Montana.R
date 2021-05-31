@@ -66,7 +66,7 @@ CleanMeta_US_Montana <- function(community_US_Montana){
            Longitude =  as.numeric(recode(destSiteID, 'Low' = -111.496672, 'High'=-111.49859499)), 
            Latitude =  as.numeric(recode(destSiteID, 'Low' = 45.3089900, 'High'=45.30523699)),
            YearEstablished = 2013,
-           PlotSize_m2 = NA) %>%
+           PlotSize_m2 = 0.25) %>%
     mutate(YearRange = (YearMax-YearEstablished)) %>% 
     select(Gradient, destSiteID, Longitude, Latitude, Elevation, YearEstablished, YearMin, YearMax, YearRange, PlotSize_m2, Country) 
   return(dat)
