@@ -31,6 +31,7 @@ pn <- . %>% print(n = Inf)
 # Source downstream trait scripts
 source("R/clean_taxonomy.R")
 source("R/Name_repair.R") #for sp_codes for No, US and Sweden where they use species codes in dat
+source("R/try_traits.R")
 source("R/merge_traits.R")
 
 # Import TRY Data
