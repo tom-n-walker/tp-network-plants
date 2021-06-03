@@ -21,12 +21,12 @@ CleanCommunity_IT_MatschMazia2 <- function(community_IT_MatschMazia2_raw){
     mutate(SpeciesName = gsub('\\_', ' ', SpeciesName)) %>%
     mutate(destSiteID = case_when(Elevation == 1500 ~ "Low",
                                     Elevation == 1950 ~ "High"),
-            Treatment = case_when(treat == "destControl" ~ "LocalControl",
+            Treatment = case_when(treat == "originControl" ~ "LocalControl", #there was a labeling mistake where they were both labelled origincontrol (one with an s)
                                  treat == "originControls"  ~ "LocalControl",
                                 treat == "warmed" ~ "Warm"),
-            originSiteID = case_when(Elevation == 1500 & treat == "destControl" ~ "Low",
+            originSiteID = case_when(Elevation == 1500 & Treatment == "LocalControl" ~ "Low",
                                    Elevation == 1950 ~ "High",
-                                   treat == 'warmed' ~ 'High')) %>% 
+                                   Treatment == 'Warm' ~ 'High')) %>% 
     select(Year, destSiteID, originSiteID, UniqueID, Treatment, SpeciesName, Cover, -treat) %>% 
     extract(UniqueID, into = c("destPlotID", "year"), "(.*)_([^_]+)$") %>% 
   mutate(UniqueID = paste(originSiteID, destSiteID, destPlotID, sep='_')) %>%  
