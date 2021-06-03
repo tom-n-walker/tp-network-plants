@@ -227,7 +227,7 @@ dd2 <- dd %>%
     return(newpoint)
   })) 
 
-dd_ind <- dd2 %>%unnest(odt_s) #individual obs
+dd_ind <- dd2 %>% unnest(odt_s) #individual obs
 
 dd_ind_ave <- dd_ind %>% group_by(Region, originSiteID, destSiteID) %>% summarize(pca1 = mean(PCA1), pca2=mean(PCA2), se1 = sd(PCA1)/sqrt(n()), se2 = sd(PCA2)/sqrt(n()))
 
@@ -555,3 +555,25 @@ plot_grid(p1 + theme(legend.position="none"),
           rel_heights = c(1/2, 1/2, 1/2),
           rel_widths = c(1/2, 1/2, 1/2),
           labels = c('A', 'B', 'C'))
+
+#### RUNNING BRMS MODEL WITH CLIMATE FOR POSITION OF X AXIS ####
+library(brms)
+library(modelr)
+library(tidybayes)
+
+m_ddclim = brm(
+  pca1 ~ T_sum_cor*YearRange, 
+  data = dd_clim_ave
+)
+
+dd_clim_ave %>%
+  group_by(YearRange) %>%
+  data_grid(T_sum_cor = seq_range(T_sum_cor, n = 51)) %>%
+  add_fitted_draws(m_ddclim) %>%
+  ggplot(aes(x = T_sum_cor, y = pca1, color = ordered(YearRange))) +
+  stat_lineribbon(aes(y = .value)) +
+  geom_point(data = dd_clim_ave) +
+  scale_fill_brewer(palette = "Greys") +
+  scale_color_brewer(palette = "Set2") +
+  TP_theme() 
+
