@@ -77,7 +77,10 @@ merge_site_taxa_data <- function(sitedata) {
     map_df("community", .id='Region') %>%
     ungroup() %>%
     select(Region, SpeciesName) %>%
-    unique()
+    unique() 
+    
+  sitedata_taxa$Region <- if_else(sitedata_taxa$Region %in% c("NO_Gudmedalen", "NO_Lavisdalen",  "NO_Skjellingahaugen",
+                          "NO_Ulvhaugen"), "Norway", sitedata_taxa$Region)
   
   return(sitedata_taxa) 
   
@@ -85,10 +88,11 @@ merge_site_taxa_data <- function(sitedata) {
 
 merge_all_taxa_data <- function(alldat) {
   
-  
+  clean_code <- left_join(alldat$spcodes, alldat$cleaned, by=c("taxa"="original_name")) 
   #merge taxa data from abundances
-  species <- left_join(alldat$sitetaxa, alldat$spcodes, by=c("SpeciesName"=="taxa")) %>%
-    left_join(., alldat$cleaned, by=c("SpeciesName"=="original_name"))
+  species <-left_join(alldat$sitetaxa, alldat$cleaned, by=c("SpeciesName"="original_name")) %>%
+    left_join(., clean_code, by=c("SpeciesName"="code")) 
+    
   
   return(species) 
   
