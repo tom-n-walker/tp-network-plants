@@ -2,6 +2,7 @@
 ### TRAIT DRAKE PLAN ########
 #############################
 #C. Chisholm, 13 April 2021
+# J. Lynn, 3 June 2021
 
 # Load libraries
 library("drake")
@@ -9,12 +10,6 @@ library("tidyverse")
 library("readxl")
 library("DBI")
 library("visNetwork")
-
-# drake configurations
-pkgconfig::set_config("drake::strings_in_dots" = "literals")
-
-# trick
-pn <- . %>% print(n = Inf)
 
 # drake configurations
 pkgconfig::set_config("drake::strings_in_dots" = "literals")
@@ -42,7 +37,9 @@ ImportSiteTaxaDrakePlan <- drake_plan(
                                                            CH_Lavey, CH_Calanda, 
                                                            US_Colorado, US_Montana, US_Arizona,
                                                            CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
-                                                           DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, SE_Abisko, FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
+                                                           DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, SE_Abisko,
+                                                         FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
+  
 )
 
 # Load lookup tables where available (SE_Abisko, US_Arizona, NO_XX) and add 

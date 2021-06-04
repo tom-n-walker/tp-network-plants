@@ -15,8 +15,10 @@ return(se_dat)
 }
     
 ### FUNCTION TO LOAD ALL NORWAY LOOKUP TABLE -----------------------------
-load_Norway_sptable <- function() {
+# source code needs to be outside of the function to avoid self invalidation? 
 source("R/ImportData/community_NO_Norway/loadCover.r")
+
+load_Norway_sptable <- function() {
 con <- src_sqlite(path = file_in("data/NO_Norway/seedclim.sqlite"), create = FALSE)
 #get taxonomy table
 taxa <- tbl(con, "taxon") %>%
@@ -27,7 +29,7 @@ no[,2] <- str_replace_all(no[,2], c('sp?'='sp', 'sp.'='sp', 'sp??'='sp', 'sp1?'=
                           'spp'='sp', 'spp.'='sp', 'spp1?'='sp'))
 no[,2] <- gsub('[[:punct:] ]+','',no[,2])
 code <- paste(substr(no[,1], 1, 3), substr(no[,2], 1, 3), sep='.')  
-no_dat <- data.frame(code=code, taxa=no_taxa)
+no_dat <- data.frame(code=code, taxa=taxa)
 
 return(no_dat)
 }
