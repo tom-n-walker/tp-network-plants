@@ -20,7 +20,7 @@ pn <- . %>% print(n = Inf)
 
 # Source downstream trait scripts
 source("R/clean_taxonomy.R") # for cleaning species lists from 'taxa' list element for all sites
-source("R/Name_repair.R") #for sp_codes for No, Arizona and Sweden where they use species codes in dat
+source("R/site_taxa_codes.R") #for sp_codes for No, Arizona and Sweden where they use species codes in dat
 
 # Import Taxa lists from all sites and clean to accepted names
 ImportTaxaDrakePlan <- drake_plan(

@@ -68,6 +68,7 @@ resolve_species <- function(taxa){
   return(taxa_out)
 }
 
+
 ### MERGE TAXA LIST FROM SITE ABUNDANCE DATA AND LOOKUP TABLES ---------------------
 merge_site_taxa_data <- function(sitedata) {
   
@@ -88,10 +89,17 @@ merge_site_taxa_data <- function(sitedata) {
 
 merge_all_taxa_data <- function(alldat) {
   
-  clean_code <- left_join(alldat$spcodes, alldat$cleaned, by=c("taxa"="original_name")) 
-  #merge taxa data from abundances
-  species <-left_join(alldat$sitetaxa, alldat$cleaned, by=c("SpeciesName"="original_name")) %>%
-    left_join(., clean_code, by=c("SpeciesName"="code")) 
+  #merge site data and species codes used for those three sites
+  site_code <- left_join(alldat$sitetaxa, alldat$spcodes, by=c("Region", "SpeciesName"="code")) %>% #sitetaxa is 2246, cleancode is 2257 (check what is being added)
+    mutate(original_name = ifelse(!is.na(taxa), taxa, SpeciesName))
+
+ # setdiff(c(clean_code$original_name), c(cleaned$original_name))# both are zero?
+ # clean_code$original_name[!(clean_code$original_name %in% cleaned$original_name)]
+ # rar <-  unique(clean_code$original_name) #1264, so duplicates being added
+ # rar <-  unique(cleaned$original_name) #1264 as well, so definitely 4 duplicates (but means that codes are site-specific)
+  
+  #merge all site data to cleaned names dataframe
+  species <-left_join(site_code, alldat$cleaned, by=c("original_name")) #%>% #is 2266 (so another set being added?)
     
   
   return(species) 
