@@ -22,45 +22,51 @@ pn <- . %>% print(n = Inf)
 source("R/clean_taxonomy.R") # for cleaning species lists from 'taxa' list element for all sites
 source("R/site_taxa_codes.R") #for sp_codes for No, Arizona and Sweden where they use species codes in dat
 
-# Import Taxa lists from all sites and clean to accepted names
-ImportTaxaDrakePlan <- drake_plan(
-  
-  taxa = get_species(),
-  
-  cleaned = resolve_species(taxa),
-  
-)
-
 # Import names from community dataframe
 ImportSiteTaxaDrakePlan <- drake_plan(
-  sitetaxa = merge_site_taxa_data(sitedata = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
-                                                           CH_Lavey, CH_Calanda, 
-                                                           US_Colorado, US_Montana, US_Arizona,
-                                                           CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
-                                                           DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, SE_Abisko,
-                                                         FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2))
   
-)
-
-# Load lookup tables where available (SE_Abisko, US_Arizona, NO_XX) and add 
-LookupTableDrakePlan <- drake_plan(
+  # Import site community species columns
+  sitetaxa = merge_site_taxa_data(sitedata = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+                                                         CH_Lavey, CH_Calanda, 
+                                                         US_Colorado, US_Montana, US_Arizona,
+                                                         CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
+                                                         DE_Grainau, DE_Susalps, DE_TransAlps, FR_AlpeHuez, SE_Abisko,
+                                                         FR_Lautaret, IT_MatschMazia1, IT_MatschMazia2)),
+  
+  # Import lookup tables for those sites with sp codes
   se_dat = load_SE_Abisko_sptable(),
   no_dat = load_Norway_sptable(),
   us_dat = load_US_Arizona_sptable(),
-  spcodes =  merge_sptable(spdat = tibble::lst(se_dat, no_dat, us_dat)) # has regions as a column but Norway is just "Norway"
+  spcodes =  merge_sptable(spdat = tibble::lst(se_dat, no_dat, us_dat)), # has regions as a column but Norway is just "Norway"
+  
+  # Import taxa lists (list element $taxa) from all sites
+  taxa = get_species()
   
 )
 
-MergeSpeciesCodes <- drake_plan(
-  species = merge_all_taxa_data(alldat = tibble::lst(cleaned, sitetaxa, spcodes))
+# Import Taxa lists from all sites and clean to accepted names
+MergeTaxaDrakePlan <- drake_plan(
   
+  mergedtaxa = merge_all_taxa_data(alldat = tibble::lst(sitetaxa, spcodes))
+
 )
 
-MyPlan <- bind_rows(ImportTaxaDrakePlan, ImportSiteTaxaDrakePlan, LookupTableDrakePlan, MergeSpeciesCodes)
+
+
+
+# Clean species names with GNI
+CleanSpeciesNames <- drake_plan(
+  
+  cleanedspecies = resolve_species(mergedtaxa)
+  #cleanedspecies %>% filter(is.na(gni_uuid)) %>% View()
+  # the only issue remaining (that isn't Sweden and Norway) is Stellaria umbellata in CN_Heibei. It should be fine (gnr_resolve works on this species, why the NAs?)
+)
+
+MyPlan <- bind_rows(ImportTaxaDrakePlan, MergeTaxaDrakePlan, CleanSpeciesNames)
 
 conf <- drake_config(MyPlan)
 conf
 
 make(MyPlan)
 
-loadd(species)
+loadd(cleanedspecies)

@@ -31,7 +31,7 @@ get_species <- function(){
 
 resolve_species <- function(taxa){
   # copy taxa into modified version for database calling
-  copy_taxa <- taxa
+  copy_taxa <- taxa$original_name
   # resolve easy fixes
   copy_taxa[copy_taxa == "Stellaria_wide_leaf"] <- "Stellaria umbellata"
   copy_taxa[copy_taxa == "Entire Meconopsis"] <- "Meconopsis"
@@ -48,6 +48,13 @@ resolve_species <- function(taxa){
   copy_taxa[copy_taxa == "Hieracium lactucela"] <- "Pilosella lactucella"
   copy_taxa[copy_taxa == "Agrostis schraderiana"] <- "Agrostis agrostiflora"
   copy_taxa[copy_taxa == "Festuca pratense"] <- "Festuca pratensis"
+  copy_taxa[copy_taxa == "Ran. acris subsp. Friesianus"] <- "Ranunculus acris subsp. friesianus"
+  copy_taxa[copy_taxa == "Symphyothricum_sp."] <- "Symphyotrichum"
+  copy_taxa[copy_taxa == "Orchidacea spec"] <- "Orchidaceae"
+  copy_taxa[copy_taxa == "Carex biggelowii"] <- "Carex bigelowii" 
+  copy_taxa[copy_taxa == "Carex spec"] <- "Carex"
+  copy_taxa[copy_taxa == "Potentilla stenophylla"] <- "Potentilla stenophylla"
+
   
   # call GNR
   taxa_gnr <- gnr_resolve(names = copy_taxa, 
@@ -60,7 +67,9 @@ resolve_species <- function(taxa){
   gnr_subset <- taxa_gnr %>% 
     select(user_supplied_name, gni_uuid, score, matched_name2)
   # construct data frame from taxa input, make character, bind GNR output
-  taxa_out <- data.frame(original_name = taxa,
+  taxa_out <- data.frame(Region = taxa$Region,
+                         SpeciesName = taxa$SpeciesName, 
+                         original_name = taxa$original_name,
                          submitted_name = copy_taxa) %>%
     mutate(submitted_name = as.character(submitted_name)) %>%
     left_join(., gnr_subset, by = c("submitted_name" = "user_supplied_name"))
@@ -99,10 +108,10 @@ merge_all_taxa_data <- function(alldat) {
  # rar <-  unique(cleaned$original_name) #1264 as well, so definitely 4 duplicates (but means that codes are site-specific)
   
   #merge all site data to cleaned names dataframe
-  species <-left_join(site_code, alldat$cleaned, by=c("original_name")) #%>% #is 2266 (so another set being added?)
+  #species <-left_join(site_code, alldat$species, by=c("original_name")) #%>% #is 2266 (so another set being added?)
     
   
-  return(species) 
+  return(site_code) 
   
 }
 

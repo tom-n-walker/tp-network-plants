@@ -48,9 +48,9 @@ CleanCommunity_FR_AlpeHuez <- function(community_FR_AlpeHuez_raw){
       bind_rows(dat) %>% 
       mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
     
-    comm <- dat2 %>% filter(!SpeciesName %in% c('Other')) %>% 
+    comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare ground')) %>% 
       filter(Cover > 0) 
-    cover <- dat2 %>% filter(SpeciesName %in% c('Other')) %>% 
+    cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare ground')) %>% 
       select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
       rename(CoverClass=SpeciesName)
     return(list(comm=comm, cover=cover)) 

@@ -6,12 +6,8 @@
 
 #### Import Community ####
 ImportCommunity_SE_Abisko <- function(){
-  
-  #import data
-  files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
-       grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
 
-  community_SE_Abisko_raw <- read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", files), sheet = "Vegetation control treatments")
+  community_SE_Abisko_raw <- read_excel("data/SE_Abisko/SE_Abisko_commdata/Vegetation data Abisko transplantation experiment (2012 + 2013 + 2014 + 2015)_for Chelsea.xlsx", sheet = "Vegetation control treatments")
   
   return(community_SE_Abisko_raw)
 }
@@ -74,9 +70,7 @@ CleanMeta_SE_Abisko <- function(community_SE_Abisko){
 
 # Cleaning species list (full name found in other sheet of excel)
 CleanTaxa_SE_Abisko <- function(){
-  files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
-    grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
-  splist <- map_df(files, ~ read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", .), sheet = "Species list 2012"))
+  splist <- read_excel("data/SE_Abisko/SE_Abisko_commdata/Vegetation data Abisko transplantation experiment (2012 + 2013 + 2014 + 2015)_for Chelsea.xlsx", sheet = "Species list 2012")
   taxa <- c(splist$Name...2, splist$Name...4)
   taxa <- taxa[!is.na(taxa)]
   taxa <- taxa[!taxa %in% c('Lichen', 'Litter', 'Moss')] 

@@ -36,10 +36,10 @@ CleanCommunity_US_Colorado <- function(community_US_Colorado_raw){
     mutate(Total_Cover = sum(Cover), Rel_Cover = Cover / Total_Cover)
   #dat2 %>% filter(Total_Cover<100) #There are plots with <100, so we need to create an Other cover class
   
-  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss')) %>% 
+  comm <- dat2 %>% filter(!SpeciesName %in% c('Other', 'Bare Soil', 'Bare soil', 'bare soil', 'Litter', 'LItter', 'litter', 'rock', 'Rock', 'moss')) %>% 
     filter(Cover > 0)
-  cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare Soil', 'Litter', 'rock', 'Rock', 'moss')) %>%
-    mutate(SpeciesName=recode(SpeciesName, "Bare Soil"='Bareground', 'moss'= 'Moss', 'rock'='Rock')) %>%
+  cover <- dat2 %>% filter(SpeciesName %in% c('Other', 'Bare Soil', 'Bare soil', 'bare soil', 'Litter', 'LItter', 'litter', 'rock', 'Rock', 'moss')) %>%
+    mutate(SpeciesName=recode(SpeciesName, "Bare Soil"='Bareground', "Bare soil"='Bareground', "bare soil"='Bareground', 'LItter'='Litter', 'litter'='Litter', 'moss'= 'Moss', 'rock'='Rock')) %>%
     select(UniqueID, SpeciesName, Cover, Rel_Cover) %>% group_by(UniqueID, SpeciesName) %>% summarize(OtherCover=sum(Cover), Rel_OtherCover=sum(Rel_Cover)) %>%
     rename(CoverClass=SpeciesName)
   return(list(comm=comm, cover=cover))
