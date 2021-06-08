@@ -39,16 +39,16 @@ ImportSiteTaxaDrakePlan <- drake_plan(
   no_dat = load_Norway_sptable(),
   us_dat = load_US_Arizona_sptable(),
   spcodes =  merge_sptable(spdat = tibble::lst(se_dat, no_dat, us_dat)), # has regions as a column but Norway is just "Norway"
-  spcodes_unlist = unnest(spcodes, cols = c(codes)),
+  #spcodes_unlist = unnest(spcodes, cols = c(codes)),
   # Import taxa lists (list element $taxa) from all sites
-  taxa = get_species()
+  #taxa = get_species()
   
 )
 
 # Import Taxa lists from all sites and clean to accepted names
 MergeTaxaDrakePlan <- drake_plan(
   
-  mergedtaxa = merge_all_taxa_data(alldat = tibble::lst(sitetaxa, spcodes_unlist))
+  mergedtaxa = merge_all_taxa_data(alldat = tibble::lst(sitetaxa, spcodes))
 
 )
 
