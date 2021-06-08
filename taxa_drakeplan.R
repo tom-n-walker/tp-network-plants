@@ -26,7 +26,8 @@ source("R/site_taxa_codes.R") #for sp_codes for No, Arizona and Sweden where the
 ImportSiteTaxaDrakePlan <- drake_plan(
   
   # Import site community species columns
-  sitetaxa = merge_site_taxa_data(sitedata = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen, NO_Skjellingahaugen, 
+  sitetaxa = merge_site_taxa_data(sitedata = tibble::lst(NO_Ulvhaugen, NO_Lavisdalen, NO_Gudmedalen,
+                                                         NO_Skjellingahaugen, 
                                                          CH_Lavey, CH_Calanda, 
                                                          US_Colorado, US_Montana, US_Arizona,
                                                          CN_Damxung, IN_Kashmir, CN_Gongga, CN_Heibei, 
@@ -38,7 +39,7 @@ ImportSiteTaxaDrakePlan <- drake_plan(
   no_dat = load_Norway_sptable(),
   us_dat = load_US_Arizona_sptable(),
   spcodes =  merge_sptable(spdat = tibble::lst(se_dat, no_dat, us_dat)), # has regions as a column but Norway is just "Norway"
-  
+  spcodes_unlist = unnest(spcodes, cols = c(codes)),
   # Import taxa lists (list element $taxa) from all sites
   taxa = get_species()
   
@@ -47,11 +48,9 @@ ImportSiteTaxaDrakePlan <- drake_plan(
 # Import Taxa lists from all sites and clean to accepted names
 MergeTaxaDrakePlan <- drake_plan(
   
-  mergedtaxa = merge_all_taxa_data(alldat = tibble::lst(sitetaxa, spcodes))
+  mergedtaxa = merge_all_taxa_data(alldat = tibble::lst(sitetaxa, spcodes_unlist))
 
 )
-
-
 
 
 # Clean species names with GNI
@@ -62,7 +61,7 @@ CleanSpeciesNames <- drake_plan(
   # the only issue remaining (that isn't Sweden and Norway) is Stellaria umbellata in CN_Heibei. It should be fine (gnr_resolve works on this species, why the NAs?)
 )
 
-MyPlan <- bind_rows(ImportTaxaDrakePlan, MergeTaxaDrakePlan, CleanSpeciesNames)
+MyPlan <- bind_rows(ImportSiteTaxaDrakePlan, MergeTaxaDrakePlan, CleanSpeciesNames)
 
 conf <- drake_config(MyPlan)
 conf

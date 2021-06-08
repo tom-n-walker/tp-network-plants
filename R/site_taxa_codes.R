@@ -31,7 +31,16 @@ load_Norway_sptable <- function() {
   no[,2] <- gsub('[[:punct:] ]+','',no[,2])
   code <- paste(substr(no[,1], 1, 3), substr(no[,2], 1, 3), sep='.')  
   no_dat <- data.frame(code=code, taxa=taxa)
-  
+  no_dat <- no_dat %>% 
+    mutate(code = recode(code, Aco.spe = "Aco.sep", Car.spx = "Car.sax", Car.car = "Caru.car", 
+                         Gal.spx = "Gal.sax", Ger.spl = "Ger.syl", Hup.spl = "Hup.sel", Kob.spm = "Kob.sim",
+                         Luz.spc = "Luz.spi", Mel.spl = "Mel.syl", Nar.spr = "Nar.str", Oma.spn = "Oma.sup",
+                         Oma.spl = "Oma.syl", Pim.spx = "Pim.sax", Pin.spl = "Pin.syl", Sel.spl = "Sel.sel",
+                         Val.spm = "Val.sam", Ver.spr = "Ver.ser")) %>%
+    mutate(code = if_else(code == "Hyp.mac" & taxa == "Hypericum maculatum", "Hype.mac", 
+                           if_else(code == "Hyp.mac" & taxa == "Hypochaeris maculata", "Hypo.mac", code))) %>%
+    mutate(code = if_else(code == "Rum.ace" & taxa == "Rumex acetosella", "Rum.acl", code))
+    
   return(no_dat)
 }
 
