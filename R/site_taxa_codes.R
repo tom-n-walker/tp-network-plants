@@ -3,16 +3,31 @@
 
 ## SE_Abisko
 load_SE_Abisko_sptable <- function() {
-  files <- list.files("data/SE_Abisko/SE_Abisko_commdata/") %>% 
-    grep(pattern = "^~", x = ., value = TRUE, invert = TRUE)
-  splist <- map_df(files, ~ read_excel(paste0("data/SE_Abisko/SE_Abisko_commdata/", .), sheet = "Species list 2012"))
-  taxa <- c(splist$Name...2, splist$Name...4)
-  code <- c(splist$Code...1, splist$Code...3)
-  df <- data.frame(code=code, taxa=taxa)
-  df <- df[complete.cases(df),]
-  se_dat <- df[!df$taxa %in% c('Lichen', 'Litter', 'Moss'),] 
-  
-  return(se_dat)
+
+    # 2012 species list (incomplete)
+    splist2012 <- read_excel("data/SE_Abisko/SE_Abisko_commdata/Vegetation data Abisko transplantation experiment (2012 + 2013 + 2014 + 2015)_for Chelsea.xlsx", sheet = "Species list 2012")
+    taxa <- c(splist2012$Name...2, splist2012$Name...4)
+    code <- c(splist2012$Code...1, splist2012$Code...3)
+    df <- data.frame(code=code, taxa=taxa)
+    df <- df[complete.cases(df),]
+    
+    
+    # 2017 species (BUT THIS STILL DOESN'T FIX ABOUT 10 SPECIES!)
+    splist2017 <- read_excel("data/SE_Abisko/SE_Abisko_commdata/Veenetal_splist.xlsx", sheet=1)
+    splist2017 <- splist2017 %>% separate(species, c("A", "B", "C", "D"), sep = " ") %>% 
+      filter(!A %in% c('moss', 'litter', 'lichen')) %>%
+      mutate(code = paste(substr(A, 1, 3), substr(B, 1, 3), sep=" "),
+             taxa = paste(A, B, sep=" ")) %>%
+      select(taxa, code)
+    
+    allyears <- bind_rows(df, splist2017)
+    
+    se_dat <- allyears[!allyears$taxa %in% c('Lichen', 'Litter', 'Moss'),] 
+    
+    se_dat <- se_dat %>% distinct()
+    
+    return(se_dat)
+
 }
 
 ## Norway
@@ -48,9 +63,7 @@ load_US_Arizona_sptable <- function() {
 ##Function to merge all
 merge_sptable <- function(spdat) {
   sp_codes <- bind_rows(list("SE_Abisko" = spdat$se_dat, "Norway" = spdat$no_dat, "US_Arizona" = spdat$us_dat), .id="Region") %>%
-    filter(!taxa %in% c(NA, "NA NA")) %>%
-    group_by(taxa) %>%
-    nest(.key  = "codes")
+    filter(!taxa %in% c(NA, "NA NA")) 
   
   return(sp_codes)
 }

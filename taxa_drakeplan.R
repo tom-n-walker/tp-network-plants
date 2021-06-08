@@ -62,7 +62,7 @@ CleanSpeciesNames <- drake_plan(
   # the only issue remaining (that isn't Sweden and Norway) is Stellaria umbellata in CN_Heibei. It should be fine (gnr_resolve works on this species, why the NAs?)
 )
 
-MyPlan <- bind_rows(ImportTaxaDrakePlan, MergeTaxaDrakePlan, CleanSpeciesNames)
+MyPlan <- bind_rows(ImportSiteTaxaDrakePlan, MergeTaxaDrakePlan, CleanSpeciesNames)
 
 conf <- drake_config(MyPlan)
 conf
